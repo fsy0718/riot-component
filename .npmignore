@@ -2,3 +2,4 @@ demo/
 *.log
 .sass-cache/
 node-modules/
+cachepath/

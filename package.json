@@ -7,6 +7,7 @@
     "riot-mixin-pack": "^0.1.7"
   },
   "devDependencies": {
+    "autoprefixer": "^6.5.1",
     "babel-preset-es2015-rollup": "^1.1.1",
     "browser-sync": "^2.13.0",
     "change-case": "^3.0.0",
@@ -20,7 +21,6 @@
     "karma-phantomjs-launcher": "^1.0.0",
     "karma-riot": "^1.1.0",
     "mocha": "^2.5.3",
-    "autoprefixer": "^6.5.1",
     "phantomjs": "^2.1.7",
     "phantomjs-prebuilt": "^2.1.7",
     "riot": "^2.4.1",
@@ -30,7 +30,6 @@
     "rollup-plugin-json": "^2.0.0",
     "rollup-plugin-node-resolve": "^1.7.0",
     "rollup-plugin-riot": "^0.4.0",
-    "rollup-plugin-sass": "^0.4.1",
     "rollup-pluginutils": "^1.5.0",
     "uglify-js": "^2.6.3"
   },
