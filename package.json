@@ -1,0 +1,64 @@
+{
+  "name": "riot-component",
+  "version": "0.0.1",
+  "description": "some components base on riot.js",
+  "main": "./src/index.js",
+  "dependencies": {
+    "riot-mixin-pack": "^0.1.7"
+  },
+  "devDependencies": {
+    "babel-preset-es2015-rollup": "^1.1.1",
+    "browser-sync": "^2.13.0",
+    "change-case": "^3.0.0",
+    "chokidar-cli": "^1.2.0",
+    "eslint": "^2.13.0",
+    "expect.js": "^0.3.1",
+    "gh-pages": "^0.11.0",
+    "karma": "^0.13.22",
+    "karma-mocha": "^1.0.1",
+    "karma-mocha-reporter": "^2.0.4",
+    "karma-phantomjs-launcher": "^1.0.0",
+    "karma-riot": "^1.1.0",
+    "mocha": "^2.5.3",
+    "phantomjs": "^2.1.7",
+    "phantomjs-prebuilt": "^2.1.7",
+    "riot": "^2.4.1",
+    "rollup": "^0.32.0",
+    "rollup-plugin-babel": "2.4.0",
+    "rollup-plugin-commonjs": "^3.0.0",
+    "rollup-plugin-json": "^2.0.0",
+    "rollup-plugin-node-resolve": "^1.7.0",
+    "rollup-plugin-riot": "^0.4.0",
+    "rollup-plugin-scss": "^0.1.0",
+    "rollup-pluginutils": "^1.5.0",
+    "uglify-js": "^2.6.3"
+  },
+  "scripts": {
+    "build": "node rollup.js",
+    "deploy": "gh-pages -d dist",
+    "pretest": "npm run build",
+    "test": "npm run eslint && npm run karma",
+    "eslint": "eslint src/*.js",
+    "karma": "karma start test/karma.conf.js",
+    "server": "browser-sync start --config ./browser-sync.config.js",
+    "watch": "chokidar 'src/*' 'demo/*' -c 'npm run build'",
+    "start": "npm run server & npm run watch",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fsy0718/riot-component.git"
+  },
+  "keywords": [
+    "riot",
+    "riot-component",
+    "component",
+    "riot-calendar"
+  ],
+  "author": "fsy0718 <fsy0718@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fsy0718/riot-component/issues"
+  },
+  "homepage": "https://github.com/fsy0718/riot-component#readme"
+}

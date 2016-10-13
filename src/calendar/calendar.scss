@@ -1,0 +1,260 @@
+﻿@import '../common/var';
+
+riot-calendar{
+  .pure-u-1-8 {
+    width: 14.285%;
+    text-align: center;
+  }
+  .weeks{
+    font-size: rSize(26);
+    color: $darkblack;
+    line-height: rSize(26 + 22 * 2);
+    position: relative;
+    &:after{
+      position: absolute;
+      content: '';
+      width: 580 / 640 * 100%;
+      height: 1px;
+      background-color: $calendar-line-color;
+      opacity: 0.97;
+      left: 30 / 640 * 100%;
+      bottom: 0;
+      z-index: 2;
+    } 
+  }
+  .control{
+    text-align: center;
+    .title{
+      color: $darkblack;
+      font-size: rSize(26);
+      line-height: 2;
+      position: relative;
+      height: rSize(26*2);
+      overflow: hidden;
+    }
+    .prev,.next{
+      position: relative;
+      i{
+        position: absolute;
+        width: rSize(16);
+        height: rSize(16);
+        top: 50%;
+        left: 50%;
+        margin-top: -1 * rSize(8);
+        margin-left: -1 * rSize(8);
+        border: {
+          top: none;
+          right: none;
+          left: 2px solid $main-color;
+          bottom: 2px solid $main-color;
+        }
+      }
+      &.disable i{
+        border-left-color: $calendar-disable-arrow-color;
+        border-bottom-color: $calendar-disable-arrow-color;
+      }
+    }
+    .prev i{
+      transform: rotate(45deg);
+    }
+    .next i{
+      transform: rotate(-135deg);
+    }
+    margin-bottom: rSize(16);
+  }
+  .calendar__body{
+    padding: rSize(13) 0;
+    position: relative;
+    min-height: rSize((64 + 16) * 6);
+    .pure-g{
+      margin-top: rSize(16);
+    }
+  }
+  .calendar__body--cur,.calendar__body--other,.title__cur,.title__other{
+    will-change: transform, opacity;
+    position: absolute;
+    width: 100%;
+    left: 0;
+    background: #fff;
+    animation-play-state: paused;
+    animation-duration: 0.45s;
+    animation-fill-mode: forwards;
+    //animation-timing-function: cubic-bezier(0.445, 0.05, 0.55, 0.95);
+    animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+    &.calendar-fadeInLeft{
+      animation-name: riot-calendar-fadeInFromLeft;
+    }
+    &.calendar-fadeInRight{
+      animation-name: riot-calendar-fadeInFromRight;
+    }
+    &.calendar-fadeOutLeft{
+      animation-name: riot-calendar-fadeOutFromLeft;
+    }
+    &.calendar-fadeOutRight{
+      animation-name: riot-calendar-fadeOutFromRight;
+    }
+    &.animation{
+      animation-play-state: running;
+    }
+  }
+  .calendar__body--cur,.calendar__body--other{
+    top: rSize(8);
+    height: 100%;
+  }
+  
+  .day {
+    height: rSize(64);
+    line-height: rSize(64);
+    text-align: center;
+    color: $calendar-day-disable-color;
+    i {
+      font-style: normal;
+    }
+
+    // &.disable
+    //   color: $calendar-gray-text
+    span {
+      display: none;
+    }
+  }
+  .enable {
+    color: $calendar-day-color;
+  }
+
+  .pure-u-1-8 {
+    position: relative;
+  }
+
+  .choice {
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    margin-left: -16px;
+
+    color: #fff;
+    @include box-sizing;
+
+    line-height: r-size(32);
+    display: inline-block;
+    i{
+      width: 100%;
+      height: 100%;
+      @include border-radius(50%);
+      content: '';
+      background-color: $main-color;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+
+      animation-duration: 0.45s;
+      animation-fill-mode: forwards;
+      //animation-timing-function: cubic-bezier(0.445, 0.05, 0.55, 0.95);
+      animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+      will-change: transform, opacity;
+    }
+    &.riot-calendar-scaleIn{
+      i{
+        animation-name: riot-calendar-scaleIn;
+      }
+
+    }
+    &.riot-calendar-scaleOut{
+      i{
+        animation-name: riot-calendar-scaleOut;
+      }
+    }
+  }
+
+  .high {
+    background-color: $calendar-day-high-color;
+    .day.enable{
+      color: #fff;
+    }
+  }
+
+  .checkoutrange {
+    font-weight: bold;
+  }
+
+  .rangeStart, .rangeEnd {
+    &:before {
+      width: 50%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 50%;
+      background-color: $calendar-day-high-color;
+      content: "";
+    }
+  }
+
+  .rangeEnd {
+    &:before {
+      left: 0;
+    }
+  }
+}
+
+@keyframes riot-calendar-fadeInFromLeft {
+  0%{
+    transform: translateX(-100%);
+    opacity: 0
+  }
+  100%{
+    transform: translateX(0);
+    opacity: 1
+  }
+}
+@keyframes riot-calendar-fadeOutFromLeft {
+  0%{
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100%{
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+@keyframes riot-calendar-fadeInFromRight {
+  0%{
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100%{
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+@keyframes riot-calendar-fadeOutFromRight {
+  0%{
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100%{
+    transform: translateX(-100%);
+    opacity: 1;
+  }
+}
+@keyframes riot-calendar-scaleIn{
+  0%{
+    transform: scale(0);
+    opacity: 0;
+  }
+  100%{
+    transform: scale(1);
+    opacith: 1;
+  }
+}
+@keyframes riot-calendar-scaleOut{
+  0%{
+    transform: scale(1);
+    opacity: 1;
+  }
+  100%{
+    transform: scale(0);
+    opacity: 0
+  }
+}
