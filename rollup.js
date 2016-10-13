@@ -7,13 +7,26 @@ const
   riot = require('rollup-plugin-riot'),
   changeCase = require('change-case'),
   packageName = require('./package.json').name,
-  scss  = require('rollup-plugin-scss')
+  sass  = require('rollup-plugin-sass'),
+  autoprefixer = require('autoprefixer'),
+  postcss = require('postcss');
+  
+const  autoprefixerconfig = require('./autoprefixer.config');
 
 rollup
   .rollup({
     entry: 'src/index.js',
     external: ['riot'],
-    plugins: [riot(), json(), nodeResolve({ jsnext: true }), babel()]
+    plugins: [sass({
+      insert: true,
+      processor: function(css, id){
+        return postcss([autoprefixer(autoprefixerconfig)])
+          .process(css)
+          .then(function(result){
+            return result.css
+          })
+      }
+    }), riot(), json(), nodeResolve({ jsnext: true }), babel()]
   })
   .then(bundle => {
     bundle.write({

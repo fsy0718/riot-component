@@ -1,3 +1,5 @@
+import {parentScope} from "../common/riot-mixin-pack"
+
 <riot-calendar>
 	<div class="calendar">
 		<div class="calendar__head">
@@ -17,14 +19,14 @@
 		<div class="calendar__body">
       <div if={otherData} class="calendar__body--other">
         <div class="pure-g" each={weekdates in otherData.weekdates}>
-          <div class="pure-u-1-8 {parseDateClass(date)}" each={date in weekdates}>
+          <div class="pure-u-1-8 {parseDateClass(date)}" each={date,index in weekdates}>
             <div class="day {date.valid === 0 && 'enable' || 'disable'} {date.select === 1 && 'choice'}"  onclick={checkDate}>{date.d}</div>
           </div>
         </div>
       </div>
       <div class="calendar__body--cur">
         <div class="pure-g" each={weekdates in curData.weekdates}>
-          <div class="pure-u-1-8 {parseDateClass(date)}" each={date in weekdates}>
+          <div class="pure-u-1-8 {parseDateClass(date)}" each={date,index in weekdates}>
             <div class="day {date.valid === 0 && 'enable' || 'disable'} {date.select === 1 && 'choice'} {!date.range && date.select === 1 && 'riot-calendar-scaleIn'}"  onclick={checkDate}>{date.d}<i if={date.select === 1}></i></div>
           </div>
         </div>
@@ -33,8 +35,8 @@
 		<div class="calendar__foot"></div>
 		<script>
       let tag = this;
-
-      const firstDay = Number(tag.opts.firstDay) || 0;
+      tag.mixin(parentScope)
+      const firstDay = Number(opts.firstDay) || 0;
       /*
         opts说明
         autoOk:                          boolean 是否自动保存
@@ -62,7 +64,6 @@
       */
       //一些帮助函数
       //天数
-
       const datesOfMonth = [31,null,31,30,31,30,31,31,30,31,30,31];
       const weekTitles = ['日','一','二','三','四','五','六'];
       let getFirstDateInMonth = function(y,m){
@@ -87,7 +88,7 @@
         return dates;
       }
       const getDatesInNextMonth = function(y, m){
-        return (tag.opts.weekMode ? 6 : getWeeksInMonth(y,m)) * 7 - getDatesInPrevMonth(y,m) - getDatesInMonth(y,m);
+        return (opts.weekMode ? 6 : getWeeksInMonth(y,m)) * 7 - getDatesInPrevMonth(y,m) - getDatesInMonth(y,m);
       }
       const getDatesInMonth = function(y,m){
         --m;
@@ -97,7 +98,18 @@
         var datesInMonth = getDatesInMonth(y,m) - 7  + getDatesInPrevMonth(y,m);
         return Math.ceil(datesInMonth / 7) + 1 || 0;
       }
+      const getDatesInYear = function(y, m, d){
+        let _d = 0;
+        let i = 1;
+        while(i < m){
+          _d = _d + (i === 2 ? isLeapYear(y) ? 29 : 28 : datesOfMonth[m-1]);
+          i++; 
+        }
+        _d += d;
+        return _d;
+      }
 
+      console.log(getDatesInYear(2016,10,13))
       const getWeekTitles = function(){
         tag.weekTitles = weekTitles.slice(firstDay,7).concat(weekTitles.slice(0,firstDay));
       }
@@ -106,8 +118,8 @@
       }
       //格式化日期
       const formatDate = function(y,m,d){
-        if(tag.opts.DateTimeFormat){
-          return tag.opts.DateTimeFormat(y,m,d);
+        if(opts.dateTimeFormat){
+          return opts.dateTimeFormat(y,m,d);
         }
         return (y + '-' + str2(m)) + (d ?  ('-' + str2(d)) : '');
       }
@@ -119,11 +131,18 @@
         }
         return '';
       }
+      //进行日期快速比较及确认日期是否选择 不能用formatDate2  防止需要的格式数据为y/m/d  造成2016/9/10 > 2016/10/1
+      const formatDate3 = function(y,m,d){
+        if(arguments.length < 3){
+          return '';
+        }
+        return '' + y + str2(m) + str2(d);
+      };
       
 
 
       const getCalendarViewDate = function(y,m){
-        let weekNum = tag.opts.weekMode ? 6 : getWeeksInMonth(y,m);
+        let weekNum = opts.weekMode ? 6 : getWeeksInMonth(y,m);
         let datesInPrevMonth = getDatesInPrevMonth(y,m);
         let datesInNextMonth = getDatesInNextMonth(y,m);
         let d = getDatesInMonth(y,m);
@@ -176,6 +195,8 @@
               _c = 1;
             }
             let _date = new Date(_y, _m - 1, _d);
+            //将YMD暂存，进行比较日期
+            _date._str = formatDate3(_y, _m, _d);
             /*
               current:            Number 表示月份  -1  前一个月  0  当前月 1 后一个月
               date:               Date  当前日期
@@ -200,16 +221,16 @@
               valid: 0
             }
             //在范围中
-            if(tag.opts.isRange){
+            if(opts.isRange){
               if(rs){
-                if(rs === r.dateformat){
+                if(rs === r.date._str){
                   r.range = -1;
                   r.select = 1;
                 }else if(re){
-                  if(r.dateformat === re){
+                  if(r.date._str === re){
                     r.range = 1;
                     r.select = 1;
-                  }else if(r.dateformat > rs && r.dateformat < re){
+                  }else if(r.date._str > rs && r.date._str < re){
                     r.range = 0;
                   }
                 }
@@ -217,13 +238,23 @@
             }else if(selectDateStr.indexOf(r.dateformat) > -1){
               r.select = 1;
             }
+            /*var o = {
+              f: r.dateformat,
+              rls: rls,
+              rle: re,
+              mis: mis,
+              mas: mas,
+              diff: r.date._str
+            }
+            console.table(o);
+            */
             if(r.current){
               r.valid = 1;
-            }else if(tag.opts.isRange){
-              if((rls && rls > r.dateformat) || (rle && rle < r.dateformat)){
+            }else if(opts.isRange){
+              if((rls && rls > r.date._str) || (rle && rle < r.date._str)){
                 r.valid = 2;
               }
-            }else if((mis && mis > r.dateformat) ||(mas && mas < r.dateformat)){
+            }else if((mis && mis > r.date._str) ||(mas && mas < r.date._str)){
               r.valid = 3;
             }
             j++;
@@ -273,28 +304,31 @@
       //选择日期排序
       tag.getSelectDates = function(){
         if(!selectDates){
-          selectDates = (tag.opts.selectDates || []).concat();
+          selectDates = (opts.selectDates || []).concat();
         }
         selectDateStr = [];
         selectDates = selectDates.filter(function(d){
-          var s = formatDate2(d);
-          if(tag.opts.isRange && ((rls && rls > s) || (rle && rle < s))){
+          var s = formatDate3(d);
+          if(opts.isRange && ((rls && rls > s) || (rle && rle < s))){
             return false
           }else if((mis && mis > s) || (mas && mas < s)){
             return false;
           }
-          selectDateStr.push(s);
             return true;
         })
 
         selectDates.sort(function(a,b){
           return a - b ;
         });
+        selectDates.forEach(function(d){
+          selectDateStr.push(formatDate2(d));
+        })
 
-        if(tag.opts.isInRange){
+
+        if(opts.isRange){
           selectDates = selectDates.slice(0,2);
           selectDateStr = selectDateStr.slice(0,2);
-        }else if(!tag.opts.isMultiple){
+        }else if(!opts.isMultiple){
           selectDates = selectDates.slice(0,1);
           selectDateStr = selectDateStr.slice(0,1);
         }
@@ -310,10 +344,10 @@
         }
         let classNames = [];
         if(tag.opts.isRange && rs && re){
-          if(rs === date.dateformat){
+          if(rs === date.date._str){
             classNames.push('rangeStart');
           }
-          if(re === date.dateformat){
+          if(re === date.date._str){
             classNames.push('rangeEnd');
           }
           if(date.range === 0){
@@ -321,7 +355,7 @@
           }
         }
         if(tag.opts.parseDateClass){
-          let c = tag.opts.parentDateClass(date);
+          let c = opts.parentDateClass(date);
           c && classNames.push(c);
         }
         return classNames.join(' ')
@@ -336,13 +370,13 @@
       let lastY;
       let lastM;
       let switchDirection;
-      let rangeLimit = tag.opts.rangeLimit || [];
+      let rangeLimit = opts.rangeLimit || [];
       const init = function(){
-        rls = formatDate2(rangeLimit[0]);
-        rle = formatDate2(rangeLimit[1]);
-        mis = formatDate2(tag.opts.minDate);
-        mas = formatDate2(tag.opts.maxDate);
-        if(tag.opts.isRange){
+        rls = formatDate3(rangeLimit[0]);
+        rle = formatDate3(rangeLimit[1]);
+        mis = formatDate3(opts.minDate);
+        mas = formatDate3(opts.maxDate);
+        if(opts.isRange){
           mis && rls && rls < mis ? rls = mis : '';
           mas && rle && rle > mas ? rle = mas : '';
         }
@@ -350,13 +384,13 @@
 
         tag.getSelectDates();
         
-        if(!tag.opts.isMultiple){
-          rs = selectDateStr[0]
+        if(!opts.isMultiple){
+          rs = formatDate3(selectDates[0].getFullYear(), selectDates[0].getMonth() + 1, selectDates[0].getDate())
         }
-        if(tag.opts.isRange){
-          re = selectDateStr[1];
+        if(opts.isRange){
+          re = formatDate3(selectDates[1].getFullYear(), selectDates[1].getMonth() + 1, selectDates[1].getDate());
         }
-        defaultDate = tag.opts.defaultDate || selectDates[0] || new Date();
+        defaultDate = opts.defaultDate || selectDates[0] || new Date();
         curY = defaultDate.getFullYear();
         curM = defaultDate.getMonth() + 1;
       }
@@ -366,7 +400,7 @@
       init();
       //})
       tag.on('update', function(){
-        if(tag.opts.switchWithAnimation && switchDirection){
+        if(opts.switchWithAnimation && switchDirection){
           tag.otherData = {
             title: lastY + '年' + lastM + '月',
             weekdates: tag.curData.weekdates
@@ -378,9 +412,9 @@
           weekdates: _d.weekDates,
           viewdates: _d.viewDates
         }
-        if(tag.opts.switchViewOverLimit){
-          let firstDateStr = formatDate(curY, curM, 1);
-          let lastDateStr = formatDate(curY, curM, getDatesInMonth(curY, curM));
+        if(opts.switchViewOverLimit){
+          let firstDateStr = formatDate3(curY, curM, 1);
+          let lastDateStr = formatDate3(curY, curM, getDatesInMonth(curY, curM));
           if(firstDateStr < mis){
             tag.prevMonthDisable = true;
           }else{
@@ -394,28 +428,29 @@
         }
       });
       let timer = null;
+      let shouldTriggerCheckEvent = false;
       //动画
       tag.on('updated', function(){
-        if(tag.opts.switchWithAnimation && switchDirection){
+        if(opts.switchWithAnimation && switchDirection){
           let $cur = tag.root.querySelector('.calendar__body--cur');
           let $curT = tag.root.querySelector('.title__cur');
           let $other = tag.root.querySelector('.calendar__body--other');
           let $otherT = tag.root.querySelector('.title__other');
-          if(tag.opts.animationTimingFunction){
-            $cur.style.webkitAnimationTimingFunction = tag.opts.animationTimingFunction;
-            $other.style.webkitAnimationTimingFunction = tag.opts.animationTimingFunction;
-            $cur.style.animationTimingFunction = tag.opts.animationTimingFunction;
-            $other.style.animationTimingFunction = tag.opts.animationTimingFunction;  
-            $curT.style.webkitAnimationTimingFunction = tag.opts.animationTimingFunction;
-            $otherT.style.webkitAnimationTimingFunction = tag.opts.animationTimingFunction;
-            $curT.style.animationTimingFunction = tag.opts.animationTimingFunction;
-            $otherT.style.animationTimingFunction = tag.opts.animationTimingFunction;         
+          if(opts.animationTimingFunction){
+            $cur.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
+            $other.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
+            $cur.style.animationTimingFunction = opts.animationTimingFunction;
+            $other.style.animationTimingFunction = opts.animationTimingFunction;  
+            $curT.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
+            $otherT.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
+            $curT.style.animationTimingFunction = opts.animationTimingFunction;
+            $otherT.style.animationTimingFunction = opts.animationTimingFunction;         
           }
-          let duration = parseFloat(tag.opts.animationDuration) || 0.45;
+          let duration = parseFloat(opts.animationDuration) || 0.45;
           let c1;
           let c2;
           if(duration !== 0.45){
-            _duration = '' + duration + 's';
+            let _duration = '' + duration + 's';
             $cur.style.webkitAnimationDuration = _duration;
             $other.style.webkitAnimationDuration = _duration;
             $cur.style.animationDuration = _duration;
@@ -454,15 +489,14 @@
             clearTimeout(timer);
             switchDirection = undefined;
           }, duration * 1000)
-        }
-        console.log(tag);      
+        }     
       })
       
       //TODO 增加判断如果小于最小值，则不能切换到别的月份
       tag.checkDate = function(e){
         let date = e.item.date;
         if(date.valid !== 0){
-          if(tag.opts.switchViewByOtherMonth){
+          if(opts.switchViewByOtherMonth){
             if((date.current === -1 && !tag.prevMonthDisable) || (date.current === 1 && !tag.nextMonthDisable)){
               changeView(date.current);
             }
@@ -472,21 +506,21 @@
           }
           
         }
-        if(tag.opts.isRange){
-          if(rs && !re && rs === date.dateformat){
+        if(opts.isRange){
+          if(rs && !re && rs === date.date._str){
             selectDates = [];
             selectDateStr = [];
             rs = undefined;
             re = undefined;
-          }else if(!rs || (rs && (rs > date.dateformat) || re)){
+          }else if(!rs || (rs && (rs > date.date._str) || re)){
             selectDates = [date.date];
             selectDateStr = [date.dateformat];
-            rs = date.dateformat;
+            rs = date.date._str;
             re = undefined;
           }else{
             selectDates.push(date.date);
             selectDateStr.push(date.dateformat);
-            re = date.dateformat;
+            re = date.date._str;
           }
         }else{
           if(date.select){
@@ -497,7 +531,7 @@
             selectDates.splice(i,1);
 
           }else{
-            if(!tag.opts.isMultiple){
+            if(!opts.isMultiple){
               selectDateStr = [date.dateformat];
               selectDates = [date.date];
             }else{
@@ -506,13 +540,9 @@
             }
           }
         }
-        if(tag.opts.onChange){
-          tag.opts.onChange(date, tag);
-        }
-        if(tag.opts.autoOk){
-          tag.unmount(true);
-        }
+        console.log(e.item)
       }
+
  
   </script>
 	</div>

@@ -69,6 +69,7 @@ riot-calendar{
     .pure-g{
       margin-top: rSize(16);
     }
+    overflow: hidden;
   }
   .calendar__body--cur,.calendar__body--other,.title__cur,.title__other{
     will-change: transform, opacity;
