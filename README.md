@@ -55,12 +55,14 @@
   ```
 
 ### 组件说明
-~~请看[api文档](https://github.com/fsy0718/riot-component)~~ 正在完善中...
+  ~~请看[api文档](https://github.com/fsy0718/riot-component)~~ 正在完善中...
+
 
 ### 开发说明
 本项目采用gulp进行项目自动编译工具，rollup进行打包
-- `npm install` 下载所有包，[请注意事项](#warning)
+- `npm install` 下载所有包
 - `npm run start:build`  进行打包并进行实时编译、热刷新页面
+
 #### npm script说明
 - `build`： 打包
 - `watch`： 监听文件修改
@@ -70,5 +72,4 @@
 
 
 ### 开发注意事项
-<a name="warning"></a>
-- rollup打包，必须将rollup包安装在本项目中，否则会出错  `[Error: You must specify an output type - valid options are amd, cjs, es6, iife, umd]`
+  参照[riotComponent开发构建说明](https://github.com/fsy0718/riot-component/wiki/riotComponent%E5%BC%80%E5%8F%91%E6%9E%84%E5%BB%BA%E8%AF%B4%E6%98%8E)
