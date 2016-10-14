@@ -10,7 +10,9 @@
   <script src="/dist/riot-component.js"></script>
 </head>
 <body>
-  <riot-calendar></riot-calendar>
+  <riot-popver>
+    <riot-calendar></riot-calendar>
+  </riot-popver>
   <script>
     /**
         autoOk:                          boolean 是否自动保存
@@ -35,7 +37,7 @@
         animationTimingFunction:         String 动画函数 cubic-bezier(0.445, 0.05, 0.55, 0.95)
         animationDuration:               动画待续时间  默认为0.45s
     **/
-    window.calendar = riot.mount('riot-calendar',{
+    window.calendar = riot.mount('riot-popver',{
       switchWithAnimation: true,
       isRange: true,
       switchViewByOtherMonth: true,

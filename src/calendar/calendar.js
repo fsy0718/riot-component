@@ -1,5 +1,4 @@
 let tag = this;
-tag.mixin(parentScope)
 const firstDay = Number(opts.firstDay) || 0;
 /*
   opts说明
@@ -72,8 +71,12 @@ const getDatesInYear = function (y, m, d) {
   _d += d;
   return _d;
 }
-window.getDatesInYear = getDatesInYear;
-console.log(getDatesInYear(2016, 10, 13))
+
+const getWeeksInYear = function(y,m ,d){
+   let _d = getDatesInYear(y, m, d);
+   return Math.round(_d, 7);
+};
+
 const getWeekTitles = function () {
   tag.weekTitles = weekTitles.slice(firstDay, 7).concat(weekTitles.slice(0, firstDay));
 }
@@ -112,7 +115,7 @@ const getCalendarViewDate = function (y, m) {
   let d = getDatesInMonth(y, m);
   let i = 0;
   let weekDates = [];
-  let viewDates = [];
+  let viewDates = {};
   let y1 = y;
   let y3 = y;
   let m1 = m;
@@ -168,6 +171,8 @@ const getCalendarViewDate = function (y, m) {
         m:                  Number 月份
         d:                  Number 日
         w:                  Number 星期
+        wy:                 Number 一年中的第几周
+        r:                  Number 处于日历的第几行
         dateformat:         String 当前日期格式化字符串
         range:              Number 表示范围选择  -1  表示范围开始  0 表示范围中   1 表示范围结束
         select:             Number 表示是否被选中 1表示选中
@@ -223,10 +228,14 @@ const getCalendarViewDate = function (y, m) {
       }
       j++;
       wd.push(r);
-      viewDates.push(r);
+      viewDates[r.dateformat] = r;
     }
     weekDates.push(wd);
     i++;
+  }
+  if(changeDateStr && opts.onChange){
+    opts.onChange(viewDates[changeDateStr]);
+    changeDateStr = undefined;
   }
   return {
     weekDates: weekDates,
@@ -348,10 +357,10 @@ const init = function () {
 
   tag.getSelectDates();
 
-  if (!opts.isMultiple) {
+  if (selectDates[0] && !opts.isMultiple) {
     rs = formatDate3(selectDates[0].getFullYear(), selectDates[0].getMonth() + 1, selectDates[0].getDate())
   }
-  if (opts.isRange) {
+  if (selectDates[1] && opts.isRange) {
     re = formatDate3(selectDates[1].getFullYear(), selectDates[1].getMonth() + 1, selectDates[1].getDate());
   }
   defaultDate = opts.defaultDate || selectDates[0] || new Date();
@@ -392,7 +401,7 @@ tag.on('update', function () {
   }
 });
 let timer = null;
-let shouldTriggerCheckEvent = false;
+let changeDateStr = undefined ;
 //动画
 tag.on('updated', function () {
   if (opts.switchWithAnimation && switchDirection) {
@@ -468,7 +477,6 @@ tag.checkDate = function (e) {
       e.preventUpdate = true;
       return;
     }
-
   }
   if (opts.isRange) {
     if (rs && !re && rs === date.date._str) {
@@ -504,5 +512,7 @@ tag.checkDate = function (e) {
       }
     }
   }
-  console.log(e.item)
+  if(opts.onChange){
+    changeDateStr = date.dateformat
+  }
 }
