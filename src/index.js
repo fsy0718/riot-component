@@ -1,1 +1,1 @@
-import "./calendar/index";
+import "./calendar/calendar.tag";

@@ -1,6 +1,7 @@
 ﻿@import '../common/var';
 
-riot-calendar{
+:scope {
+  display: block;
   .pure-u-1-8 {
     width: 14.285%;
     text-align: center;

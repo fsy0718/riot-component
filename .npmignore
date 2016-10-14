@@ -3,3 +3,4 @@ demo/
 .sass-cache/
 node-modules/
 cachepath/
+gulp/
