@@ -7,7 +7,7 @@ const configDoc = require('../config.doc');
 const config = require('../config')
 
 gulp.task('doc', function () {
-  return gulp.src([config.sourcepath + '/components/**/*.js'])
+  return gulp.src([config.basepath + '/readme.doc.md',config.sourcepath + '/components/**/*.js'])
     .pipe(jsdoc(configDoc))
     
 })
