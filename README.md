@@ -56,7 +56,7 @@
   ```
 
 ### 组件说明
-  ~~请看[api文档](https://github.com/fsy0718/riot-component)~~ 正在完善中...
+  请看[api文档](https://fsy0718.github.io/riot-component/)
 
 
 ### 开发说明
