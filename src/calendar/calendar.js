@@ -6,7 +6,7 @@
 /**
  * onChange 函数说明
  * @callback onChangeCall
- * @param {riot-date} date 当前被点击riot-date对象
+ * @param {riot-date|null} date 当前被点击riot-date对象,如果一个日期被取消选中时，则返回null,但可以通过tag来进行操作
  * @param {tag} tag 当前riot-calendar实例对象
  */
 /**
@@ -40,8 +40,8 @@
  */
 /**
  * @typedef {object} selectDateObj
- * @property {date[]} dates  被选中排序后的Date数组
- * @property {string[]} dateStr 被选中排序后并经过opts.dateTimeFormat格式化后的日期字符串
+ * @property {date[]} dates  被选中排序后的Date数组或空数组
+ * @property {string[]} dateStr 被选中排序后并经过opts.dateTimeFormat格式化后的日期字符串或空数组
  */
 /**
  * @typedef {object} riot-date
@@ -168,7 +168,7 @@ const formatDate2 = function (d) {
 //进行日期快速比较及确认日期是否选择 不能用formatDate2  防止需要的格式数据为y/m/d  造成2016/9/10 > 2016/10/1
 const formatDate3 = function (y, m, d) {
   if (arguments.length < 3) {
-    return '';
+    return '' + (typeof y === 'object' ?  y.getFullYear() + str2(y.getMonth() + 1) + str2(y.getDate()) : '');
   }
   return '' + y + str2(m) + str2(d);
 };
@@ -275,8 +275,8 @@ const getCalendarViewDate = function (y, m) {
     i++;
   }
   if(changeDateStr && opts.onChange){
-    opts.onChange(viewDates[changeDateStr],tag);
-    changeDateStr = undefined;
+    opts.onChange(changeDateStr === -1 ? null : viewDates[changeDateStr],tag);
+    changeDateStr = 0;
   }
   return {
     weekDates: weekDates,
@@ -321,7 +321,6 @@ tag.nextMonth = function (e) {
     tag.update();
   }
 }
-
 
 //选择日期排序
 tag.getSelectDates = function () {
@@ -438,12 +437,12 @@ tag.on('update', function () {
   if (opts.switchViewOverLimit) {
     let firstDateStr = formatDate3(curY, curM, 1);
     let lastDateStr = formatDate3(curY, curM, getDatesInMonth(curY, curM));
-    if (firstDateStr < mis) {
+    if (firstDateStr <= mis) {
       tag.prevMonthDisable = true;
     } else {
       tag.prevMonthDisable = false;
     }
-    if (mas && lastDateStr > mas) {
+    if (mas && lastDateStr >= mas) {
       tag.nextMonthDisable = true;
     } else {
       tag.nextMonthDisable = false;
@@ -451,7 +450,7 @@ tag.on('update', function () {
   }
 });
 let timer = null;
-let changeDateStr = undefined;
+let changeDateStr = 0;
 //动画
 tag.on('updated', function () {
   if (switchWithAnimation && switchDirection) {
@@ -517,6 +516,7 @@ tag.on('updated', function () {
 
 tag.checkDate = function (e) {
   let date = e.item.date;
+  let nocheckDate;
   if (date.valid !== 0) {
     if (opts.switchViewByOtherMonth) {
       if ((date.current === -1 && !tag.prevMonthDisable) || (date.current === 1 && !tag.nextMonthDisable)) {
@@ -533,6 +533,7 @@ tag.checkDate = function (e) {
       selectDateStr = [];
       rs = undefined;
       re = undefined;
+      nocheckDate = -1;
     } else if (!rs || (rs && (rs > date.date._str) || re)) {
       selectDates = [date.date];
       selectDateStr = [date.dateformat];
@@ -550,6 +551,7 @@ tag.checkDate = function (e) {
       var i = selectDateStr.indexOf(date.dateformat);
       selectDateStr.splice(i, 1);
       selectDates.splice(i, 1);
+      nocheckDate = -1;
 
     } else {
       if (!opts.isMultiple) {
@@ -562,7 +564,7 @@ tag.checkDate = function (e) {
     }
   }
   if(opts.onChange){
-    changeDateStr = date.dateformat
+    changeDateStr = nocheckDate || date.dateformat
   }
 }
 

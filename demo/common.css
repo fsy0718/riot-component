@@ -1,0 +1,25 @@
+.ctac{
+    text-align: center;
+}
+.code-source{
+    overflow-x: auto;
+}
+.code-source textarea{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 5px;
+    border: solid 1px #ccc;
+    text-align: left;
+}
+.pure-u-1-2{
+    box-sizing: border-box;
+    padding-right: 20px;
+}
+.pure-u-1-2 + .pure-u-1-2{
+    padding-left: 20px;
+    padding-right: 0;
+}
+.wrap{
+    width: 90%;
+    margin: 20px auto;
+}

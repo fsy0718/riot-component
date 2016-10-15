@@ -7,50 +7,29 @@
   <script src="riot.min.js"></script>
     <link rel="stylesheet" href="grids-min.css">
   <link rel="stylesheet" href="reset.css">
-  <script src="/dist/riot-component.js"></script>
 </head>
 <body>
-  <riot-popver>
-    <riot-calendar></riot-calendar>
-  </riot-popver>
+  <h1>demo链接</h1>
+  <ul>
+    <li>
+      <a href="javascript:;" data-name="calendar">日历</a>
+    </li>
+  </ul>
   <script>
-    /**
-        autoOk:                          boolean 是否自动保存
-        defaultDate:                     Date 默认日期
-        minDate:                         Date 最小日期
-        maxDate:                         Date 最大日期
-
-        isRange:                         Boolean 是否为选择范围
-        rangeLimit:                      [Date]   选择的范围      
-
-        weekMode:                        Boolean 是否固定星期 true 固定 默认为false
-        firstDay:                        Number  每周的第一天 默认为0
-
-        isMultiple:                      Boolean 是否为多选
-        selectDates:                     [Date]   选中的日期
-
-        switchViewByOtherMonth:          Boolean 表示点击其它月份是否切换日历视图 默认false
-        switchViewOverLimit:             Boolean 表示超出最小与最大日历是否能切换日历视图 默认false
-        showOtherMonthDay:               Boolean 是否显示其它月的日期
-
-        switchWithAnimation:             Boolean 切换时是否需要动画
-        animationTimingFunction:         String 动画函数 cubic-bezier(0.445, 0.05, 0.55, 0.95)
-        animationDuration:               动画待续时间  默认为0.45s
-    **/
-    window.calendar = riot.mount('riot-popver',{
-      switchWithAnimation: true,
-      isRange: true,
-      switchViewByOtherMonth: true,
-      switchViewOverLimit: true,
-      weekMode: true,
-      selectDates: [new Date(), new Date(2016,8,15), new Date(2016,11,1)],
-      dateTimeFormat: function(y,m,d){
-        return y + '/' + m + '/' + d;
-      },
-      onChange: function(date){
-        console.log(date);
-      } 
-    });
+    var hostname = location.hostname;
+    var prefix = '/';
+    if(hostname === 'fsy0718.github.io'){
+      prefix = '/riot-component/demo/';
+    }
+    document.querySelector('ul').addEventListener('click', function(e){
+      var target = e.target;
+      if(target.tagName.toLowerCase() === 'a'){
+        var name = target.dataset.name
+        if(name){
+          target.href = prefix + name + '.html';
+        }
+      }
+    },false)
   </script>
 </body>
 </html>
