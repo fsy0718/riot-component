@@ -13,7 +13,7 @@
   - 引用需要的`riot-component`js文件,有[amd,commonjs,es6,script标签四个版本]
   - 开始使用riot-component组件
 
-  ```
+  ```html
   <!DOCTYPE html>
   <html>
     <head>
@@ -30,17 +30,18 @@
   ```
 2. 使用riot-component包
 
-  ` $ npm install --save riot-component`
-
+  ```shell
+  $ npm install --save riot-component`
   ```
+
+  ```javascript
   //app.js
   import riot from 'riot'
   import 'riot-component'
   riot.mount('riot-calendar')
-
   ```
 
-  ```
+  ```html
   <!DOCTYPE html>
     <html>
       <head>

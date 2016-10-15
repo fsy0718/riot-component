@@ -42,7 +42,7 @@ var syncEvent = {
   }
 };
 
-/** Return all property names */
+/* Return all property names */
 function getAllPropertyNames(obj) {
   var arr = [];
   for (var key in obj) {
@@ -50,7 +50,7 @@ function getAllPropertyNames(obj) {
   }return arr;
 }
 
-/** Call original method and update automatically */
+/* Call original method and update automatically */
 function hook(p, key) {
   var h = function h(e) {
     // update only when the argument is an Event object

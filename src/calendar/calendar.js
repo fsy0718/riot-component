@@ -1,30 +1,97 @@
+/**
+ * Tag构造函数
+ * @external Tag
+ * @see http://riotjs.com/api/#tag-instance
+ */
+/**
+ * onChange 函数说明
+ * @callback onChangeCall
+ * @param {riot-date} date 当前被点击riot-date对象
+ * @param {tag} tag 当前riot-calendar实例对象
+ */
+/**
+ * dateTimeFormat 函数说明
+ * @callback dateTimeFormatCall
+ * @param {number} y 年份
+ * @param {number} m 月份
+ * @param {number} d 天数
+ */
+/**
+ * parseDateClass 函数说明
+ * @callback parseDateClassCall
+ * @param {riot-date} date 当前正在渲染的riot-date对象
+ * @returns {string|string[]} 需要被添加类名
+ */
+
+/**
+ * getSelectDatesCall 函数说明
+ * @callback getSelectDatesCall
+ * @returns {selectDateObj}
+
+ */
+/**
+ * 扩展Tag实例
+ * @see http://riotjs.com/api/#tag-instance
+ * @typedef {object} tag
+ * @extends external:Tag
+ * @property {function} prevMonth  选择前一个月,不能传参数
+ * @property {function} nextMonth  选择下一个月，不能传参数
+ * @property {getSelectDatesCall} getSelectDates 返回当前选择日期对象
+ */
+/**
+ * @typedef {object} selectDateObj
+ * @property {date[]} dates  被选中排序后的Date数组
+ * @property {string[]} dateStr 被选中排序后并经过opts.dateTimeFormat格式化后的日期字符串
+ */
+/**
+ * @typedef {object} riot-date
+ * @property {number} current     表示月份 -1:前一个月  0:当前月 1:后一个月
+ * @property {date}   date          当前日期对象
+ * @property {number} y            年份
+ * @property {number} m            月份
+ * @property {number} d            日
+ * @property {number} w            星期
+ * @property {string} dateformat   日期字符串，可以被opts.dateTimeFormat控制，默认为yyyy-mm-dd
+ * @property {number} [range]      表示范围选择,只有当opts.isRange为true时有效  -1:表示范围开始  0:表示范围中   1:表示范围结束
+ * @property {number} [select]     表示是否被选中 1:表示选中
+ * @property {number} valid        表示当前日期是否可用  0:表示可用  1:表示其它月  2:表示超出range范围  3:表示超出min-max范围
+ */
+
+/**
+ * @function riot-calendar
+ * @description 基于riot的日历，默认日历视图由defaultDate|selectDates|new Date()按顺序提供
+ * @param {Object} opts
+ * @param {boolean}   [opts.autoOk=false]                是否自动保存
+ * @param {date}      [opts.defaultDate]                 默认日期
+ * @param {date}      [opts.minDate]                     最小日期
+ * @param {date}      [opts.maxDate]                     最大日期
+ * @param {boolean}   [opts.isRange]                     是否为选择范围
+ * @param {date[]}    [opts.rangeLimit]                  选择的范围      
+ * @param {boolean}   [opts.weekMode=false]              是否固定星期 true 固定
+ * @param {number}    [opts.firstDay=0]                  每周的第一天
+ * @param {boolean}   [opts.isMultiple                   是否为多选
+ * @param {date[]}    [opts.selectDates]                 选中的日期
+ * @param {boolean}   [opts.switchViewByOtherMonth=false] 表示点击其它月份是否切换日历视图 
+ * @param {boolean}   [opts.switchViewOverLimit=false]   表示超出最小与最大日历是否能切换日历视图
+ * @param {boolean}   [opts.showOtherMonthDay=true]      是否显示其它月的日期
+ * @param {boolean}   [opts.switchWithAnimation=true]    切换时是否需要动画
+ * @param {string}    [opts.animationTimingFunction=cubic-bezier(0.445, 0.05, 0.55, 0.95)]      动画函数 
+ * @param {number}    [opts.animationDuration=0.45]       动画待续时间  默认为0.45s
+ * @param {onChangeCall}  [opts.onChange]                 日期被点击时的回调函数
+ * @param {dateTimeFormatCall} [opts.dateTimeFormat]      自定义日历显示格式
+ * @param {parseDateClassCall} [opts.parseDateClass]      自定义日历日期显示的className
+ * @returns {tag}
+ * @example
+ *  riot.mount('riot-calendar', opts)
+ */
+
+
+
+
+
 let tag = this;
 const firstDay = Number(opts.firstDay) || 0;
-/*
-  opts说明
-  autoOk:                          boolean 是否自动保存
-  defaultDate:                     Date 默认日期
-  minDate:                         Date 最小日期
-  maxDate:                         Date 最大日期
 
-  isRange:                         Boolean 是否为选择范围
-  rangeLimit:                      [Date]   选择的范围      
-
-  weekMode:                        Boolean 是否固定星期 true 固定 默认为false
-  firstDay:                        Number  每周的第一天 默认为0
-
-  isMultiple:                      Boolean 是否为多选
-  selectDates:                     [Date]   选中的日期
-
-  switchViewByOtherMonth:          Boolean 表示点击其它月份是否切换日历视图 默认false
-  switchViewOverLimit:             Boolean 表示超出最小与最大日历是否能切换日历视图 默认false
-  showOtherMonthDay:               Boolean 是否显示其它月的日期
-
-  switchWithAnimation:             Boolean 切换时是否需要动画
-  animationTimingFunction:         String 动画函数 cubic-bezier(0.445, 0.05, 0.55, 0.95)
-  animationDuration:               动画待续时间  默认为0.45s
-
-*/
 //一些帮助函数
 //天数
 const datesOfMonth = [31, null, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -106,8 +173,6 @@ const formatDate3 = function (y, m, d) {
   return '' + y + str2(m) + str2(d);
 };
 
-
-
 const getCalendarViewDate = function (y, m) {
   let weekNum = opts.weekMode ? 6 : getWeeksInMonth(y, m);
   let datesInPrevMonth = getDatesInPrevMonth(y, m);
@@ -164,21 +229,7 @@ const getCalendarViewDate = function (y, m) {
       let _date = new Date(_y, _m - 1, _d);
       //将YMD暂存，进行比较日期
       _date._str = formatDate3(_y, _m, _d);
-      /*
-        current:            Number 表示月份  -1  前一个月  0  当前月 1 后一个月
-        date:               Date  当前日期
-        y:                  Number 年份
-        m:                  Number 月份
-        d:                  Number 日
-        w:                  Number 星期
-        wy:                 Number 一年中的第几周
-        r:                  Number 处于日历的第几行
-        dateformat:         String 当前日期格式化字符串
-        range:              Number 表示范围选择  -1  表示范围开始  0 表示范围中   1 表示范围结束
-        select:             Number 表示是否被选中 1表示选中
-        valid:              Number 表示是否可用  0 表示可用  1 表示其它月  2 表示超出range范围  3 表示超出min max范围
 
-      */
       let r = {
         current: _c,
         date: _date,
@@ -207,16 +258,6 @@ const getCalendarViewDate = function (y, m) {
       } else if (selectDateStr.indexOf(r.dateformat) > -1) {
         r.select = 1;
       }
-      /*var o = {
-        f: r.dateformat,
-        rls: rls,
-        rle: re,
-        mis: mis,
-        mas: mas,
-        diff: r.date._str
-      }
-      console.table(o);
-      */
       if (r.current) {
         r.valid = 1;
       } else if (opts.isRange) {
@@ -234,7 +275,7 @@ const getCalendarViewDate = function (y, m) {
     i++;
   }
   if(changeDateStr && opts.onChange){
-    opts.onChange(viewDates[changeDateStr]);
+    opts.onChange(viewDates[changeDateStr],tag);
     changeDateStr = undefined;
   }
   return {
@@ -261,18 +302,26 @@ const changeView = function (direction) {
 
 tag.prevMonth = function (e) {
   if (tag.prevMonthDisable) {
-    e.preventUpdate = true;
+    e ? e.preventUpdate = true : '';
     return;
   }
   changeView(-1);
+  if(!e){
+    tag.update();
+  }
+
 }
 tag.nextMonth = function (e) {
   if (tag.nextMonthDisable) {
-    e.preventUpdate = true;
+    e ? e.preventUpdate = true : '';
     return;
   }
   changeView(1);
+  if(!e){
+    tag.update();
+  }
 }
+
 
 //选择日期排序
 tag.getSelectDates = function () {
@@ -329,7 +378,7 @@ tag.parseDateClass = function (date) {
   }
   if (tag.opts.parseDateClass) {
     let c = opts.parentDateClass(date);
-    c && classNames.push(c);
+    c ? classNames = classNames.concat(c) : '';
   }
   return classNames.join(' ')
 }
@@ -344,6 +393,7 @@ let lastY;
 let lastM;
 let switchDirection;
 let rangeLimit = opts.rangeLimit || [];
+let switchWithAnimation = opts.switchWithAnimation === undefined && true || opts.switchWithAnimation;
 const init = function () {
   rls = formatDate3(rangeLimit[0]);
   rle = formatDate3(rangeLimit[1]);
@@ -373,7 +423,7 @@ const init = function () {
 init();
 //})
 tag.on('update', function () {
-  if (opts.switchWithAnimation && switchDirection) {
+  if (switchWithAnimation && switchDirection) {
     tag.otherData = {
       title: lastY + '年' + lastM + '月',
       weekdates: tag.curData.weekdates
@@ -401,10 +451,10 @@ tag.on('update', function () {
   }
 });
 let timer = null;
-let changeDateStr = undefined ;
+let changeDateStr = undefined;
 //动画
 tag.on('updated', function () {
-  if (opts.switchWithAnimation && switchDirection) {
+  if (switchWithAnimation && switchDirection) {
     let $cur = tag.root.querySelector('.calendar__body--cur');
     let $curT = tag.root.querySelector('.title__cur');
     let $other = tag.root.querySelector('.calendar__body--other');
@@ -465,7 +515,6 @@ tag.on('updated', function () {
   }
 })
 
-//TODO 增加判断如果小于最小值，则不能切换到别的月份
 tag.checkDate = function (e) {
   let date = e.item.date;
   if (date.valid !== 0) {
@@ -516,3 +565,4 @@ tag.checkDate = function (e) {
     changeDateStr = date.dateformat
   }
 }
+
