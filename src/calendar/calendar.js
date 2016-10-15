@@ -6,7 +6,7 @@
 /**
  * onChange 函数说明
  * @callback onChangeCall
- * @param {riot-date|null} date 当前被点击riot-date对象,如果一个日期被取消选中时，则返回null,但可以通过tag来进行操作
+ * @param {riot-date|null} date 当前被点击riot-date对象
  * @param {tag} tag 当前riot-calendar实例对象
  */
 /**
@@ -275,7 +275,7 @@ const getCalendarViewDate = function (y, m) {
     i++;
   }
   if(changeDateStr && opts.onChange){
-    opts.onChange(changeDateStr === -1 ? null : viewDates[changeDateStr],tag);
+    opts.onChange(viewDates[changeDateStr],tag);
     changeDateStr = 0;
   }
   return {
@@ -516,7 +516,6 @@ tag.on('updated', function () {
 
 tag.checkDate = function (e) {
   let date = e.item.date;
-  let nocheckDate;
   if (date.valid !== 0) {
     if (opts.switchViewByOtherMonth) {
       if ((date.current === -1 && !tag.prevMonthDisable) || (date.current === 1 && !tag.nextMonthDisable)) {
@@ -533,7 +532,6 @@ tag.checkDate = function (e) {
       selectDateStr = [];
       rs = undefined;
       re = undefined;
-      nocheckDate = -1;
     } else if (!rs || (rs && (rs > date.date._str) || re)) {
       selectDates = [date.date];
       selectDateStr = [date.dateformat];
@@ -551,8 +549,6 @@ tag.checkDate = function (e) {
       var i = selectDateStr.indexOf(date.dateformat);
       selectDateStr.splice(i, 1);
       selectDates.splice(i, 1);
-      nocheckDate = -1;
-
     } else {
       if (!opts.isMultiple) {
         selectDateStr = [date.dateformat];
@@ -564,7 +560,7 @@ tag.checkDate = function (e) {
     }
   }
   if(opts.onChange){
-    changeDateStr = nocheckDate || date.dateformat
+    changeDateStr = date.dateformat
   }
 }
 

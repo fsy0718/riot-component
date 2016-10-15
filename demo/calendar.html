@@ -49,8 +49,7 @@
               return d + '/' + m + '/' + y;
             },
             onChange: function(date,tag){
-              console.log(tag.getSelectDates())
-              ipt2.value = date && date.dateformat || '';
+              ipt2.value = date.select && date.dateformat || '';
             }
           })
         </textarea>
@@ -98,7 +97,7 @@
               return d + '/' + m + '/' + y;
             },
             onChange: function(date){
-              ipt4.value = date && date.dateformat || '';
+              ipt4.value = date.select && date.dateformat || '';
             },
             minDate: new Date()
           })

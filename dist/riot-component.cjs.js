@@ -196,7 +196,7 @@ riot.tag2('riot-calendar', '<div class="calendar"> <div class="calendar__head"> 
       i++;
     }
     if (changeDateStr && opts.onChange) {
-      opts.onChange(changeDateStr === -1 ? null : viewDates[changeDateStr], tag);
+      opts.onChange(viewDates[changeDateStr], tag);
       changeDateStr = 0;
     }
     return {
@@ -432,7 +432,6 @@ riot.tag2('riot-calendar', '<div class="calendar"> <div class="calendar__head"> 
 
   tag.checkDate = function (e) {
     let date = e.item.date;
-    let nocheckDate;
     if (date.valid !== 0) {
       if (opts.switchViewByOtherMonth) {
         if (date.current === -1 && !tag.prevMonthDisable || date.current === 1 && !tag.nextMonthDisable) {
@@ -449,7 +448,6 @@ riot.tag2('riot-calendar', '<div class="calendar"> <div class="calendar__head"> 
         selectDateStr = [];
         rs = undefined;
         re = undefined;
-        nocheckDate = -1;
       } else if (!rs || rs && rs > date.date._str || re) {
         selectDates = [date.date];
         selectDateStr = [date.dateformat];
@@ -467,7 +465,6 @@ riot.tag2('riot-calendar', '<div class="calendar"> <div class="calendar__head"> 
         var i = selectDateStr.indexOf(date.dateformat);
         selectDateStr.splice(i, 1);
         selectDates.splice(i, 1);
-        nocheckDate = -1;
       } else {
         if (!opts.isMultiple) {
           selectDateStr = [date.dateformat];
@@ -479,7 +476,7 @@ riot.tag2('riot-calendar', '<div class="calendar"> <div class="calendar__head"> 
       }
     }
     if (opts.onChange) {
-      changeDateStr = nocheckDate || date.dateformat;
+      changeDateStr = date.dateformat;
     }
   };
 });
