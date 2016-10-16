@@ -144,9 +144,9 @@ const getDatesInYear = function (y, m, d) {
   return _d;
 }
 
-const getWeeksInYear = function(y,m ,d){
-   let _d = getDatesInYear(y, m, d);
-   return Math.round(_d, 7);
+const getWeeksInYear = function (y, m, d) {
+  let _d = getDatesInYear(y, m, d);
+  return Math.round(_d, 7);
 };
 
 const getWeekTitles = function () {
@@ -173,7 +173,7 @@ const formatDate2 = function (d) {
 //进行日期快速比较及确认日期是否选择 不能用formatDate2  防止需要的格式数据为y/m/d  造成2016/9/10 > 2016/10/1
 const formatDate3 = function (y, m, d) {
   if (arguments.length < 3) {
-    return '' + (typeof y === 'object' ?  y.getFullYear() + str2(y.getMonth() + 1) + str2(y.getDate()) : '');
+    return '' + (typeof y === 'object' ? y.getFullYear() + str2(y.getMonth() + 1) + str2(y.getDate()) : '');
   }
   return '' + y + str2(m) + str2(d);
 };
@@ -280,10 +280,6 @@ const getCalendarViewDate = function (y, m) {
     weekDates.push(wd);
     i++;
   }
-  if(changeDateStr && opts.onChange){
-    opts.onChange(viewDates[changeDateStr],tag);
-    changeDateStr = 0;
-  }
   return {
     weekDates: weekDates,
     viewDates: viewDates
@@ -312,7 +308,7 @@ tag.prevMonth = function (e) {
     return;
   }
   changeView(-1);
-  if(!e){
+  if (!e) {
     tag.update();
   }
 
@@ -323,7 +319,7 @@ tag.nextMonth = function (e) {
     return;
   }
   changeView(1);
-  if(!e){
+  if (!e) {
     tag.update();
   }
 }
@@ -364,28 +360,54 @@ tag.getSelectDates = function () {
   }
 }
 
-tag.parseDateClass = function (date) {
+tag.parseDateBoxClass = function (date) {
   if (!date) {
-    return false;
+    return '';
   }
   let classNames = [];
   if (tag.opts.isRange && rs && re) {
-    if (rs === date.date._str) {
-      classNames.push('rangeStart');
+    if (date.range === -1) {
+      classNames.push('range--start');
     }
-    if (re === date.date._str) {
-      classNames.push('rangeEnd');
+    if (date.range === 1) {
+      classNames.push('range--end');
     }
     if (date.range === 0) {
-      classNames.push('high');
+      classNames.push('range--area');
     }
-  }
-  if (tag.opts.parseDateClass) {
-    let c = opts.parentDateClass(date);
-    c ? classNames = classNames.concat(c) : '';
   }
   return classNames.join(' ')
 }
+
+tag.parseDateClass = function (date) {
+  if (!date) {
+    return '';
+  }
+  let classNames = [];
+  //是否可用
+  classNames.push(date.disable === 0 ? 'enable' : 'disable');
+  date.select === 1 && classNames.push('choice');
+  //有当前变化值才会有上次选中值
+  if(curChangeDateStr){
+    //当前就是变化的日期
+    if(curChangeDateStr === date.dateformat){
+      classNames.push(date.select === 1 ? 'riot-calendar-scaleIn' : 'riot-calendar-scaleOut');
+    }
+    else if(lastSelectDateStr.indexOf(date.dateformat) > -1){
+      if(opts.isRange){
+        if(selectDateStr.length === 1){
+          if(lastSelectDateStr.length === 2 && (selectDateStr[0] !== lastSelectDateStr[0] || selectDateStr[0] !== lastSelectDateStr[1])){
+            classNames.push('riot-calendar-scaleOut');
+          }
+        }
+      }else if(!opts.isMultiple){
+        classNames.push('riot-calendar-scaleOut');
+      }
+    }
+  }
+  return classNames.join(' ')
+}
+
 //范围值
 let rs, re, rls, rle, selectDates, selectDateStr, mis, mas;
 //默认日期  配置日期  范围起点  选择日期最小的一个   今天
@@ -398,6 +420,9 @@ let lastM;
 let switchDirection;
 let rangeLimit = opts.rangeLimit || [];
 let switchWithAnimation = opts.switchWithAnimation === undefined && true || opts.switchWithAnimation;
+//curChangeDateStr，lastSelectDates 两个用处，一、记录用户当前点击日期，二、用于触发被选中日期的动画,
+let curChangeDateStr = undefined;
+let lastSelectDateStr = [];
 const init = function () {
   rls = formatDate3(rangeLimit[0]);
   rle = formatDate3(rangeLimit[1]);
@@ -410,7 +435,6 @@ const init = function () {
   getWeekTitles();
 
   tag.getSelectDates();
-
   if (selectDates[0] && !opts.isMultiple) {
     rs = formatDate3(selectDates[0].getFullYear(), selectDates[0].getMonth() + 1, selectDates[0].getDate())
   }
@@ -434,11 +458,17 @@ tag.on('update', function () {
     }
   }
   let _d = getCalendarViewDate(curY, curM);
+  //在update时，检测是否需要触发onChange事件
+  if (opts.onChange && curChangeDateStr) {
+    opts.onChange(_d.viewDates[curChangeDateStr], tag);
+  }
   tag.curData = {
     title: curY + '年' + curM + '月',
     weekdates: _d.weekDates,
     viewdates: _d.viewDates
   }
+
+
   if (opts.switchViewOverLimit) {
     let firstDateStr = formatDate3(curY, curM, 1);
     let lastDateStr = formatDate3(curY, curM, getDatesInMonth(curY, curM));
@@ -455,9 +485,10 @@ tag.on('update', function () {
   }
 });
 let timer = null;
-let changeDateStr = 0;
+
 //动画
 tag.on('updated', function () {
+  lastSelectDateStr = selectDateStr.concat();
   if (switchWithAnimation && switchDirection) {
     let $cur = tag.root.querySelector('.calendar__body--cur');
     let $curT = tag.root.querySelector('.title__cur');
@@ -517,6 +548,11 @@ tag.on('updated', function () {
       switchDirection = undefined;
     }, duration * 1000)
   }
+  //在更新完毕后，需要把tag.curChangeDateStr清除
+  if (opts.onChange && curChangeDateStr) {
+    curChangeDateStr = undefined;
+  }
+  
 })
 
 tag.checkDate = function (e) {
@@ -549,8 +585,6 @@ tag.checkDate = function (e) {
     }
   } else {
     if (date.select) {
-      //非range的时候做动画
-      e.srcElement.classList.add('riot-calendar-scaleOut')
       var i = selectDateStr.indexOf(date.dateformat);
       selectDateStr.splice(i, 1);
       selectDates.splice(i, 1);
@@ -564,8 +598,6 @@ tag.checkDate = function (e) {
       }
     }
   }
-  if(opts.onChange){
-    changeDateStr = date.dateformat
-  }
+  curChangeDateStr = date.dateformat;
 }
 
