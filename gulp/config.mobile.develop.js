@@ -27,7 +27,7 @@ module.exports = {
     cascade: false
   },
   browsersync: {
-    files: ["dist/riot-component.js", "demo/index.html"],
+    files: ["dist/riot-component.js", "demo/*.html"],
     server: {
       baseDir: "demo",
       routes: {

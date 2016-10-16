@@ -1,21 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>riot-component demo</title>
-  <script src="riot.min.js"></script>
-    <link rel="stylesheet" href="grids-min.css">
-  <link rel="stylesheet" href="reset.css">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<title>riot-component demo</title>
+	<script src="riot.min.js"></script>
+	<link rel="stylesheet" href="./pure-min.css">
+	<link rel="stylesheet" href="./reset.css">
+  <style>
+    .pure-menu-list{
+      padding-left: 20px;
+    }
+    h1{
+      text-align: center;
+      font-size: 2rem;
+      margin: 20px;
+    }
+    .pure-menu-link{
+      display: inline-block;
+      color: rgb(28, 184, 65);
+    }
+    .pure-menu-link:hover{
+      background: rgba(28,184,65,.5);
+      color: #fff;
+    }
+  </style>
 </head>
+
 <body>
-  <h1>demo链接</h1>
-  <ul>
-    <li>
-      <a href="javascript:;" data-name="calendar">日历</a>
-    </li>
-  </ul>
-  <script>
+  <h1>riot-component</h1>
+	<div class="pure-menu">
+		<span class="pure-menu-heading">在线实例链接</span>
+		<ul class="pure-menu-list">
+			<li class="pure-menu-item">
+				<a href="javascript:;" class="pure-menu-link" data-name="calendar">日历</a>
+			</li>
+		</ul>
+	</div>
+	<script>
     var hostname = location.hostname;
     var prefix = '/';
     if(hostname === 'fsy0718.github.io'){
@@ -32,4 +55,5 @@
     },false)
   </script>
 </body>
+
 </html>

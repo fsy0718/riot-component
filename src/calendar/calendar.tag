@@ -18,14 +18,14 @@
 			<div if={otherData} class="calendar__body--other">
 				<div class="pure-g" each={weekdates in otherData.weekdates}>
 					<div class="pure-u-1-8 {parseDateClass(date)}" each={date in weekdates}>
-						<div class="day {date.valid === 0 && 'enable' || 'disable'} {date.select === 1 && 'choice'}" onclick={checkDate}>{date.d}</div>
+						<div class="day {date.disable === 0 && 'enable' || 'disable'} {date.select === 1 && 'choice'}" onclick={checkDate}>{date.d}</div>
 					</div>
 				</div>
 			</div>
 			<div class="calendar__body--cur">
 				<div class="pure-g" each={weekdates in curData.weekdates}>
 					<div class="pure-u-1-8 {parseDateClass(date)}" each={date in weekdates}>
-						<div class="day {date.valid === 0 && 'enable' || 'disable'} {date.select === 1 && 'choice'} {!date.range && date.select === 1 && 'riot-calendar-scaleIn'}"
+						<div class="day {date.disable === 0 && 'enable' || 'disable'} {date.select === 1 && 'choice'} {!date.range && date.select === 1 && 'riot-calendar-scaleIn'}"
 							onclick={checkDate}>{date.d}<i if={date.select===1 }></i></div>
 					</div>
 				</div>

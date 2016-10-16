@@ -5,164 +5,271 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	<title>riot-calendar</title>
-	<link rel="stylesheet" href="./grids-min.css">
+	<link rel="stylesheet" href="./pure-min.css">
 	<link rel="stylesheet" href="./reset.css">
 	<link rel="stylesheet" href="./common.css">
+	<link rel="stylesheet" href="./prism.css">
 	<style>
 		input {
 			border: solid 1px #ccc;
 			width: 100%;
 		}
 		
-		.pure-g .pure-g {
-			margin: 10px 0;
+		.pure-g .result {
+			margin-top: 10px;
+			box-sizing: border-box;
+			padding: 20px 0 20px 20px;
+			border-top: solid 1px #ddd;
+		}
+		
+		textarea.code {
+			display: none;
 		}
 	</style>
 </head>
 
 <body>
 	<div class="wrap">
+		<div class="demo-title">riot-calenar实例</div>
 		<div class="pure-g ctac">
 			<div class="pure-u-1-2">
-				<h4>基本的riot-calendar</h4>
-				<riot-calendar></riot-calendar>
-				<div class="code-source">
-					<textarea class="code">
-          var c1 = document.querySelector('riot-calendar');
-          riot.mount(c1, 'riot-calendar')
-        </textarea>
+				<div class="demo-card">
+					<h4>基本的riot-calendar</h4>
+					<riot-calendar></riot-calendar>
+					<div class="demo-desc">最基本的用法</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code">
+var c1 = document.querySelector('riot-calendar');
+riot.mount(c1, 'riot-calendar')
+        		</textarea>
+					</div>
 				</div>
-			</div>
-			<div class="pure-u-1-2">
+				<div class="demo-card">
+					<h4>范围选择riot-calendar</h4>
+					<riot-calendar-1></riot-calendar-1>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">范围值:</p>
+						<p class="pure-u-3-5"><input class="datepicker3" type="text" /></p>
+					</div>
+					<div class="demo-desc">传入<code>isRange</code>进行范围选择</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code" data-line="4">
+var c3 = document.querySelector('riot-calendar-1');
+var ipt3 = document.querySelector('.datepicker3')
+riot.mount(c3, 'riot-calendar',{
+	isRange: true,
+	dateTimeFormat: function(y, m, d){
+		return '' + y + '年' + m + '月' + d + '日';
+	},
+	selectDates:[new Date(2016,9,1), new Date(2016,9,25)],
+	onChange: function(date,tag){
+		ipt3.value = tag.getSelectDates().dateStr.join(' - ')
+	}
+})
+        </textarea>
+					</div>
+				</div>
+				<div class="demo-card">
+					<h4>设置最小值minDate</h4>
+					<div class="riot-calendar-4"></div>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">选取值:</p>
+						<p class="pure-u-3-5"><input class="datepicker4" type="text" /></p>
+					</div>
+					<div class="demo-desc">传入<code>minDate</code>,设置最小可选日期</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code" data-line="10">
+var c4 = document.querySelector('.riot-calendar-4');
+var ipt4 = document.querySelector('.datepicker4');
+riot.mount(c4, 'riot-calendar',{
+	dateTimeFormat: function(y,m,d){
+		return d + '/' + m + '/' + y;
+	},
+	onChange: function(date){
+		ipt4.value = date.select && date.dateformat || '';
+	},
+	minDate: new Date()
+})
+        </textarea>
+					</div>
+				</div>
+				<div class="demo-card">
+					<h4>超出范围后禁止切换日历</h4>
+					<riot-calendar-6></riot-calendar-6>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">选择值:</p>
+						<p class="pure-u-3-5"><input class="datepicker6" type="text" /></p>
+					</div>
+					<div class="demo-desc">设置<code>switchViewOverLimit</code>禁用超出范围切换日历</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code" data-line="10">
+var c6 = document.querySelector('riot-calendar-6');
+var ipt6 = document.querySelector('.datepicker6');
+riot.mount(c6, 'riot-calendar',{
+	isMultiple: true,
+	selectDates:[new Date(2016,9,1), new Date(2016,9,25)],
+	onChange: function(date,tag){
+		ipt6.value = tag.getSelectDates().dateStr.join(',');
+	},
+	minDate: new Date(2016,9,1),
+	switchViewOverLimit: true,
+	maxDate: new Date(2016,11,1)
+})
+        </textarea>
+					</div>
+				</div>
+		</div>
+		<div class="pure-u-1-2">
+			<div class="demo-card">
 				<h4>dateTimeFormat方法，自定义日期显示格式</h4>
-				<div class="pure-g">
-					<p class="pure-u-1-5">自定义值:</p>
-					<p class="pure-u-4-5"><input class="datepicker2" type="text" /></p>
-				</div>
 				<div class="riot-calendar"></div>
+				<div class="pure-g result">
+					<p class="pure-u-1-5">自定义值:</p>
+					<p class="pure-u-3-5"><input class="datepicker2" type="text" /></p>
+				</div>
+				<div class="demo-desc">设置<code>dateTimeFormat</code>自定义日历显示格式</div>
+				<div class="view-source">
+					<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+				</div>
 				<div class="code-source">
-					<textarea class="code">
-          var c2 = document.querySelector('.riot-calendar');
-          var ipt2 = document.querySelector('.datepicker2');
-          riot.mount(c2, 'riot-calendar',{
-            dateTimeFormat: function(y,m,d){
-              return d + '/' + m + '/' + y;
-            },
-            onChange: function(date,tag){
-              ipt2.value = date.select && date.dateformat || '';
-            }
-          })
-        </textarea>
+					<textarea class="code" data-line="4-6">
+var c2 = document.querySelector('.riot-calendar');
+var ipt2 = document.querySelector('.datepicker2');
+	riot.mount(c2, 'riot-calendar',{
+	dateTimeFormat: function(y,m,d){
+		return d + '/' + m + '/' + y;
+	},
+	onChange: function(date,tag){
+		ipt2.value = date.select && date.dateformat || '';
+	}
+})
+        		</textarea>
 				</div>
 			</div>
-		</div>
-		<div class="pure-g ctac">
-			<div class="pure-u-1-2">
-				<h4>范围选择riot-calendar</h4>
-				<div class="pure-g">
-					<p class="pure-u-1-5">范围值:</p>
-					<p class="pure-u-4-5"><input class="datepicker3" type="text" /></p>
-				</div>
-				<riot-calendar-1></riot-calendar-1>
-				<div class="code-source">
-					<textarea class="code">
-          var c3 = document.querySelector('riot-calendar-1');
-          var ipt3 = document.querySelector('.datepicker3')
-          riot.mount(c3, 'riot-calendar',{
-            isRange: true,
-            dateTimeFormat: function(y, m, d){
-              return '' + y + '年' + m + '月' + d + '日';
-            },
-            selectDates:[new Date(2016,9,1), new Date(2016,9,25)],
-            onChange: function(date,tag){
-              ipt3.value = tag.getSelectDates().dateStr.join(' - ')
-            }
-          })
+			<div class="demo-card">
+				<h4>范围选择riot-calendar，并设置范围的最大与最小可选区域</h4>
+				<div class="riot-calendar-8"></div>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">范围值:</p>
+						<p class="pure-u-3-5"><input class="datepicker8" type="text" /></p>
+					</div>
+					<div class="demo-desc">传入<code>isRange</code>进行范围选择,并通过<code>rangeLimit</code>设置范围大小</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code" data-line="4-6">
+var c8 = document.querySelector('.riot-calendar-8');
+var ipt8 = document.querySelector('.datepicker8')
+riot.mount(c8, 'riot-calendar',{
+	isRange: true,
+	rangeLimit: [new Date(2016,8,1), new Date(2016,10,1)],
+	switchViewOverLimit: true,
+	dateTimeFormat: function(y, m, d){
+		return '' + y + '年' + m + '月' + d + '日';
+	},
+	selectDates:[new Date(2016,9,1), new Date(2016,9,25)],
+	onChange: function(date,tag){
+		ipt3.value = tag.getSelectDates().dateStr.join(' - ')
+	}
+})
         </textarea>
+					</div>
 				</div>
-			</div>
-			<div class="pure-u-1-2">
-				<h4>设置最小值minDate</h4>
-				<div class="pure-g">
+			<div>
+			<div class="demo-card">
+				<h4>disabledDate数组控制不可选日期</h4>
+				<div class="riot-calendar-7"></div>
+				<div class="pure-g result">
 					<p class="pure-u-1-5">选取值:</p>
-					<p class="pure-u-4-5"><input class="datepicker4" type="text" /></p>
+					<p class="pure-u-3-5"><input class="datepicker7" type="text" /></p>
 				</div>
-				<div class="riot-calendar-4"></div>
+				<div class="demo-desc">
+					设置<code>disabledDate</code>函数进行精细化控制，将可选的星期天全部置为不可选
+				</div>
+				<div class="view-source">
+					<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+				</div>
 				<div class="code-source">
-					<textarea class="code">
-          var c4 = document.querySelector('.riot-calendar-4');
-          var ipt4 = document.querySelector('.datepicker4');
-          riot.mount(c4, 'riot-calendar',{
-            dateTimeFormat: function(y,m,d){
-              return d + '/' + m + '/' + y;
-            },
-            onChange: function(date){
-              ipt4.value = date.select && date.dateformat || '';
-            },
-            minDate: new Date()
-          })
-        </textarea>
+					<textarea class="code" data-line="10-14">
+var c7 = document.querySelector('.riot-calendar-7');
+var ipt7 = document.querySelector('.datepicker7');
+riot.mount(c7, 'riot-calendar',{
+	dateTimeFormat: function(y,m,d){
+		return d + '/' + m + '/' + y;
+	},
+	onChange: function(date){
+		ipt7.value = date.select && date.dateformat || '';
+	},
+	disabledDate: function(date){
+		if(date.w === 0 && date.enable === 0){
+			date.disable = 4
+		}
+	},
+	minDate: new Date()
+})
+        		</textarea>
 				</div>
 			</div>
-		</div>
-		<div class="pure-g ctac">
-			<div class="pure-u-1-2">
+			<div class="demo-card">
 				<h4>多选riot-calendar</h4>
-				<div class="pure-g">
-					<p class="pure-u-1-5">多选值:</p>
-					<p class="pure-u-4-5"><input class="datepicker5" type="text" /></p>
-				</div>
 				<riot-calendar-5></riot-calendar-5>
-				<div class="code-source">
-					<textarea class="code">
-          var c5 = document.querySelector('riot-calendar-5');
-          var ipt5 = document.querySelector('.datepicker5');
-          riot.mount(c5, 'riot-calendar',{
-            isMultiple: true,
-            selectDates:[new Date(2016,9,1), new Date(2016,9,25)],
-            onChange: function(date,tag){
-              ipt5.value = tag.getSelectDates().dateStr.join(',');
-            }
-          })
-        </textarea>
+				<div class="pure-g result">
+					<p class="pure-u-1-5">多选值:</p>
+					<p class="pure-u-3-5"><input class="datepicker5" type="text" /></p>
 				</div>
-			</div>
-			<div class="pure-u-1-2">
-				<h4>超出范围后禁止切换日历</h4>
-				<div class="pure-g">
-					<p class="pure-u-1-5">选择值:</p>
-					<p class="pure-u-4-5"><input class="datepicker6" type="text" /></p>
+				<div class="demo-desc">设置<code>isMultiple</code>，可以多选日期</div>
+				<div class="view-source">
+					<a title="查看源码" class="view-source-target" href="javascript:;"></a>
 				</div>
-				<riot-calendar-6></riot-calendar-6>
 				<div class="code-source">
-					<textarea class="code">
-          var c6 = document.querySelector('riot-calendar-6');
-          var ipt6 = document.querySelector('.datepicker6');
-          riot.mount(c6, 'riot-calendar',{
-            isMultiple: true,
-            selectDates:[new Date(2016,9,1), new Date(2016,9,25)],
-            onChange: function(date,tag){
-              ipt6.value = tag.getSelectDates().dateStr.join(',');
-            },
-            minDate: new Date(2016,9,1),
-            switchViewOverLimit: true,
-            maxDate: new Date(2016,11,1)
-          })
-        </textarea>
+					<textarea class="code" data-line="4">
+var c5 = document.querySelector('riot-calendar-5');
+var ipt5 = document.querySelector('.datepicker5');
+riot.mount(c5, 'riot-calendar',{
+	isMultiple: true,
+	selectDates:[new Date(2016,9,1), new Date(2016,9,25)],
+	onChange: function(date,tag){
+		ipt5.value = tag.getSelectDates().dateStr.join(',');
+	}
+})
+        		</textarea>
 				</div>
 			</div>
 		</div>
 	</div>
 	<script src="./riot.min.js"></script>
 	<script src="../dist/riot-component.js"></script>
+	<script src="./prism.js"></script>
 	<script>
     var codes = [].slice.call(document.querySelectorAll('textarea.code'),0);
     codes.forEach(function(ipt){
       var _code = ipt.value;
       eval(_code);
+			var hightline = ipt.dataset.line;
+			var pre = document.createElement('pre');
+			if(hightline){
+				pre.dataset.line = hightline;
+			}
+
+			pre.className = 'line-numbers language-javascript';
+			pre.innerHTML = '<code class="language-javascript">' + _code + '</code>';
+			ipt.parentNode.appendChild(pre);
     })
-    
   </script>
+	<script src="./common.js"></script>
 </body>
 
 </html>

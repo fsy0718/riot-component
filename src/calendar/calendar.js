@@ -6,7 +6,7 @@
 /**
  * onChange 函数说明
  * @callback onChangeCall
- * @param {riot-date|null} date 当前被点击riot-date对象
+ * @param {riot-date} date 当前被点击riot-date对象
  * @param {tag} tag 当前riot-calendar实例对象
  */
 /**
@@ -54,7 +54,7 @@
  * @property {string} dateformat   日期字符串，可以被opts.dateTimeFormat控制，默认为yyyy-mm-dd
  * @property {number} [range]      表示范围选择,只有当opts.isRange为true时有效  -1:表示范围开始  0:表示范围中   1:表示范围结束
  * @property {number} [select]     表示是否被选中 1:表示选中
- * @property {number} valid        表示当前日期是否可用  0:表示可用  1:表示其它月  2:表示超出range范围  3:表示超出min-max范围
+ * @property {number} disable        表示当前日期是否可用  0:表示可用  1:表示其它月  2:表示超出range范围  3:表示超出min-max范围
  */
 
 /**
@@ -80,6 +80,8 @@
  * @param {onChangeCall}  [opts.onChange]                 日期被点击时的回调函数
  * @param {dateTimeFormatCall} [opts.dateTimeFormat]      自定义日历显示格式
  * @param {parseDateClassCall} [opts.parseDateClass]      自定义日历日期显示的className
+ * @param {disabledDateCall}   [opts.disabledDate]    更精细的不可选日期控制函数
+ * @since 0.0.2
  * @returns {tag}
  * @example
  *  riot.mount('riot-calendar', opts)
@@ -238,7 +240,7 @@ const getCalendarViewDate = function (y, m) {
         d: _d,
         w: _date.getDay(),
         dateformat: formatDate(_y, _m, _d),
-        valid: 0
+        disable: 0
       }
       //在范围中
       if (opts.isRange) {
@@ -259,14 +261,15 @@ const getCalendarViewDate = function (y, m) {
         r.select = 1;
       }
       if (r.current) {
-        r.valid = 1;
+        r.disable = 1;
       } else if (opts.isRange) {
         if ((rls && rls > r.date._str) || (rle && rle < r.date._str)) {
-          r.valid = 2;
+          r.disable = 2;
         }
       } else if ((mis && mis > r.date._str) || (mas && mas < r.date._str)) {
-        r.valid = 3;
+        r.disable = 3;
       }
+      opts.disabledDate && opts.disabledDate(r);
       j++;
       wd.push(r);
       viewDates[r.dateformat] = r;
@@ -344,7 +347,6 @@ tag.getSelectDates = function () {
   selectDates.forEach(function (d) {
     selectDateStr.push(formatDate2(d));
   })
-
 
   if (opts.isRange) {
     selectDates = selectDates.slice(0, 2);
@@ -437,12 +439,12 @@ tag.on('update', function () {
   if (opts.switchViewOverLimit) {
     let firstDateStr = formatDate3(curY, curM, 1);
     let lastDateStr = formatDate3(curY, curM, getDatesInMonth(curY, curM));
-    if (firstDateStr <= mis) {
+    if (opts.isRange && firstDateStr <= rls || firstDateStr <= mis) {
       tag.prevMonthDisable = true;
     } else {
       tag.prevMonthDisable = false;
     }
-    if (mas && lastDateStr >= mas) {
+    if (opts.isRange && lastDateStr >= rle || mas && lastDateStr >= mas) {
       tag.nextMonthDisable = true;
     } else {
       tag.nextMonthDisable = false;
@@ -516,7 +518,7 @@ tag.on('updated', function () {
 
 tag.checkDate = function (e) {
   let date = e.item.date;
-  if (date.valid !== 0) {
+  if (date.disable !== 0) {
     if (opts.switchViewByOtherMonth) {
       if ((date.current === -1 && !tag.prevMonthDisable) || (date.current === 1 && !tag.nextMonthDisable)) {
         changeView(date.current);
