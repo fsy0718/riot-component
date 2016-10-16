@@ -308,7 +308,7 @@ riot.tag2('riot-calendar', '<div class="calendar"> <div class="calendar__head"> 
       } else if (lastSelectDateStr.indexOf(date.dateformat) > -1) {
         if (opts.isRange) {
           if (selectDateStr.length === 1) {
-            if (lastSelectDateStr.length === 2 && (selectDateStr[0] !== lastSelectDateStr[0] || selectDateStr[0] !== lastSelectDateStr[1])) {
+            if (lastSelectDateStr.length === 1 || lastSelectDateStr.length === 2 && (selectDateStr[0] !== lastSelectDateStr[0] || selectDateStr[0] !== lastSelectDateStr[1])) {
               classNames.push('riot-calendar-scaleOut');
             }
           }
