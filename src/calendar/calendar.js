@@ -24,10 +24,14 @@
  */
 
 /**
- * getSelectDatesCall 函数说明
+ * getSelectDates 函数说明
  * @callback getSelectDatesCall
  * @returns {selectDateObj}
-
+ */
+/**
+ * disabledDate 不可选日期函数说明
+ * @callback disabledDateCall
+ * @param {riot-date} date 当前正在渲染的riot-date对象
  */
 /**
  * 扩展Tag实例
@@ -80,8 +84,7 @@
  * @param {onChangeCall}  [opts.onChange]                 日期被点击时的回调函数
  * @param {dateTimeFormatCall} [opts.dateTimeFormat]      自定义日历显示格式
  * @param {parseDateClassCall} [opts.parseDateClass]      自定义日历日期显示的className
- * @param {disabledDateCall}   [opts.disabledDate]    更精细的不可选日期控制函数
- * @since 0.0.2
+ * @param {disabledDateCall}   [opts.disabledDate]    更精细的不可选日期控制函数 @since 0.0.2
  * @returns {tag}
  * @example
  *  riot.mount('riot-calendar', opts)
