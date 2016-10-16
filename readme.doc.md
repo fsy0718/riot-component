@@ -7,6 +7,5 @@
         isRange: true
     })
 ```
-[在线实例地址](../demo/index.html)
 ### 组件
 - [日历](./global.html#riot-calendar)
