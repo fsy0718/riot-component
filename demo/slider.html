@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<title>riot-calendar</title>
+	<link rel="stylesheet" href="./pure-min.css">
+	<link rel="stylesheet" href="./reset.css">
+	<link rel="stylesheet" href="./common.css">
+	<link rel="stylesheet" href="./prism.css">
+	<style>
+		riot-slider{
+			padding: 40px 10px;
+			display: block;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="wrap">
+		<div class="demo-title">riot-slider示例</div>
+		<div class="pure-g ctac">
+			<div class="pure-u-1-2">
+				<div class="demo-card">
+					<h4>基本的riot-slider</h4>
+					<riot-slider></riot-slider>
+					<div class="demo-desc">最基本的用法</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code">
+var s1 = document.querySelector('riot-slider');
+riot.mount(s1,'riot-slider');
+        		</textarea>
+					</div>
+				</div>
+			</div>
+			<div class="pure-u-1-2">
+				<div class="demo-card">
+					<h4>两个滑块的riot-slider</h4>
+					<riot-slider class="riot-slider-2"></riot-slider>
+					<div class="demo-desc"><code>range</code>为真</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code" data-line="3">
+var s1 = document.querySelector('.riot-slider-2');
+riot.mount(s1,'riot-slider',{
+	range: true
+});
+        		</textarea>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="./riot.min.js"></script>
+	<script src="../dist/riot-component.js"></script>
+	<script src="./prism.js"></script>
+	<script>
+    var codes = [].slice.call(document.querySelectorAll('textarea.code'),0);
+    codes.forEach(function(ipt){
+      var _code = ipt.value;
+      eval(_code);
+			var hightline = ipt.dataset.line;
+			var pre = document.createElement('pre');
+			if(hightline){
+				pre.dataset.line = hightline;
+			}
+
+			pre.className = 'line-numbers language-javascript';
+			pre.innerHTML = '<code class="language-javascript">' + _code + '</code>';
+			ipt.parentNode.appendChild(pre);
+    })
+  </script>
+	<script src="./common.js"></script>
+</body>
+
+</html>

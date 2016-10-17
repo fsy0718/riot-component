@@ -64,22 +64,22 @@
 /**
  * @function riot-calendar
  * @description 基于riot的日历，默认日历视图由defaultDate|selectDates|new Date()按顺序提供，{@link https://fsy0718.github.io/riot-component/demo/calendar.html 实例}
- * @param {Object} opts
+ * @param {object} opts
  * @param {boolean}   [opts.autoOk=false]                是否自动保存
  * @param {date}      [opts.defaultDate]                 默认日期
  * @param {date}      [opts.minDate]                     最小日期
  * @param {date}      [opts.maxDate]                     最大日期
  * @param {boolean}   [opts.isRange]                     是否为选择范围
- * @param {date[]}    [opts.rangeLimit]                  选择的范围      
+ * @param {date[]}    [opts.rangeLimit]                  选择的范围
  * @param {boolean}   [opts.weekMode=false]              是否固定星期 true 固定
  * @param {number}    [opts.firstDay=0]                  每周的第一天
  * @param {boolean}   [opts.isMultiple                   是否为多选
  * @param {date[]}    [opts.selectDates]                 选中的日期
- * @param {boolean}   [opts.switchViewByOtherMonth=false] 表示点击其它月份是否切换日历视图 
+ * @param {boolean}   [opts.switchViewByOtherMonth=false] 表示点击其它月份是否切换日历视图
  * @param {boolean}   [opts.switchViewOverLimit=false]   表示超出最小与最大日历是否能切换日历视图
- * @param {boolean}   [opts.showOtherMonthDay=true]      是否显示其它月的日期
+ * @param {boolean}   [opts.showOtherMonthDate=true]      是否显示其它月的日期
  * @param {boolean}   [opts.switchWithAnimation=true]    切换时是否需要动画
- * @param {string}    [opts.animationTimingFunction=cubic-bezier(0.445, 0.05, 0.55, 0.95)]      动画函数 
+ * @param {string}    [opts.animationTimingFunction=cubic-bezier(0.445, 0.05, 0.55, 0.95)]      动画函数
  * @param {number}    [opts.animationDuration=0.45]       动画待续时间  默认为0.45s
  * @param {onChangeCall}  [opts.onChange]                 日期被点击时的回调函数
  * @param {dateTimeFormatCall} [opts.dateTimeFormat]      自定义日历显示格式
@@ -490,9 +490,9 @@ let timer = null;
 tag.on('updated', function () {
   lastSelectDateStr = selectDateStr.concat();
   if (switchWithAnimation && switchDirection) {
-    let $cur = tag.root.querySelector('.calendar__body--cur');
+    let $cur = tag.root.querySelector('.riot-calendar__body--cur');
     let $curT = tag.root.querySelector('.title__cur');
-    let $other = tag.root.querySelector('.calendar__body--other');
+    let $other = tag.root.querySelector('.riot-calendar__body--other');
     let $otherT = tag.root.querySelector('.title__other');
     if (opts.animationTimingFunction) {
       $cur.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
@@ -552,7 +552,7 @@ tag.on('updated', function () {
   if (opts.onChange && curChangeDateStr) {
     curChangeDateStr = undefined;
   }
-  
+
 })
 
 tag.checkDate = function (e) {

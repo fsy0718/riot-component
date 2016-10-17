@@ -63,7 +63,7 @@
     }
     margin-bottom: rSize(16);
   }
-  .calendar__body{
+  .riot-calendar__body{
     padding: rSize(13) 0;
     position: relative;
     min-height: rSize((64 + 16) * 6);
@@ -72,7 +72,7 @@
     }
     overflow: hidden;
   }
-  .calendar__body--cur,.calendar__body--other,.title__cur,.title__other{
+  .riot-calendar__body--cur,.riot-calendar__body--other,.title__cur,.title__other{
     will-change: transform, opacity;
     position: absolute;
     width: 100%;
@@ -99,7 +99,7 @@
       animation-play-state: running;
     }
   }
-  .calendar__body--cur,.calendar__body--other{
+  .riot-calendar__body--cur,.riot-calendar__body--other{
     top: rSize(8);
     height: 100%;
   }

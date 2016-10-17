@@ -14,6 +14,7 @@
     "gulp-inject": "^4.1.0",
     "browser-sync": "^2.14.0",
     "gulp-sequence": "^0.4.5",
+    "gulp-jsdoc3":"^1.0.1",
     "del": "^2.2.2",
     "change-case": "^3.0.0",
     "riot": "^2.4.1",
@@ -25,7 +26,9 @@
     "rollup-plugin-node-resolve": "^1.7.0",
     "rollup-plugin-riot": "^0.4.0",
     "rollup-pluginutils": "^1.5.0",
-    "uglify-js": "^2.6.3"
+    "uglify-js": "^2.6.3",
+    "babel-preset-es2015-rollup": "1.2.0",
+    "babel-plugin-transform-object-rest-spread": "^6.16.0"
   },
   "scripts": {
     "test": "npm run eslint && npm run karma",

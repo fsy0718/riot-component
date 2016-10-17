@@ -27,6 +27,15 @@ $calendar-day-high-color: #eee2e9;
 $calendar-line-color: #efebea;
 $calendar-disable-arrow-color: #b8b8b8;
 
+//slider颜色
+$slider-track-color: #eeeaea;
+$slider-track-select-color: #7f1f59;
+$slider-mark-color: #fff;
+$slider-mark-shadow-color: rgba(195,195,195,0.25);
+$slider-mark-text-color: #bfbfbf;
+$slider-mark-text-select-color: #651c4d;
+
+
 // mixin function
 
 @function r-size($size) {

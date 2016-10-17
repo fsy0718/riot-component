@@ -22,15 +22,12 @@
 			border-top: solid 1px #ddd;
 		}
 		
-		textarea.code {
-			display: none;
-		}
 	</style>
 </head>
 
 <body>
 	<div class="wrap">
-		<div class="demo-title">riot-calenar实例</div>
+		<div class="demo-title">riot-calenar示例</div>
 		<div class="pure-g ctac">
 			<div class="pure-u-1-2">
 				<div class="demo-card">
@@ -214,7 +211,7 @@ riot.mount(c7, 'riot-calendar',{
 		ipt7.value = date.select && date.dateformat || '';
 	},
 	disabledDate: function(date){
-		if(date.w === 0 && date.enable === 0){
+		if(date.w === 0 && date.disable === 0){
 			date.disable = 4
 		}
 	},
