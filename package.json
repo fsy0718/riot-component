@@ -28,7 +28,8 @@
     "rollup-pluginutils": "^1.5.0",
     "uglify-js": "^2.6.3",
     "babel-preset-es2015-rollup": "1.2.0",
-    "babel-plugin-transform-object-rest-spread": "^6.16.0"
+    "babel-plugin-transform-object-rest-spread": "^6.16.0",
+    "babel-plugin-external-helpers": "^6.8.0"
   },
   "scripts": {
     "test": "npm run eslint && npm run karma",

@@ -7,7 +7,7 @@
     <div class="riot-slider__marks" if={opts.marks || opts.showDots}>
       <div each={mark in marks} class={mark.select && 'riot-slider__marks--items-select' || 'riot-slider__marks--items'}>
         <span class="riot-slider__marks--items-dot"></span>
-        <span class="riot-slider__marks--items-tip">{mark}</span>
+        <span class="riot-slider__marks--items-tip">{mark.label}</span>
       </div>
     </div>
   </div>
