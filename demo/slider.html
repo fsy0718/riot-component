@@ -76,13 +76,41 @@ riot.mount(s1,'riot-slider',{
 		80: '￥600',
 		'-10': '测试'
 	},
-	value:[25,60],
+	value:[20,60],
 	min: 0,
 	max: 100
 });
         		</textarea>
 					</div>
 				</div>
+				<div class="demo-card">
+					<h4>两个滑块的riot-slider</h4>
+					<riot-slider class="riot-slider-2-2"></riot-slider>
+					<div class="demo-desc"><code>range</code>为真</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code" data-line="3">
+var s1 = document.querySelector('.riot-slider-2-2');
+riot.mount(s1,'riot-slider',{
+	range: true,
+	marks: {
+		25: '￥150元不买贵的',
+		40: '￥300',
+		60: '￥450',
+		80: '￥600',
+		'-10': '测试'
+	},
+	value:[20,60],
+	step: 10,
+	min: 0,
+	max: 100,
+	showDots: true
+});
+        		</textarea>
+					</div>
+				</div>			
 			</div>
 		</div>
 	</div>

@@ -157,7 +157,6 @@ const getEnablePoint = function (min, max, step, marks) {
     marks: opts.showDots ? points : markPoints
   } 
 }
-
 //根据slider__mark来计算当前的值
 const getMousePosition = function(e){
   return isVertical ? e.clientY : e.pageX;
@@ -167,9 +166,12 @@ const getHandleRect = function(handle=sliderRootEle){
   return coords;
 }
 //判断是否点击的mark或dot
-const getHandleIsMark = function(ele){
+const elementIsMark = function(ele){
   let _c = ele.classList;
-  return _c.contains('riot-slider__marks--items-dot') || _c.contains('riot-slider__marks--items-tip') || _c.contains('.riot-slider__handler');
+  return _c.contains('riot-slider__marks--items-dot') || _c.contains('riot-slider__marks--items-tip');
+}
+const elementIsHandler = function(ele){
+  return ele.classList.contains('riot-slider__handler');
 }
 //通过元素获取值
 const getValueByEle = function(ele){
@@ -189,27 +191,88 @@ const getPrecentByPosition = function(pos){
   }
   return v;
 }
-
-const getValueByEvent = function(e){
-  const {range, step, dots} = opts;
-  let position = getMousePosition(e);
-  let precent = getPrecentByPosition(position) * 100;
-  let source;
-  if(range){
-    if(!step){
-      //只能选上marks
-      source = tag.marks;
-    }else{
-      source = state.points;
+//获取最近值
+const getClosetValue = function(source, val){
+  let i = 0;
+  let len = source.length;
+  if(val === source[0].key){
+    return source[0];
+  }
+  if(val === source[len - 1].key){
+    return source[len-1]
+  }
+  while(i < len){
+    let _lastVal = i > 0 ? source[i-1] : {key:-1};
+    let _val = source[i];
+    let d1 = val - _lastVal.key;
+    let d2 = _val.key - val;
+    if(d1 >= 0 && d2 >= 0){
+      console.log('value1',i);
+      return d1 > d2 ? _val : _lastVal;
     }
-  }else if(!dots){
-    source = state.points;
-  }else{
-    
+    i++;    
   }
 }
-
-
+//二分法查换值
+const getClosetValueByDichotomy = function(source, val){
+  let len = source.length;
+  if(val === source[0].key){
+    return source[0];
+  }
+  if(val === source[len-1].key){
+    return source[len-1];
+  }
+  let _source = source.slice(0)
+  let _len;
+  let i = 0;
+  while((_len = _source.length) > 1){
+    let _l;
+    ++i;
+    if(_len === 2){
+      _l = 0;
+    }else{
+      _l = Math.floor(_len / 2)
+    }
+    let d1 = val - _source[_l].key;
+    let d2 = _source[_l + 1].key - val;
+    if(d1 < 0){
+      //说明在右边
+      _source = _source.slice(0,_l + 1);
+    }else if(d2 < 0){
+      //说明在左边
+      _source = _source.slice(_l);
+    }else{
+      console.log('value2',i)
+      return d1 > d2 ? _source[_l + 1] : _source[_l];
+    }
+  }
+}
+//TODO 如果是只能通过mark来取值，可以根据precent来判断是否到达下一个值的范围，就不用实时的获取value
+//通过事件来获取值
+const getValueByEvent = function(e,precent){
+  const {range, step, dots} = opts;
+  if(!precent){
+    let position = getMousePosition(e);
+    precent = getPrecentByPosition(position);
+  }
+  let _value = precent * (state.max - state.min) + state.min;
+  let source;
+  if(range && !step){
+    source = tag.marks;
+  }else if(!dots){
+    source = state.points;
+  }
+  if(source){
+    let _value1 = getClosetValue(source, _value);
+    let _value2 = getClosetValueByDichotomy(source, _value);
+    console.log(precent,'_value1',_value1, '_value2', _value2)
+  }
+  return {
+    precent: parseNumber(precent) * 100,
+    value: _value
+  }
+}
+//初始化参数，before-mount会在update之后触发
 const init = function () {
   let {marks, value, range, min = 0, max = 100, step = 1} = opts;
   min = Math.max(0, min);
@@ -235,7 +298,7 @@ const init = function () {
   }else{
     _value = _value.slice(0,1);
   }
-  //存储值
+  //存储值，需要对value在dots下对值进行校验是否为mark中的
   state.value = _value;
   state.min = min;
   state.max = max;
@@ -243,15 +306,12 @@ const init = function () {
   state.points = data.points;
   tag.marks = data.marks
 }
-
 init();
 
 tag.on('update', function () {
   tag.selectTrack = {
     left: parseNumber((state.value[0] - state.min) / (state.max - state.min)) * 100,
-    width: parseNumber((state.value[1] - state.value[0]) / (state.max - state.min)) * 100,
-    key1: state.value[0],
-    key2: state.value[1]
+    width: parseNumber((state.value[1] - state.value[0]) / (state.max - state.min)) * 100
   }
 });
 tag.on('mount', function(){
@@ -276,15 +336,19 @@ tag.onMouseDown = function(e){
     e.preventUpdate = true;
     return;
   }
-
   let srcElement = e.srcElement;
   //筛选，如果是mark或handler，则直接得到值
-  let isMarkOrHandleEle = getHandleIsMark(srcElement);
+  let isMarkEle = elementIsMark(srcElement);
   let v = null;
-  if(isMarkOrHandleEle){
+  if(isMarkEle){
     v = getValueByEle(srcElement);
+  }else if(elementIsHandler(srcElement)){
+    v = getValueByEvent(e, srcElement.dataset.key / 100);
+    console.log(v)
   }
   if(v === null){
     v = getValueByEvent(e);
   }
 }
+
+
