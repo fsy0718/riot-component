@@ -21,8 +21,6 @@
         top: rSize(10);
         bottom: rSize(10);
         border-radius: rSize(5);
-        left: 10%;
-        width: 30%;
       }
     }
     //滑块
@@ -47,10 +45,6 @@
       bottom: rSize(10);
       width: 100%; 
       &--items{
-        @extend %Lposa;
-        top: 0;
-        //调试
-        left: 10%;
         &-dot{
           width: rSize(18);
           height: rSize(18);
@@ -58,9 +52,9 @@
           background: #fff;
           border: solid 1px $slider-track-color;
           top: -1 * rSize(18 - 10);
-          left: 0;
           @extend %Lposa;
           @extend %Lcurp;
+          margin-left: -0.5 * rSize(18);
         }
         &-tip{
           font-size: rSize(24);
@@ -73,8 +67,6 @@
         }
       }
       &--items-select{
-        //调试
-        left: 40%;
         .riot-slider__marks--items{
           &-dot{
             border-color: $slider-track-select-color;

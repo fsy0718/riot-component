@@ -22,56 +22,63 @@ const packageJSONpath = path.join(process.cwd(), './package.json');
 const packageJSON = require(packageJSONpath);
 const packageName = packageJSON.name
 
-gulp.task('build:clean', function(cb){
-  del([config.cachepath + '/**'],{
+gulp.task('build:clean', function (cb) {
+  del([config.cachepath + '/**'], {
     force: true
   }).then(paths => {
     cb();
   })
 })
+
+let rollupPluginList = [
+  riot(),
+  json(),
+  nodeResolve({
+    jsnext: true
+  }),
+  babel()
+]
+if (config.strip) {
+  let strip = require('rollup-plugin-strip');
+  rollupPluginList.splice(1,0,strip(config.strip))
+}
+
 //后期需要增加版本号显示功能
-gulp.task('build:riot', function(){
-  let promise = new Promise(function(resolve, reject){
+gulp.task('build:riot', function () {
+  let promise = new Promise(function (resolve, reject) {
     rollup.rollup({
       entry: `${config.cachepath}/index.js`,
       external: ['riot'],
-      plugins: [
-        riot(),
-        json(),
-        nodeResolve({
-          jsnext: true
-        }),
-        babel()
-      ]
-    }).then( bundle => {
-      bundle.write({
-        format: 'iife',
-        moduleName: changeCase.camelCase(packageName),
-        globals: { riot: 'riot' },
-        dest: `${ config.destpath}/${ packageName }.js`
+      plugins: rollupPluginList
+    }).then(bundle => {
+        bundle.write({
+          format: 'iife',
+          moduleName: changeCase.camelCase(packageName),
+          globals: { riot: 'riot' },
+          dest: `${config.destpath}/${packageName}.js`
+        })
+        bundle.write({ format: 'es', dest: `${config.destpath}/${packageName}.es6.js` })
+        bundle.write({ format: 'amd', dest: `${config.destpath}/${packageName}.amd.js` })
+        bundle.write({ format: 'cjs', dest: `${config.destpath}/${packageName}.cjs.js` })
+        resolve();
+      }).catch(error => {
+        console.error(error);
+        reject();
       })
-      bundle.write({ format: 'es', dest: `${ config.destpath}/${ packageName }.es6.js` })
-      bundle.write({ format: 'amd', dest: `${ config.destpath}/${ packageName }.amd.js` })
-      bundle.write({ format: 'cjs', dest: `${ config.destpath}/${ packageName }.cjs.js` })
-      resolve();
-    }).catch(error => {
-      console.error(error);
-      reject();
-    })
   })
   return promise;
 
 });
 
-gulp.task('build:noclean', function(){
+gulp.task('build:noclean', function () {
   console.log(1);
-   gulpSequence('css',['riot:copy', 'riot:tag'], 'build:riot')(function(){
+  gulpSequence('css', ['riot:copy', 'riot:tag'], 'build:riot')(function () {
     console.log('build done!');
-  }) 
+  })
 })
 
-gulp.task('build',function(){
-  gulpSequence('build:clean','css',['riot:copy', 'riot:tag'], 'build:riot', 'build:clean')(function(){
+gulp.task('build', function () {
+  gulpSequence('build:clean', 'css', ['riot:copy', 'riot:tag'], 'build:riot', 'build:clean')(function () {
     console.log('build done!');
   })
 })

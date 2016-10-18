@@ -10,7 +10,7 @@
 	<link rel="stylesheet" href="./common.css">
 	<link rel="stylesheet" href="./prism.css">
 	<style>
-		riot-slider{
+		[data-is="riot-slider"]{
 			padding: 40px 10px;
 			display: block;
 		}
@@ -36,6 +36,25 @@ riot.mount(s1,'riot-slider');
         		</textarea>
 					</div>
 				</div>
+				<div class="demo-card">
+					<h4>基本的riot-slider</h4>
+					<div class="riot-slider-1-2"></div>
+					<div class="demo-desc">最基本的用法</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code">
+var s1 = document.querySelector('.riot-slider-1-2');
+riot.mount(s1,'riot-slider',{
+	min: 10,
+	max: 100,
+	step: 10,
+	showDots: true
+});
+        		</textarea>
+					</div>
+				</div>
 			</div>
 			<div class="pure-u-1-2">
 				<div class="demo-card">
@@ -51,8 +70,15 @@ var s1 = document.querySelector('.riot-slider-2');
 riot.mount(s1,'riot-slider',{
 	range: true,
 	marks: {
-		20: '20%'
-	}
+		20: '￥150元不买贵的',
+		40: '￥300',
+		60: '￥450',
+		80: '￥600',
+		'-10': '测试'
+	},
+	value:[25,60],
+	min: 0,
+	max: 100
 });
         		</textarea>
 					</div>

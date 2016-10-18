@@ -33,7 +33,8 @@ module.exports = {
       routes: {
         "/dist": "./dist"
       }
-    }
+    },
+    open: false
 
   }
 }
