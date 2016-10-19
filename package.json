@@ -7,18 +7,23 @@
     "riot-mixin-pack": "^0.1.7"
   },
   "devDependencies": {
-    "require-dir": "^0.3.1",
-    "gulp-ruby-sass": "^2.1.0",
-    "gulp-autoprefixer": "^3.1.1",
-    "gulp": "^3.9.1",
-    "gulp-inject": "^4.1.0",
-    "browser-sync": "^2.14.0",
-    "gulp-sequence": "^0.4.5",
-    "gulp-jsdoc3": "^1.0.1",
-    "del": "^2.2.2",
-    "change-case": "^3.0.0",
-    "riot": "^2.4.1",
+    "babel-plugin-external-helpers": "^6.8.0",
+    "babel-plugin-transform-object-rest-spread": "^6.16.0",
+    "babel-preset-es2015-rollup": "1.2.0",
     "bluebird": "^3.4.2",
+    "browser-sync": "^2.14.0",
+    "change-case": "^3.0.0",
+    "cz-conventional-changelog": "^1.2.0",
+    "ghooks": "^1.3.2",
+    "del": "^2.2.2",
+    "gulp": "^3.9.1",
+    "gulp-autoprefixer": "^3.1.1",
+    "gulp-inject": "^4.1.0",
+    "gulp-jsdoc3": "^1.0.1",
+    "gulp-ruby-sass": "^2.1.0",
+    "gulp-sequence": "^0.4.5",
+    "require-dir": "^0.3.1",
+    "riot": "^2.4.1",
     "rollup": "^0.36.3",
     "rollup-plugin-babel": "2.4.0",
     "rollup-plugin-commonjs": "^3.0.0",
@@ -27,10 +32,7 @@
     "rollup-plugin-riot": "^0.4.0",
     "rollup-plugin-strip": "^1.1.1",
     "rollup-pluginutils": "^1.5.0",
-    "uglify-js": "^2.6.3",
-    "babel-preset-es2015-rollup": "1.2.0",
-    "babel-plugin-transform-object-rest-spread": "^6.16.0",
-    "babel-plugin-external-helpers": "^6.8.0"
+    "uglify-js": "^2.6.3"
   },
   "scripts": {
     "test": "npm run eslint && npm run karma",
@@ -58,5 +60,21 @@
   "bugs": {
     "url": "https://github.com/fsy0718/riot-component/issues"
   },
-  "homepage": "https://github.com/fsy0718/riot-component#readme"
+  "homepage": "https://github.com/fsy0718/riot-component#readme",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    },
+    "ghooks": {
+      "commit-msg": "./validate-commit-msg.js"
+    },
+    "validate-commit-msg": {
+      "types": ["feat", "fix", "docs", "style", "refactor", "perf", "test", "chore", "revert","build","ci"],
+      "warnOnFail": false, 
+      "maxSubjectLength": 100, 
+      "subjectPattern": ".+", 
+      "subjectPatternErrorMsg": "subject does not match subject pattern!", 
+      "helpMessage": ""
+    }
+  }
 }
