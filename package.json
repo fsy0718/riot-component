@@ -43,7 +43,9 @@
     "watch": "gulp watch",
     "server": "gulp server",
     "start": "gulp server:watch",
-    "start:build": "gulp server:watch:build"
+    "start:build": "gulp server:watch:build",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
+    "changelog:first": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
   },
   "repository": {
     "type": "git",
