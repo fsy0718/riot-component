@@ -70,3 +70,9 @@
     padding: 10px;
     text-align: left;
 }
+
+@media (max-width:600px){
+    .pure-u-1-2{
+        width: 100%;
+    }
+}

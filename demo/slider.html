@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<title>riot-calendar</title>
+	<title>riot-slider</title>
 	<link rel="stylesheet" href="./pure-min.css">
 	<link rel="stylesheet" href="./reset.css">
 	<link rel="stylesheet" href="./common.css">
@@ -24,15 +24,19 @@
 			<div class="pure-u-1-2">
 				<div class="demo-card">
 					<h4>基本的riot-slider</h4>
-					<riot-slider></riot-slider>
+					<riot-slider-1-1></riot-slider-1-1>
 					<div class="demo-desc">最基本的用法</div>
 					<div class="view-source">
 						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
 					</div>
 					<div class="code-source">
 						<textarea class="code">
-var s1 = document.querySelector('riot-slider');
-riot.mount(s1,'riot-slider');
+var s11 = document.querySelector('riot-slider-1-1');
+riot.mount(s11,'riot-slider',{
+  onChange: function(v){
+    console.log(v);
+  }
+});
         		</textarea>
 					</div>
 				</div>
@@ -45,12 +49,17 @@ riot.mount(s1,'riot-slider');
 					</div>
 					<div class="code-source">
 						<textarea class="code">
-var s1 = document.querySelector('.riot-slider-1-2');
-riot.mount(s1,'riot-slider',{
+var s12 = document.querySelector('.riot-slider-1-2');
+riot.mount(s12,'riot-slider',{
 	min: 10,
 	max: 100,
 	step: 10,
-	showDots: true
+  f: 1,
+	showAllDots: true,
+  showAllTips: true,
+  onChange: function(v){
+    console.log(v);
+  }
 });
         		</textarea>
 					</div>
@@ -59,32 +68,39 @@ riot.mount(s1,'riot-slider',{
 			<div class="pure-u-1-2">
 				<div class="demo-card">
 					<h4>两个滑块的riot-slider</h4>
-					<riot-slider class="riot-slider-2"></riot-slider>
+					<riot-slider class="riot-slider-2-1"></riot-slider>
 					<div class="demo-desc"><code>range</code>为真</div>
 					<div class="view-source">
 						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
 					</div>
 					<div class="code-source">
 						<textarea class="code" data-line="3">
-var s1 = document.querySelector('.riot-slider-2');
-riot.mount(s1,'riot-slider',{
+var s21 = document.querySelector('.riot-slider-2-1');
+riot.mount(s21,'riot-slider',{
 	range: true,
 	marks: {
-		20: '￥150元不买贵的',
+    0 : '',
+		20: '￥150',
 		40: '￥300',
 		60: '￥450',
 		80: '￥600',
-		'-10': '测试'
+		'-10': '测试',
+    100: ''
 	},
 	value:[20,60],
 	min: 0,
-	max: 100
+	max: 100,
+  showMarkDots: false,
+  dots: true,
+  onChange: function(v){
+    console.log(v);
+  }
 });
         		</textarea>
 					</div>
 				</div>
 				<div class="demo-card">
-					<h4>两个滑块的riot-slider</h4>
+					<h4>两个滑块的riot-slider1</h4>
 					<riot-slider class="riot-slider-2-2"></riot-slider>
 					<div class="demo-desc"><code>range</code>为真</div>
 					<div class="view-source">
@@ -92,21 +108,49 @@ riot.mount(s1,'riot-slider',{
 					</div>
 					<div class="code-source">
 						<textarea class="code" data-line="3">
-var s1 = document.querySelector('.riot-slider-2-2');
-riot.mount(s1,'riot-slider',{
+var s22 = document.querySelector('.riot-slider-2-2');
+riot.mount(s22,'riot-slider',{
 	range: true,
 	marks: {
-		25: '￥150元不买贵的',
+		20: '￥150元不买贵的',
 		40: '￥300',
 		60: '￥450',
 		80: '￥600',
-		'-10': '测试'
+    90: '测试',
 	},
+  value: [20,60],
+	min: 0,
+	max: 100,
+  disableCross: true,
+  onChange: function(v){
+    console.log(v);
+  }
+});
+        		</textarea>
+					</div>
+				</div>
+				<div class="demo-card">
+					<h4>两个滑块的riot-slider</h4>
+					<riot-slider class="riot-slider-2-3"></riot-slider>
+					<div class="demo-desc"><code>range</code>为真</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code" data-line="3">
+var s23 = document.querySelector('.riot-slider-2-3');
+riot.mount(s23,'riot-slider',{
+	range: true,
 	value:[20,60],
 	step: 10,
 	min: 0,
 	max: 100,
-	showDots: true
+	showAllDots: true,
+  showAllTips: true,
+  dots: true,
+  onChange: function(v){
+    console.log(v);
+  }
 });
         		</textarea>
 					</div>
