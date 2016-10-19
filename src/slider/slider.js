@@ -35,7 +35,6 @@ let state = {};
 let sliderRootEle = null;
 //TODO 增加vertical为true的支持
 let isVertical = opts.vertical || false;
-
 const isNotTouchEvent = function (e) {
   return e.touches.length > 1 || (e.type.toLowerCase() === 'touchend' && e.touches.length > 0)
 }
