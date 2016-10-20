@@ -10,7 +10,7 @@
  */
 
 /**
- * @todo 增加vertical的支持
+ * @todo 增加vertical的支持,设置point的order值，滑到时计算顺序，快速查找值
  * @function riot-slider
  * @description 基于riot的slider，为ant-design库中slider的riot版本
  * @see {@link https://ant.design/components/slider/ 滑动输入条}
@@ -37,11 +37,6 @@ let sliderRootEle = null;
 let isVertical = opts.vertical || false;
 const isNotTouchEvent = function (e) {
   return e.touches.length > 1 || (e.type.toLowerCase() === 'touchend' && e.touches.length > 0)
-}
-const calOffset = function (value) {
-  const {min, max} = state;
-  const ratio = (value - min) / (max - min);
-  return ratio * 100;
 }
 //保留四位有效数字
 const floatReg = /\./
@@ -72,24 +67,6 @@ const getEnablePoint = function (min, max, step, marks) {
           label: '' + i,
           precent: parseNumber((i - min) / length * 100)
         }
-        /*let index = state.value.indexOf(i);
-        if(index > -1){
-          _point.select = 1;
-        }
-        if(opts.range){
-          if(_point.range){
-            _point.range = 2;
-          }
-          if(index === 0){
-            _point.range = -1;
-          }
-          else if(index === 1){
-            _point.range = 1;
-          }
-          else if(i > state.value[0] && i < state.value[1]){
-            _point.range = 0;
-          }
-        }*/
         if(opts.showAllTips){
           _point.width = w;
           _point.tip = true
@@ -124,27 +101,6 @@ const getEnablePoint = function (min, max, step, marks) {
           _point.tip = mark.tip !== undefined ? mark.tip : opts.showMarkTips !== undefined ? opts.showMarkTips : true
         }
         _point.precent = parseNumber((_point.key - min) / length * 100);
-        /*let index = state.value.indexOf(_key);
-        //select
-        if(index > -1){
-          _point.select = 1;
-        }
-        //range值
-        if(opts.range){
-          if(_point.range){
-            _point.range = 2;
-          }
-
-          if(index === 0){
-            _point.range = -1;
-          }
-          else if(index === 1){
-            _point.range = 1;
-          }
-          else if(_key > state.value[0] && _key < state.value[1]){
-            _point.range = 0;
-          }
-        }*/
         points.push(_point);
         _markPoints.push(_point);
       } else {
@@ -170,14 +126,6 @@ const getEnablePoint = function (min, max, step, marks) {
     marks: opts.showAllDots ? points : markPoints
   }
 }
-//为每个point增加顺序
-const setPointOrder = function (source) {
-  if (source) {
-    source.forEach(function (point, i) {
-      point.order = i;
-    });
-  }
-}
 //根据slider__mark来计算当前的值
 const getMousePosition = function (e) {
   return isVertical ? e.clientY : e.pageX;
@@ -189,30 +137,9 @@ const getHandleRect = function (handle = sliderRootEle) {
   const coords = handle.getBoundingClientRect();
   return coords;
 }
-//判断是否点击的mark或dot
-const elementIsMark = function (ele) {
-  let _c = ele.classList;
-  return _c.contains('riot-slider__marks--items-dot') || _c.contains('riot-slider__marks--items-tip');
-}
-const elementIsHandler = function (ele) {
-  return ele.classList.contains('riot-slider__handler');
-}
-//通过元素获取值
-const getValueByEle = function (ele) {
-  if (ele.dataset.key !== undefined) {
-    let val = tag.marks[ele.dataset.key];
-    return {
-      precent: val.precent,
-      point: val
-    }
-  }
-  return null;
-}
-//TODO 如果是只能通过mark来取值，可以根据precent来判断是否到达下一个值的范围，就不用实时的获取value
-//通过事件来获取值
-const getValueByEvent = function (e, type) {
+//通过position来获取point
+const getClosetPointByPosition = function (position) {
   const {range, step, dots} = opts;
-  let position = type === 'mouse' ? getMousePosition(e) : getTouchPosition(e);
   //precent需要先乘100并保留四位有效数字，求_value时再除以100,否则会造成3 => 2.999999999999999999999999的情况
   let precent = parseNumber(getPrecentByPosition(position) * 100);
   let _value = precent / 100 * (state.max - state.min) + state.min;
@@ -235,38 +162,11 @@ const getPrecentByPosition = function (pos) {
   }
   return v;
 }
-//循环查找最近值
-const getClosetValue = function (source, val) {
-  let i = 0;
-  let len = source.length;
-  if (val === source[0].key) {
-    return source[0];
-  }
-  if (val === source[len - 1].key) {
-    return source[len - 1]
-  }
-  while (i < len) {
-    let _lastVal = i > 0 ? source[i - 1] : { key: -1 };
-    let _val = source[i];
-    let d1 = val - _lastVal.key;
-    let d2 = _val.key - val;
-    if (d1 >= 0 && d2 >= 0) {
-      console.log('value1', i);
-      return d1 > d2 ? _val : i === 0 ? _val : _lastVal;
-    }
-    //当只有marks时，可能点击的位置在最后一个mark的后面，应该取最后一个mark
-    if (i === len - 1) {
-      return source[i];
-    }
-    i++;
-
-  }
-}
 const setRangeValue = function (val) {
-  state.value = [val, state.oldVal].sort(function (a, b) {
+  state.value = [val, state.rangeStableValue].sort(function (a, b) {
     return a - b;
   })
-  if (opts.disableCross && (state.handle === 0 && val > state.oldVal || state.handle === 1 && val < state.oldVal)) {
+  if (opts.disableCross && (state.rangeChangeHandle === 0 && val > state.rangeStableValue || state.rangeChangeHandle === 1 && val < state.rangeStableValue)) {
     return false;
   }
   return true;
@@ -322,40 +222,45 @@ const getClosetValueByDichotomy = function (source, val) {
     }
   }
 }
-const onMouseMove = function (e) {
-  onMove(e, 'mouse');
+const diffArrayIsEqual = function(arr1, arr2){
+
 }
-const onMove = function(e, type){
-  console.log(3)
-  //不断的去比较值，后期进行优化
-  let point = getValueByEvent(e,type);
-  let _point = point.point;
-  if (state.key !== _point.key) {
-    state.key = _point.key;
-    if (opts.range) {
-      let result = setRangeValue(_point.key);
-      if (!result) {
-        return;
-      }
-    } else {
-      state.value = [state.min, _point.key];
-    }
-    console.log(state.value);
-    tag.update();
-    if (opts.onChange) {
-      let _val = opts.range ? state.value : [state.value[1]]
-      opts.onChange(_val);
+//更新state.value值
+const updateStateValue = function(point){
+  state.changePointKey = point.key;
+  if (opts.range) {
+    let result = setRangeValue(point.key);
+    if (!result) {
+      return;
     }
   } else {
-    return;
+    state.value = [state.min, point.key];
   }
+  tag.update();
+  if (opts.onChange) {
+    opts.onChange(opts.range ? state.value : [state.value[1]]);
+  }
+}
+const onMouseMove = function (e) {
+  let position = getMousePosition(e);
+  onMove(position)
 }
 const onTouchMove = function(e){
   if(isNotTouchEvent(e)){
     end('touch');
+    e.preventUpdate = true;
     return;
   }
-  onMove(e, 'touch')
+  let position = getTouchPosition(e);
+  onMove(position)
+}
+const onMove = function(position){
+  //TODO 不断的去比较值，后期进行优化
+  let closetPoint = getClosetPointByPosition(position);
+  let point = closetPoint.point;
+  if (state.changePointKey !== point.key ) {
+    updateStateValue(point);
+  }
 }
 const end = function (type) {
   //TODO 需要值
@@ -364,13 +269,18 @@ const end = function (type) {
   opts.afterChange && opts.afterChange(state.value);
   removeEvents(type);
 }
-const onStart = function (v, e, type) {
-  console.log(2)
-  state.key = v.point.key;
-  opts.range ? state.handle = getHandleIndex(v.precent) : '';
-  state.oldVal = state.value[state.handle === 0 ? 1 : 0];
-  opts.beforeChange && opts.beforeChange(_v.key);
-  onMove(e, type);
+const onStart = function (position) {
+  let closetPoint = getClosetPointByPosition(position);
+  state.changePointKey = closetPoint.point.key;
+  if(opts.range){
+    state.rangeChangeHandle = getHandleIndex(closetPoint.precent);
+    state.rangeStableValue = state.value[state.rangeChangeHandle === 0 ? 1 : 0];
+  }
+  opts.beforeChange && opts.beforeChange(closetPoint.key);
+  //如果点击的位置不在选中的结束或开始，则更新state.value
+  if(state.value.indexOf(state.changePointKey) === -1){
+    updateStateValue(closetPoint.point);
+  }
 
 }
 const pauseEvent = function (e) {
@@ -398,21 +308,6 @@ const removeEvents = function (type) {
   } else if (type === 'mouse') {
     tag.onMouseMoveListener.remove();
     tag.onMouseUpListener.remove();
-  }
-}
-//全部通过事件判断
-const getNextPoint = function(e, type){
-  let srcElement = e.srcElement;
-  //筛选，如果是mark或handler，则直接得到值
-  let isMarkEle = elementIsMark(srcElement);
-  let v = null;
-  if (isMarkEle) {
-    v = getValueByEle(srcElement);
-  } else if (elementIsHandler(srcElement)) {
-    v = getValueByEvent(e, srcElement.dataset.key);
-  }
-  if (v === null) {
-    
   }
 }
 //初始化参数，before-mount会在update之后触发
@@ -452,7 +347,6 @@ const init = function () {
   } else {
     state.source = data.points;
   }
-  //setPointOrder(state.source);
   tag.marks = data.marks;
 }
 init();
@@ -476,19 +370,18 @@ tag.onMouseDown = function (e) {
     e.preventUpdate = true;
     return;
   }
-  console.log(1);
-  let v = getValueByEvent(e, 'mouse');
+  let position = getMousePosition(e);
+  onStart(position);
   pauseEvent(e);
-  onStart(v,e,'mouse');
   addDocumentEvents('mouse');
 }
 tag.onTouchStart = function(e){
   if(isNotTouchEvent(e)){
+    e.preventUpdate = true;
     return;
   }
-  let v = getValueByEvent(e, 'touch');
+  onStart(v);
   pauseEvent(e);
-  onStart(v, e,'touch');
   addDocumentEvents('touch');
 }
 //更新
@@ -501,6 +394,3 @@ tag.on('update', function () {
 tag.on('mount', function () {
   sliderRootEle = tag.root.querySelector('.riot-slider');
 })
-
-
-
