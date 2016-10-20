@@ -26,9 +26,11 @@
  * @param {boolean} [opts.dots=false] 是否只能拖到刻度上
  * @param {boolean} [opts.showMarkTip=true] 是否显示mark的提示
  * @param {boolean} [opts.showMarkDot=true] 是否显示mark的刻度
- * @param {boolean} [opts.disableCross=true] 在range时是否可以值是否可以互换
+ * @param {boolean} [opts.allowCross=true] 在range时是否可以值是否可以互换
  * @param {boolean} [opts.showAllTips=false] 是否显示根据min max step计算出来的dot的提示
  * @param {boolean} [opts.showAllDots=false] 是否显示根据min max step计算出来的dot图标
+ * @param {boolean} [opts.included=true]     值为 true 时表示值为包含关系，false 表示并列
+ * @param {boolean} [opts.rangeValueShouldEqual=true] range变动过程中两个值是否可以相等
  */
 import addEventListener from "../common/rc-util-dom-addEventListener"
 "use strict";
@@ -38,6 +40,11 @@ let state = {};
 let sliderRootEle = null;
 //TODO 增加vertical为true的支持
 let isVertical = opts.vertical || false;
+//是否可以交换值
+let allowCross = opts.allowCross === undefined ? true : opts.allowCross;
+//range值是否可以相等
+let rangeValueShouldEqual = opts.rangeValueShouldEqual === undefined ? true : opts.rangeValueShouldEqual
+tag.included = opts.included === undefined ? true : opts.included;
 const isNotTouchEvent = function (e) {
   return e.touches.length > 1 || (e.type.toLowerCase() === 'touchend' && e.touches.length > 0)
 }
@@ -88,13 +95,14 @@ const getEnablePoint = function (min, max, step, marks) {
     w = getMarkWidth(markCount);
     for (let key in marks) {
       let _key = parseFloat(key);
+      let mark = marks[key];
       if (_key >= min && _key <= max) {
         let markIsString = typeof marks[key] === 'string'
         let _point = {
           key: _key,
           mark: true,
-          label: markIsString ? marks[key] : (marks[key].label || ''),
-          width: markIsString ? w : parseNumber(marks[key].width || w)
+          label: markIsString ? mark : (mark.label || ''),
+          width: markIsString ? w : parseNumber(mark.width || w)
         }
         if (markIsString) {
           _point.dot = opts.showMarkDots !== undefined ? opts.showMarkDots : true
@@ -107,7 +115,7 @@ const getEnablePoint = function (min, max, step, marks) {
         points.push(_point);
         _markPoints.push(_point);
       } else {
-        console.warn('riot-slider中实例类名为%s中有key为%s的mark由于不在opts.min和opts.max之间被移除', opts.class, key)
+        console.warn('riot-slider实例类名为%s中有key为%s的mark由于不在opts.min和opts.max之间被移除', opts.class, key)
       }
     }
     //筛选出错误的mark
@@ -166,10 +174,13 @@ const getPrecentByPosition = function (pos) {
   return v;
 }
 const setRangeValue = function (val) {
+  if(!rangeValueShouldEqual && val === state.rangeStableValue){
+    return false;
+  }
   state.value = [val, state.rangeStableValue].sort(function (a, b) {
     return a - b;
   })
-  if (opts.disableCross && (state.rangeChangeHandle === 0 && val > state.rangeStableValue || state.rangeChangeHandle === 1 && val < state.rangeStableValue)) {
+  if (!allowCross && (state.rangeChangeHandle === 0 && val > state.rangeStableValue || state.rangeChangeHandle === 1 && val < state.rangeStableValue)) {
     return false;
   }
   return true;
@@ -319,26 +330,26 @@ const init = function () {
   min = Math.max(0, min);
   //筛选不合规范的值
   let _value = [min, min];
-  if (value && value.length) {
+  if(value !== undefined && Object.prototype.toString.call(value) !== '[object Array]'){
+    console.warn('riot-slider实例类名为%s的opts.value不为数组，将强制转为数组',opts.class || 'riot-slider');
+    _value = [Number(value) || min]
+  }else if (value && value.length) {
     let _v = [];
+    
     value.forEach(function (v) {
       if (v >= min && v <= max) {
         _v.push(+v);
       } else {
-        console.warn('%s由于不在opts.min与opts.max之间被移动', v)
+        console.warn('riot-slider实例类名为%s的opts.value由于不在opts.min与opts.max之间被移动', opts.class || 'riot-slider',v)
       }
     });
     _value = _v.sort();
   }
-  if (range) {
-    let _valen = _value.length;
-    if (_valen > 2) {
-      _value = _value.slice(0, 2)
-    } else if (_valen < 2) {
-      _value.unshift(min)
-    }
-  } else {
-    _value = _value.slice(0, 1);
+  let _valen = _value.length;
+  if (_valen > 2) {
+    _value = _value.slice(0, 2)
+  } else if (_valen < 2) {
+    _value.unshift(min)
   }
   //存储值，需要对value在dots下对值进行校验是否为mark中的
   state.value = _value;
@@ -361,7 +372,7 @@ tag.noop = function (e) {
 tag.parseMarkItemClass = function (mark, type) {
   if (mark) {
     //mark元素与handler重叠会有问题，浏览器对4.5px处理方式不一样
-    if (mark.precent > tag.selectTrack.left && mark.precent < (tag.selectTrack.left + tag.selectTrack.width)) {
+    if (included && mark.precent > tag.selectTrack.left && mark.precent < (tag.selectTrack.left + tag.selectTrack.width)) {
       return 'riot-slider__marks--items-select'
     }
   }

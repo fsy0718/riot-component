@@ -70,7 +70,17 @@
     padding: 10px;
     text-align: left;
 }
+input {
+  border: solid 1px #ccc;
+  width: 100%;
+}
 
+.pure-g .result {
+  margin-top: 10px;
+  box-sizing: border-box;
+  padding: 20px 0 20px 20px;
+  border-top: solid 1px #ddd;
+}
 @media (max-width:600px){
     .pure-u-1-2{
         width: 100%;

@@ -79,5 +79,31 @@
       }
       
     }
+    //并列关系
+    &--independent{
+      .riot-slider__handler{
+        background-color: $slider-track-select-color;
+      }
+    }
+    //禁止
+    &--disable{
+      .riot-slider__track--select{
+        background-color: darken($slider-track-color,10);
+      }
+      .riot-slider__handler{
+        cursor: not-allowed;
+        background-color: $slider-track-color;
+      }
+      .riot-slider__marks--items-select{
+        .riot-slider__marks--items{
+          &-dot{
+            border: solid 1px $slider-track-color;
+          }
+          &-tip{
+            color: $slider-mark-text-color;
+          }
+        }
+      }
+    }
   }
 }

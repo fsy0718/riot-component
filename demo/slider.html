@@ -25,6 +25,10 @@
 				<div class="demo-card">
 					<h4>基本的riot-slider</h4>
 					<riot-slider-1-1></riot-slider-1-1>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">滑动值:</p>
+						<p class="pure-u-3-5"><input class="ipt-1-1" type="text"></p>
+					</div>
 					<div class="demo-desc">最基本的用法</div>
 					<div class="view-source">
 						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
@@ -32,33 +36,99 @@
 					<div class="code-source">
 						<textarea class="code">
 var s11 = document.querySelector('riot-slider-1-1');
+var i11 = document.querySelector('.ipt-1-1');
 riot.mount(s11,'riot-slider',{
   onChange: function(v){
-    console.log(v);
+		i11.value = v.join('-');
+  },
+	value: [10]
+});
+        		</textarea>
+					</div>
+				</div>
+				<div class="demo-card">
+					<h4>禁止滑动</h4>
+					<div class="riot-slider-1-3"></div>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">滑动值:</p>
+						<p class="pure-u-3-5"><input class="ipt-1-3" type="text"></p>
+					</div>
+					<div class="demo-desc">设置<code>disable</code>为<code>true</code>禁止滑动</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source" >
+						<textarea class="code" data-line="4">
+var s13 = document.querySelector('.riot-slider-1-3');
+var i13 = document.querySelector('.ipt-1-3')
+riot.mount(s13,'riot-slider',{
+	disabled: true,
+	min: 10,
+	max: 100,
+	step: 10,
+	showAllDots: true,
+  showAllTips: true,
+  onChange: function(v){
+    i13.value = v.join('-')
+  },
+	value: [30]
+});
+        		</textarea>
+					</div>
+				</div>
+				<div class="demo-card">
+					<h4>设置step值</h4>
+					<div class="riot-slider-1-2"></div>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">滑动值:</p>
+						<p class="pure-u-3-5"><input class="ipt-1-2" type="text"></p>
+					</div>
+					<div class="demo-desc">设置<code>step</code>值，并设置<code>showAllDots</code>与<code>showAllTips</code>显示刻度及提示</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source" >
+						<textarea class="code" data-line="5-7">
+var s12 = document.querySelector('.riot-slider-1-2');
+var i12 = document.querySelector('.ipt-1-2')
+riot.mount(s12,'riot-slider',{
+	min: 10,
+	max: 100,
+	step: 10,
+	showAllDots: true,
+  showAllTips: true,
+  onChange: function(v){
+    i12.value = v.join('-')
   }
 });
         		</textarea>
 					</div>
 				</div>
 				<div class="demo-card">
-					<h4>基本的riot-slider</h4>
-					<div class="riot-slider-1-2"></div>
-					<div class="demo-desc">最基本的用法</div>
+					<h4>included=false表示值是并列关系</h4>
+					<div class="riot-slider-1-4"></div>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">滑动值:</p>
+						<p class="pure-u-3-5"><input class="ipt-1-4" type="text"></p>
+					</div>
+					<div class="demo-desc">设置<code>included=false</code>值</div>
 					<div class="view-source">
 						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
 					</div>
-					<div class="code-source">
-						<textarea class="code">
-var s12 = document.querySelector('.riot-slider-1-2');
-riot.mount(s12,'riot-slider',{
+					<div class="code-source" >
+						<textarea class="code" data-line="4">
+var s14 = document.querySelector('.riot-slider-1-4');
+var i14 = document.querySelector('.ipt-1-4')
+riot.mount(s14,'riot-slider',{
+	included:false,
 	min: 10,
 	max: 100,
 	step: 10,
-  f: 1,
+	value: 20,
 	showAllDots: true,
   showAllTips: true,
   onChange: function(v){
-    console.log(v);
+    i14.value = v.join(',')
   }
 });
         		</textarea>
@@ -67,16 +137,107 @@ riot.mount(s12,'riot-slider',{
 			</div>
 			<div class="pure-u-1-2">
 				<div class="demo-card">
-					<h4>两个滑块的riot-slider</h4>
+					<h4>riot-slider为range</h4>
 					<riot-slider class="riot-slider-2-1"></riot-slider>
-					<div class="demo-desc"><code>range</code>为真</div>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">滑动值:</p>
+						<p class="pure-u-3-5"><input class="ipt-2-1" type="text"></p>
+					</div>
+					<div class="demo-desc">设置<code>range</code>为真，开启两个滑块</div>
 					<div class="view-source">
 						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
 					</div>
 					<div class="code-source">
-						<textarea class="code" data-line="3">
+						<textarea class="code" data-line="4">
 var s21 = document.querySelector('.riot-slider-2-1');
+var i21 = document.querySelector('.ipt-2-1')
 riot.mount(s21,'riot-slider',{
+	range: true,
+	marks: {
+    0 : '￥0',
+		20: '￥150',
+		40: '￥300',
+		60: '￥450',
+		80: '￥600',
+		'-10': '测试',
+    100: '￥100'
+	},
+	value:[20,60],
+	min: 0,
+	max: 100,
+  onChange: function(v){
+		var str;
+		if(v[0] === v[1]){
+			str = '￥' + v[0] * 7.5;
+		}else{
+			str = '￥' + v[0] * 7.5 + ' - ' + '￥' + v[1] * 7.5;
+		}
+		i21.value = str;
+  }
+});
+        		</textarea>
+					</div>
+				</div>
+				<div class="demo-card">
+					<h4>riot-slide为range且只能滑到刻度上</h4>
+					<riot-slider class="riot-slider-2-2"></riot-slider>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">滑动值:</p>
+						<p class="pure-u-3-5"><input class="ipt-2-2" type="text"></p>
+					</div>
+					<div class="demo-desc">设置<code>range</code>为真，开启两个滑块,设置<code>dots</code>为真，只允许滑到刻度上，如果<code>step=null</code>则只能滑到marks上</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code" data-line="4">
+var s22 = document.querySelector('.riot-slider-2-2');
+var i22 = document.querySelector('.ipt-2-2');
+riot.mount(s22,'riot-slider',{
+	dots: true,
+	range: true,
+	marks: {
+		0: '￥0',
+		20: '￥150',
+		40: '￥300',
+		60: '￥450',
+		80: '￥600',
+		100: '￥100'
+	},
+  value: [20,60],
+	min: 0,
+	max: 100,
+
+  onChange: function(v){
+		var str;
+		if(v[0] === v[1]){
+			str = '￥' + v[0] * 7.5;
+		}else{
+			str = '￥' + v[0] * 7.5 + ' - ' + '￥' + v[1] * 7.5;
+		}
+		i22.value = str;
+  }
+});
+        		</textarea>
+					</div>
+				</div>
+				<div class="demo-card">
+					<h4>riot-slider为range且个性化刻度显示</h4>
+					<riot-slider class="riot-slider-2-4"></riot-slider>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">滑动值:</p>
+						<p class="pure-u-3-5"><input class="ipt-2-4" type="text"></p>
+					</div>
+					<div class="demo-desc">设置<code>range</code>为真，开启两个滑块,设置<code>dots</code>为真，只允许滑到刻度上,并通过设置mark的<code>dot</code>与<code>tip</code>个性化100的刻度与提示</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code" data-line="4,13-17">
+var s24 = document.querySelector('.riot-slider-2-4');
+var i24 = document.querySelector('.ipt-2-4')
+riot.mount(s24,'riot-slider',{
+	dots: true,
 	range: true,
 	marks: {
     0 : '',
@@ -85,61 +246,47 @@ riot.mount(s21,'riot-slider',{
 		60: '￥450',
 		80: '￥600',
 		'-10': '测试',
-    100: ''
+    100: {
+			label: '￥150',
+			tip: false,
+			dot: false
+		}
 	},
 	value:[20,60],
 	min: 0,
 	max: 100,
-  showMarkDots: false,
-  dots: true,
   onChange: function(v){
-    console.log(v);
+		var str;
+		if(v[0] === v[1]){
+			str = '￥' + v[0] * 7.5;
+		}else{
+			str = '￥' + v[0] * 7.5 + ' - ' + '￥' + v[1] * 7.5;
+		}
+		i24.value = str;
   }
 });
         		</textarea>
 					</div>
 				</div>
 				<div class="demo-card">
-					<h4>两个滑块的riot-slider1</h4>
-					<riot-slider class="riot-slider-2-2"></riot-slider>
-					<div class="demo-desc"><code>range</code>为真</div>
-					<div class="view-source">
-						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
-					</div>
-					<div class="code-source">
-						<textarea class="code" data-line="3">
-var s22 = document.querySelector('.riot-slider-2-2');
-riot.mount(s22,'riot-slider',{
-	range: true,
-	marks: {
-		20: '￥150元不买贵的',
-		40: '￥300',
-		60: '￥450',
-		80: '￥600',
-    90: '测试',
-	},
-  value: [20,60],
-	min: 0,
-	max: 100,
-  disableCross: true,
-  onChange: function(v){
-    console.log(v);
-  }
-});
-        		</textarea>
-					</div>
-				</div>
-				<div class="demo-card">
-					<h4>两个滑块的riot-slider</h4>
+					<h4>riot-slider为range且禁止两个滑块交叉滑动</h4>
 					<riot-slider class="riot-slider-2-3"></riot-slider>
-					<div class="demo-desc"><code>range</code>为真</div>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">滑动值:</p>
+						<p class="pure-u-3-5">
+							<input class="ipt-2-3" type="text">
+						</p>
+					</div>
+					<div class="demo-desc"><code>range</code>为真,设置<code>allowCross=false</code>禁止两个滑块交叉滑动</div>
 					<div class="view-source">
 						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
 					</div>
 					<div class="code-source">
-						<textarea class="code" data-line="3">
+						<textarea class="code" data-line="4">
 var s23 = document.querySelector('.riot-slider-2-3');
+var i23 = document.querySelector('.ipt-2-3');
 riot.mount(s23,'riot-slider',{
+	allowCross: false,
 	range: true,
 	value:[20,60],
 	step: 10,
@@ -149,7 +296,53 @@ riot.mount(s23,'riot-slider',{
   showAllTips: true,
   dots: true,
   onChange: function(v){
-    console.log(v);
+		var str;
+		if(v[0] === v[1]){
+			str = '￥' + v[0] * 7.5;
+		}else{
+			str = '￥' + v[0] * 7.5 + ' - ' + '￥' + v[1] * 7.5;
+		}
+		i23.value = str;
+  }
+});
+        		</textarea>
+					</div>
+				</div>
+				<div class="demo-card">
+					<h4>riot-slider为range且禁止两个值相等</h4>
+					<riot-slider class="riot-slider-2-5"></riot-slider>
+					<div class="pure-g result">
+						<p class="pure-u-1-5">滑动值:</p>
+						<p class="pure-u-3-5">
+							<input class="ipt-2-5" type="text">
+						</p>
+					</div>
+					<div class="demo-desc"><code>range</code>为真,设置<code>rangeValueShouldEqual=false</code>禁止两个值相等</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source">
+						<textarea class="code" data-line="4">
+var s25 = document.querySelector('.riot-slider-2-5');
+var i25 = document.querySelector('.ipt-2-5');
+riot.mount(s25,'riot-slider',{
+	rangeValueShouldEqual: false,
+	range: true,
+	value:[20,60],
+	step: 10,
+	min: 0,
+	max: 100,
+	showAllDots: true,
+  showAllTips: true,
+  dots: true,
+  onChange: function(v){
+		var str;
+		if(v[0] === v[1]){
+			str = '￥' + v[0] * 7.5;
+		}else{
+			str = '￥' + v[0] * 7.5 + ' - ' + '￥' + v[1] * 7.5;
+		}
+		i25.value = str;
   }
 });
         		</textarea>
