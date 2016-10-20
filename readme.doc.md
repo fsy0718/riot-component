@@ -8,4 +8,5 @@
     })
 ```
 ### 组件
-- [日历](./global.html#riot-calendar)
+- [日历](./module-riot-calendar.html)
+- [滑块](./module-riot-slider.html)
