@@ -71,11 +71,23 @@
       "commit-msg": "./validate-commit-msg.js"
     },
     "validate-commit-msg": {
-      "types": ["feat", "fix", "docs", "style", "refactor", "perf", "test", "chore", "revert","build","ci"],
-      "warnOnFail": false, 
-      "maxSubjectLength": 100, 
-      "subjectPattern": ".+", 
-      "subjectPatternErrorMsg": "subject does not match subject pattern!", 
+      "types": [
+        "feat",
+        "fix",
+        "docs",
+        "style",
+        "refactor",
+        "perf",
+        "test",
+        "chore",
+        "revert",
+        "build",
+        "ci"
+      ],
+      "warnOnFail": false,
+      "maxSubjectLength": 100,
+      "subjectPattern": ".+",
+      "subjectPatternErrorMsg": "subject does not match subject pattern!",
       "helpMessage": ""
     }
   }
