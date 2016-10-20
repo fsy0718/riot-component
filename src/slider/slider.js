@@ -1,4 +1,9 @@
 /**
+ * @module riot-slider
+ * @description 基于riot的slider,<a href="../demo/slider.html">实例</a>
+ * 实现ant-design的{@link https://ant.design/components/slider/ 滑动输入条}
+ */
+/**
  * @typedef {object} riot-point
  * @property {number} key 当前的关键值
  * @property {number} mark 是否为mark 真为1
@@ -12,8 +17,7 @@
 /**
  * @todo 增加vertical的支持,设置point的order值，滑到时计算顺序，快速查找值
  * @function riot-slider
- * @description 基于riot的slider，为ant-design库中slider的riot版本
- * @see {@link https://ant.design/components/slider/ 滑动输入条}
+
  * @param {object} opts
  * @param {boolean} [opts.range=false] 双滑块模式
  * @param {number}  [opts.min=0] 最小值

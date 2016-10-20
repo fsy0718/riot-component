@@ -1,6 +1,7 @@
 #riot-component
 基于riot的组件,在线[demo](https://fsy0718.github.io/riot-component/demo/index.html)
 - [x] calendar
+- [x] slider
 - [ ] popver
 
 ### 开始使用

@@ -1,4 +1,8 @@
 /**
+ * @module riot-calendar
+ * @description 基于riot的日历，默认日历视图由defaultDate|selectDates|new Date()按顺序提供，<a href="../demo/calendar.html">实例</a>
+ */
+/**
  * Tag构造函数
  * @external Tag
  * @see http://riotjs.com/api/#tag-instance
@@ -63,7 +67,6 @@
 
 /**
  * @function riot-calendar
- * @description 基于riot的日历，默认日历视图由defaultDate|selectDates|new Date()按顺序提供，{@link https://fsy0718.github.io/riot-component/demo/calendar.html 实例}
  * @param {object} opts
  * @param {boolean}   [opts.autoOk=false]                是否自动保存
  * @param {date}      [opts.defaultDate]                 默认日期
