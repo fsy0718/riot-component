@@ -6,11 +6,11 @@ const config = require('../config');
 
 
 gulp.task('css', function(){
-  return sass(config.sourcepath + '/**/*.scss')
+  return sass(config.sourcepath + '/components/**/*.scss')
     .on('error', sass.logError)
     .pipe(
       autoprefixer(config.autoprefixer)
     )
-    .pipe(gulp.dest(config.cachepath));
+    .pipe(gulp.dest(config.cachepath + '/components'));
 
 })

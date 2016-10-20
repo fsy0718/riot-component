@@ -603,4 +603,3 @@ tag.checkDate = function (e) {
   }
   curChangeDateStr = date.dateformat;
 }
-

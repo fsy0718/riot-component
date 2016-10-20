@@ -13,14 +13,7 @@ const commonjs = require('rollup-plugin-commonjs');
 const gulpSequence = require('gulp-sequence');
 const Promise = require('bluebird');
 
-
-
 const config = require('../config');
-
-const packageJSONpath = path.join(process.cwd(), './package.json');
-
-const packageJSON = require(packageJSONpath);
-const packageName = packageJSON.name
 
 gulp.task('build:clean', function (cb) {
   del([config.cachepath + '/**'], {
@@ -53,13 +46,13 @@ gulp.task('build:riot', function () {
     }).then(bundle => {
         bundle.write({
           format: 'iife',
-          moduleName: changeCase.camelCase(packageName),
+          moduleName: changeCase.camelCase(config.package.name),
           globals: { riot: 'riot' },
-          dest: `${config.destpath}/${packageName}.js`
+          dest: `${config.destpath}/${config.package.name}.js`
         })
-        bundle.write({ format: 'es', dest: `${config.destpath}/${packageName}.es6.js` })
-        bundle.write({ format: 'amd', dest: `${config.destpath}/${packageName}.amd.js` })
-        bundle.write({ format: 'cjs', dest: `${config.destpath}/${packageName}.cjs.js` })
+        bundle.write({ format: 'es', dest: `${config.destpath}/${config.package.name}.es6.js` })
+        bundle.write({ format: 'amd', dest: `${config.destpath}/${config.package.name}.amd.js` })
+        bundle.write({ format: 'cjs', dest: `${config.destpath}/${config.package.name}.cjs.js` })
         resolve();
       }).catch(error => {
         console.error(error);
@@ -71,7 +64,6 @@ gulp.task('build:riot', function () {
 });
 
 gulp.task('build:noclean', function () {
-  console.log(1);
   gulpSequence('css', ['riot:copy', 'riot:tag'], 'build:riot')(function () {
     console.log('build done!');
   })

@@ -13,7 +13,6 @@
  * @property {number}  width 每个point的宽度
  *  
  */
-
 /**
  * @todo 增加vertical的支持,设置point的order值，滑到时计算顺序，快速查找值
  * @function riot-slider
