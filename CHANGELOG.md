@@ -18,4 +18,9 @@
 * **calendar:** 增加日期点击时的动画 ([3b11a94](https://github.com/fsy0718/riot-component/commit/3b11a94))
 
 
+<a name="0.0.1"></a>
+## 0.0.1 (2016-10-13)
 
+
+### Features
+* **calendar:** 增加calendar组件 ([55fef2f](https://github.com/fsy0718/riot-component/commit/55fef2f))
