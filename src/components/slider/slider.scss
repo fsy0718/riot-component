@@ -31,7 +31,7 @@
       border-radius: 50%;
       background-color: $slider-mark-color;
       box-shadow: 0 0 rSize(5) 1px $slider-mark-shadow-color;
-      top:0;
+      top: rSize(24 - 20) / 2;
       z-index: 10;
       margin-left: -0.5 * rSize(24);
       @extend %Lcurp;

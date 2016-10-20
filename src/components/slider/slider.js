@@ -383,7 +383,8 @@ tag.onTouchStart = function(e){
     e.preventUpdate = true;
     return;
   }
-  onStart(v);
+  let position = getTouchPosition(e);
+  onStart(position);
   pauseEvent(e);
   addDocumentEvents('touch');
 }
