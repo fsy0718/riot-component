@@ -388,7 +388,7 @@ tag.noop = function (e) {
 tag.parseMarkItemClass = function (mark, type) {
   if (mark) {
     //mark元素与handler重叠会有问题，浏览器对4.5px处理方式不一样
-    if (included && mark.precent > tag.selectTrack.left && mark.precent < (tag.selectTrack.left + tag.selectTrack.width)) {
+    if (tag.included && mark.precent > tag.selectTrack.left && mark.precent < (tag.selectTrack.left + tag.selectTrack.width)) {
       return 'riot-slider__marks--items-select'
     }
   }
@@ -420,7 +420,7 @@ tag.on('update', function () {
   tag.selectTrack = {
     left: parseNumber((state.value[0] - state.min) / (state.max - state.min) * 100),
     width: parseNumber((state.value[1] - state.value[0]) / (state.max - state.min) * 100)
-  }
+  } 
 });
 tag.on('mount', function () {
   sliderRootEle = tag.root.querySelector('.riot-slider');

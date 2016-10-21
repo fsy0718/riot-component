@@ -62,12 +62,10 @@
       _d += d;
       return _d;
     };
-
     var getWeeksInYear = function getWeeksInYear(y, m, d) {
       var _d = getDatesInYear(y, m, d);
       return Math.round(_d, 7);
     };
-
     var getWeekTitles = function getWeekTitles() {
       tag.weekTitles = weekTitles.slice(firstDay, 7).concat(weekTitles.slice(0, firstDay));
     };
@@ -96,7 +94,6 @@
       }
       return '' + y + str2(m) + str2(d);
     };
-
     var getCalendarViewDate = function getCalendarViewDate(y, m) {
       var weekNum = opts.weekMode ? 6 : getWeeksInMonth(y, m);
       var datesInPrevMonth = getDatesInPrevMonth(y, m);
@@ -186,10 +183,8 @@
           }
           if (r.current) {
             r.disable = 1;
-          } else if (opts.isRange) {
-            if (rls && rls > r.date._str || rle && rle < r.date._str) {
-              r.disable = 2;
-            }
+          } else if (opts.isRange && rls && rls > r.date._str || rle && rle < r.date._str) {
+            r.disable = 2;
           } else if (mis && mis > r.date._str || mas && mas < r.date._str) {
             r.disable = 3;
           }
@@ -206,7 +201,6 @@
         viewDates: viewDates
       };
     };
-
     var changeView = function changeView(direction) {
       switchDirection = direction;
       lastY = curY;
@@ -222,7 +216,6 @@
         curY++;
       }
     };
-
     tag.prevMonth = function (e) {
       if (tag.prevMonthDisable) {
         e ? e.preventUpdate = true : '';
@@ -252,13 +245,14 @@
       selectDates = selectDates.filter(function (d) {
         var s = formatDate3(d);
         if (opts.isRange && (rls && rls > s || rle && rle < s)) {
+          console.warn('riot-calendr实例类名为%s的value中%s由于不符合rangeLimit条件而被移除', opts.class || 'riot-calendar', d);
           return false;
         } else if (mis && mis > s || mas && mas < s) {
+          console.warn('riot-calendr实例类名为%s的value中%s由于不符合minDate与maxDate条件而被移除', opts.class || 'riot-calendar', d);
           return false;
         }
         return true;
       });
-
       selectDates.sort(function (a, b) {
         return a - b;
       });
@@ -278,7 +272,6 @@
         dates: selectDates
       };
     };
-
     tag.parseDateBoxClass = function (date) {
       if (!date) {
         return '';
@@ -297,7 +290,6 @@
       }
       return classNames.join(' ');
     };
-
     tag.parseDateClass = function (date) {
       if (!date) {
         return '';
@@ -357,7 +349,6 @@
         mas && rle && rle > mas ? rle = mas : '';
       }
       getWeekTitles();
-
       tag.getSelectDates();
       if (selectDates[0] && !opts.isMultiple) {
         rs = formatDate3(selectDates[0].getFullYear(), selectDates[0].getMonth() + 1, selectDates[0].getDate());
@@ -389,7 +380,6 @@
         weekdates: _d.weekDates,
         viewdates: _d.viewDates
       };
-
       if (opts.switchViewOverLimit) {
         var firstDateStr = formatDate3(curY, curM, 1);
         var lastDateStr = formatDate3(curY, curM, getDatesInMonth(curY, curM));
@@ -398,7 +388,7 @@
         } else {
           tag.prevMonthDisable = false;
         }
-        if (opts.isRange && lastDateStr >= rle || mas && lastDateStr >= mas) {
+        if (opts.isRange && rle && lastDateStr >= rle || mas && lastDateStr >= mas) {
           tag.nextMonthDisable = true;
         } else {
           tag.nextMonthDisable = false;
@@ -475,7 +465,6 @@
         curChangeDateStr = undefined;
       }
     });
-
     tag.checkDate = function (e) {
       var date = e.item.date;
       if (date.disable !== 0) {
@@ -897,7 +886,7 @@
     tag.parseMarkItemClass = function (mark, type) {
       if (mark) {
 
-        if (included && mark.precent > tag.selectTrack.left && mark.precent < tag.selectTrack.left + tag.selectTrack.width) {
+        if (tag.included && mark.precent > tag.selectTrack.left && mark.precent < tag.selectTrack.left + tag.selectTrack.width) {
           return 'riot-slider__marks--items-select';
         }
       }

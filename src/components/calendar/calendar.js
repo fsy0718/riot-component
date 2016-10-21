@@ -64,7 +64,6 @@
  * @property {number} [select]     表示是否被选中 1:表示选中
  * @property {number} disable        表示当前日期是否可用  0:表示可用  1:表示其它月  2:表示超出range范围  3:表示超出min-max范围
  */
-
 /**
  * @function riot-calendar
  * @param {object} opts
@@ -92,11 +91,6 @@
  * @example
  *  riot.mount('riot-calendar', opts)
  */
-
-
-
-
-
 let tag = this;
 const firstDay = Number(opts.firstDay) || 0;
 
@@ -146,12 +140,10 @@ const getDatesInYear = function (y, m, d) {
   _d += d;
   return _d;
 }
-
 const getWeeksInYear = function (y, m, d) {
   let _d = getDatesInYear(y, m, d);
   return Math.round(_d, 7);
 };
-
 const getWeekTitles = function () {
   tag.weekTitles = weekTitles.slice(firstDay, 7).concat(weekTitles.slice(0, firstDay));
 }
@@ -180,7 +172,6 @@ const formatDate3 = function (y, m, d) {
   }
   return '' + y + str2(m) + str2(d);
 };
-
 const getCalendarViewDate = function (y, m) {
   let weekNum = opts.weekMode ? 6 : getWeeksInMonth(y, m);
   let datesInPrevMonth = getDatesInPrevMonth(y, m);
@@ -268,10 +259,8 @@ const getCalendarViewDate = function (y, m) {
       }
       if (r.current) {
         r.disable = 1;
-      } else if (opts.isRange) {
-        if ((rls && rls > r.date._str) || (rle && rle < r.date._str)) {
-          r.disable = 2;
-        }
+      } else if (opts.isRange && (rls && rls > r.date._str) || (rle && rle < r.date._str)) {
+        r.disable = 2;
       } else if ((mis && mis > r.date._str) || (mas && mas < r.date._str)) {
         r.disable = 3;
       }
@@ -288,7 +277,6 @@ const getCalendarViewDate = function (y, m) {
     viewDates: viewDates
   }
 }
-
 const changeView = function (direction) {
   switchDirection = direction;
   lastY = curY;
@@ -304,7 +292,6 @@ const changeView = function (direction) {
     curY++;
   }
 }
-
 tag.prevMonth = function (e) {
   if (tag.prevMonthDisable) {
     e ? e.preventUpdate = true : '';
@@ -326,7 +313,6 @@ tag.nextMonth = function (e) {
     tag.update();
   }
 }
-
 //选择日期排序
 tag.getSelectDates = function () {
   if (!selectDates) {
@@ -336,13 +322,14 @@ tag.getSelectDates = function () {
   selectDates = selectDates.filter(function (d) {
     var s = formatDate3(d);
     if (opts.isRange && ((rls && rls > s) || (rle && rle < s))) {
+      console.warn('riot-calendr实例类名为%s的value中%s由于不符合rangeLimit条件而被移除',opts.class || 'riot-calendar',d)
       return false
     } else if ((mis && mis > s) || (mas && mas < s)) {
+      console.warn('riot-calendr实例类名为%s的value中%s由于不符合minDate与maxDate条件而被移除',opts.class || 'riot-calendar',d)
       return false;
     }
     return true;
   })
-
   selectDates.sort(function (a, b) {
     return a - b;
   });
@@ -362,7 +349,6 @@ tag.getSelectDates = function () {
     dates: selectDates
   }
 }
-
 tag.parseDateBoxClass = function (date) {
   if (!date) {
     return '';
@@ -381,7 +367,6 @@ tag.parseDateBoxClass = function (date) {
   }
   return classNames.join(' ')
 }
-
 tag.parseDateClass = function (date) {
   if (!date) {
     return '';
@@ -410,7 +395,6 @@ tag.parseDateClass = function (date) {
   }
   return classNames.join(' ')
 }
-
 //范围值
 let rs, re, rls, rle, selectDates, selectDateStr, mis, mas;
 //默认日期  配置日期  范围起点  选择日期最小的一个   今天
@@ -436,7 +420,6 @@ const init = function () {
     mas && rle && rle > mas ? rle = mas : '';
   }
   getWeekTitles();
-
   tag.getSelectDates();
   if (selectDates[0] && !opts.isMultiple) {
     rs = formatDate3(selectDates[0].getFullYear(), selectDates[0].getMonth() + 1, selectDates[0].getDate())
@@ -470,8 +453,6 @@ tag.on('update', function () {
     weekdates: _d.weekDates,
     viewdates: _d.viewDates
   }
-
-
   if (opts.switchViewOverLimit) {
     let firstDateStr = formatDate3(curY, curM, 1);
     let lastDateStr = formatDate3(curY, curM, getDatesInMonth(curY, curM));
@@ -480,7 +461,7 @@ tag.on('update', function () {
     } else {
       tag.prevMonthDisable = false;
     }
-    if (opts.isRange && lastDateStr >= rle || mas && lastDateStr >= mas) {
+    if ((opts.isRange && rle && lastDateStr >= rle) || (mas && lastDateStr >= mas)) {
       tag.nextMonthDisable = true;
     } else {
       tag.nextMonthDisable = false;
@@ -488,7 +469,6 @@ tag.on('update', function () {
   }
 });
 let timer = null;
-
 //动画
 tag.on('updated', function () {
   lastSelectDateStr = selectDateStr.concat();
@@ -555,9 +535,7 @@ tag.on('updated', function () {
   if (opts.onChange && curChangeDateStr) {
     curChangeDateStr = undefined;
   }
-
 })
-
 tag.checkDate = function (e) {
   let date = e.item.date;
   if (date.disable !== 0) {
