@@ -3,9 +3,6 @@
   "version": "0.0.2",
   "description": "some components base on riot.js",
   "main": "./dist/riot-component.cjs.js",
-  "dependencies": {
-    "riot-mixin-pack": "^0.1.7"
-  },
   "devDependencies": {
     "babel-plugin-external-helpers": "^6.8.0",
     "babel-plugin-transform-object-rest-spread": "^6.16.0",

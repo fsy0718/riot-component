@@ -134,6 +134,50 @@ riot.mount(s14,'riot-slider',{
         		</textarea>
 					</div>
 				</div>
+				<div class="demo-card">
+					<h4>事件回调</h4>
+					<div class="riot-slider-1-5"></div>
+					<div class="pure-g result">
+						<span class="pure-u-1-8">onBeforeChange值:</span>
+						<p class="pure-u-1-8"><input class="ipt-1-5-1" type="text"></p>
+						<span class="pure-u-1-8">&nbsp;</span>
+						<p class="pure-u-1-8">onChange值:</p>
+						<p class="pure-u-1-8"><input class="ipt-1-5-2" type="text"></p>
+						<span class="pure-u-1-8">&nbsp;</span>
+						<p class="pure-u-1-8">onAfterChange值:</p>
+						<p class="pure-u-1-8"><input class="ipt-1-5-3" type="text"></p>
+					</div>
+					<div class="demo-desc">设置<code>onBeforeChange/onChange/onAfterChange回调</code>值</div>
+					<div class="view-source">
+						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
+					</div>
+					<div class="code-source" >
+						<textarea class="code" data-line="4">
+var s15 = document.querySelector('.riot-slider-1-5');
+var i151 = document.querySelector('.ipt-1-5-1');
+var i152 = document.querySelector('.ipt-1-5-2');
+var i153 = document.querySelector('.ipt-1-5-3');
+riot.mount(s15,'riot-slider',{
+	min: 10,
+	max: 100,
+	step: 10,
+	value: 20,
+	showAllDots: true,
+  showAllTips: true,
+  onChange: function(v){
+    i152.value = v.join(',')
+  },
+	onBeforeChange: function(v){
+		console.log(v);
+		i151.value = v.join(',')
+	},
+	onAfterChange: function(v){
+		i153.value = v.join(',')
+	}
+});
+        		</textarea>
+					</div>
+				</div>
 			</div>
 			<div class="pure-u-1-2">
 				<div class="demo-card">
