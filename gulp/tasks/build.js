@@ -35,6 +35,10 @@ if (config.strip) {
   let strip = require('rollup-plugin-strip');
   rollupPluginList.splice(1,0,strip(config.strip))
 }
+let dest = `${config.destpath}/${config.package.name}`
+if(!config.options.withCss){
+  dest = dest + '-no-css';
+}
 
 //后期需要增加版本号显示功能
 gulp.task('build:riot', function () {
@@ -48,11 +52,11 @@ gulp.task('build:riot', function () {
           format: 'iife',
           moduleName: changeCase.camelCase(config.package.name),
           globals: { riot: 'riot' },
-          dest: `${config.destpath}/${config.package.name}.js`
+          dest: `${dest}.js`
         })
-        bundle.write({ format: 'es', dest: `${config.destpath}/${config.package.name}.es6.js` })
-        bundle.write({ format: 'amd', dest: `${config.destpath}/${config.package.name}.amd.js` })
-        bundle.write({ format: 'cjs', dest: `${config.destpath}/${config.package.name}.cjs.js` })
+        bundle.write({ format: 'es', dest: `${dest}.es6.js` })
+        bundle.write({ format: 'amd', dest: `${dest}.amd.js` })
+        bundle.write({ format: 'cjs', dest: `${dest}.cjs.js` })
         resolve();
       }).catch(error => {
         console.error(error);
@@ -68,9 +72,14 @@ gulp.task('build:noclean', function () {
     console.log('build done!');
   })
 })
-
+gulp.task('build:noCss', function(){
+  gulpSequence('build:clean', 'css:noCss', ['riot:copy', 'riot:tag'], 'build:riot', 'build:clean')(function () {
+    console.log('build done!');
+  })
+})
 gulp.task('build', function () {
   gulpSequence('build:clean', 'css', ['riot:copy', 'riot:tag'], 'build:riot', 'build:clean')(function () {
     console.log('build done!');
   })
-})
+});
+

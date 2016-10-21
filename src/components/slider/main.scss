@@ -1,7 +1,7 @@
-﻿@import "../common/var";
+﻿@charset "utf-8";
+@import "../common/var";
 @import "../common/lib";
-
-:scope{
+:scope/*slider*/{
   .riot-slider{
     width: 100%;
     @extend %Lposr;

@@ -1,11 +1,7 @@
 <riot-popver>
   <yield/>
-  <style scoped>
-  <!-- inject:css -->
-  <!-- endinject -->
-  </style>
+  <!--inject-style-->
   <script>
-  <!-- inject:js -->
-  <!-- endinject -->
+  <!-- inject: ./popver.js -->
   </script>
 </riot-popver>

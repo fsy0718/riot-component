@@ -12,12 +12,8 @@
       </div>
     </div>
   </div>
-  <style scoped>
-  <!-- inject:css -->
-  <!-- endinject -->
-  </style>
+  <!--inject-style-->
   <script>
-  <!-- inject:js -->
-  <!-- endinject -->
+  <!-- inject: ./slider.js -->
   </script>
 </riot-slider>

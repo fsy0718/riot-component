@@ -20,14 +20,14 @@ $gray-bg-color: #f7f6f5;
 
 $orange-money: #ff9700;
 
-//日历颜色
+
 $calendar-day-color: #393836;
 $calendar-day-disable-color: #c5c5c5;
 $calendar-day-high-color: #eee2e9;
 $calendar-line-color: #efebea;
 $calendar-disable-arrow-color: #b8b8b8;
 
-//slider颜色
+
 $slider-track-color: #eeeaea;
 $slider-track-select-color: #7f1f59;
 $slider-mark-color: #fff;
@@ -209,7 +209,7 @@ $slider-mark-text-select-color: #651c4d;
   }
 }
 
-//紫色阴影
+
 @mixin shadowpurple($x: 0px, $y: 5px, $z: 15px, $w: 5px, $color: #eed5e4) {
   box-shadow: $x $y $z $w $color;
 }

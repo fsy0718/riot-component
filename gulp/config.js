@@ -4,9 +4,11 @@ const minimist = require('minimist');
 
 const defaultOptions = {
   string: ['env', 'platform'],
+  boolean: ['withCss'],
   default: {
     env: process.env.NODE_ENV || 'develop',
-    platform: 'mobile'
+    platform: 'mobile',
+    withCss: true
   }
 }
 const options = minimist(process.argv.slice(2), defaultOptions);

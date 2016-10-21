@@ -1,6 +1,7 @@
+@charset "utf-8";
 @import '../common/var';
 
-:scope {
+:scope/*popver*/ {
   background-color: #fff;
   border-radius: 0 0 7px 7px;
 }

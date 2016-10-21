@@ -1,10 +1,13 @@
 "use strict";
 const gulp = require('gulp');
-const inject = require('gulp-inject');
+const inject = require('gulp-inject-file');
 const path = require('path');
 const replace = require('gulp-replace');
 const config = require('../config');
+const rename = require('gulp-rename');
 const gulpSequence = require('gulp-sequence');
+const injectString = require('gulp-inject-string');
+const gulpIf = require('gulp-if');
 
 gulp.task('riot:copy:js:index', function(){
   return gulp.src(config.sourcepath + '/index.js')
@@ -26,31 +29,39 @@ gulp.task('riot:copy:js:index', function(){
     )
     .pipe(gulp.dest(config.cachepath));
 })
-gulp.task('riot:copy:component', function(){
-  return gulp.src([config.sourcepath + '/components/**/*.js',config.sourcepath + '/components/**/*.tag'])
+gulp.task('riot:copy:js', function(){
+  return gulp.src([config.sourcepath + '/components/**/*.js'])
     .pipe(gulp.dest(config.cachepath + '/components'));
 });
+gulp.task('riot:copy:tag', function(){
+  return gulp.src([config.sourcepath + '/components/**/*.tag'])
+    .pipe(
+      gulpIf(
+        config.options.withCss, injectString.replace('<!--inject-style-->','<style scoped><!-- inject: ./main.css--></style>')
+      )
+    )
+    .pipe(rename(function(path){
+      if(path.basename.indexOf('_') === -1){
+        path.basename = 'cache_' + path.basename;
+      } 
+    }))
+    .pipe(gulp.dest(config.cachepath + '/components'));
+})
 
 gulp.task('riot:copy', function (cb) {
-  gulpSequence('riot:copy:js:index', 'riot:copy:component')(function () {
+  gulpSequence('riot:copy:js:index', 'riot:copy:js','riot:copy:tag')(function () {
     console.log('riot:copy done!');
     cb();
   })
 })
 
 gulp.task('riot:tag',['riot:copy'], function(){
-  let transform = function(filepath, file, index, length, targetFile){
-    let p1 = path.parse(filepath);
-    let p2 = path.parse(targetFile.path);
-    if(p1.name === p2.name){
-      return file.contents.toString('utf-8');
-    }
-  }
-  let source = gulp.src([config.cachepath + '/components/**/*.css', config.cachepath + '/components/**/*.js']);
-  return gulp.src(config.cachepath + '/components/**/*.tag')
-    .pipe(inject(source, {
-      removeTags: true,
-      transform: transform
+  return gulp.src(config.cachepath + '/components/**/cache_*.tag')
+    .pipe(inject({
+      pattern: '<!--\\s*inject:<filename>-->'
+    }))
+    .pipe(rename(function(path){
+      path.basename = path.basename.replace(/cache\_/,'')
     }))
     .pipe(gulp.dest(config.cachepath + '/components'));
 });

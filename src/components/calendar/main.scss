@@ -1,6 +1,6 @@
-﻿@import '../common/var';
-
-:scope {
+﻿@charset "utf-8";
+@import '../common/var';
+:scope/*calendar*/ {
   display: block;
   .pure-u-1-8 {
     width: 14.285%;
