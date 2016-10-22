@@ -84,7 +84,8 @@
     <div class="container-overview">
     
         
-            <div class="description">基于riot的slider,<a href="../demo/slider.html">实例</a>实现ant-design的<a href="https://ant.design/components/slider/">滑动输入条</a></div>
+            <div class="description">基于riot的slider,<a href="../demo/slider.html">实例</a>
+实现ant-design的<a href="https://ant.design/components/slider/">滑动输入条</a></div>
         
 
         
@@ -372,6 +373,8 @@
             
                 <td class="attributes">
                 
+                    &lt;optional><br>
+                
 
                 
 
@@ -473,6 +476,46 @@
 
         <tr>
             
+                <td class="name"><code>control</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last">是否不能滑动只能展示值，与disable作用一样，但拥有正常slider的样式</td>
+        </tr>
+
+    
+
+        <tr>
+            
                 <td class="name"><code>showMarkTip</code></td>
             
 
@@ -553,7 +596,7 @@
 
         <tr>
             
-                <td class="name"><code>disableCross</code></td>
+                <td class="name"><code>allowCross</code></td>
             
 
             <td class="type">
@@ -670,6 +713,240 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>included</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last">值为 true 时表示值为包含关系，false 表示并列</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rangeValueShouldEqual</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+
+            <td class="description last">range变动过程中两个值是否可以相等</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>rangeGapFixed</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+
+            <td class="description last">range在变动过程中是否固定不变</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">onChangeCall</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">正在滑动时的回调函数</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onBeforeChange</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">onBeforeChangeCall</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">滑动之前的回调函数</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onAfterChangeCall</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">onAfterChangeCall</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">滑动结束后的回调函数</td>
+        </tr>
+
+    
     </tbody>
 </table>
 
@@ -723,8 +1000,168 @@
 	<dd class="tag-todo">
 		<ul>
 			<li>增加vertical的支持,设置point的order值，滑到时计算顺序，快速查找值</li>
+			
+			<li>track select用scale与translateX做动画</li>
 			</ul>
 	</dd>
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    返回riot-slider的实例对象
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">sliderTag</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        </dl>
+    
+
+    
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        <dl>
+                
+<hr>
+<dt>
+    <h4 class="name" id="~onAfterChangeCall"><span class="type-signature"></span>onAfterChangeCall(正在变动的值,range时length为2)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        滑动结束时的回调函数说明
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>正在变动的值,range时length为2</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;number></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
 	
 </dl>
 
@@ -744,13 +1181,263 @@
     
 </dd>
 
-        </dl>
+            
+                
+<hr>
+<dt>
+    <h4 class="name" id="~onBeforeChangeCall"><span class="type-signature"></span>onBeforeChangeCall(正在变动的值,range时length为2)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        滑动开始时的回调函数说明
+    </div>
     
 
     
-        <h3 class="subsection-title">Type Definitions</h3>
 
-        <dl>
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>正在变动的值,range时length为2</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;number></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt>
+    <h4 class="name" id="~onChangeCall"><span class="type-signature"></span>onChangeCall(正在变动的值,range时length为2)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        滑动过程中的回调函数说明
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>正在变动的值,range时length为2</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;number></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
                 
 <hr>
 <dt class="name" id="~riot-point">
@@ -990,6 +1677,265 @@
     
 </dd>
 
+            
+                
+<hr>
+<dt>
+    <h4 class="name" id="~setControlCall"><span class="type-signature"></span>setControlCall(control)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        设置slider是否受控回调函数说明
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>control</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">是否受控</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt class="name" id="~sliderTag">
+    <h4 id="~sliderTag">sliderTag</h4>
+
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        扩展Tag实例
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>setControl</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">setControlCall</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">设置当前slider是否受控</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+	<dt class="tag-see method-doc-label method-doc-details-label">See:</dt>
+	<dd class="tag-see">
+		<ul>
+			<li><a href="http://riotjs.com/api/#tag-instance">http://riotjs.com/api/#tag-instance</a></li>
+			</ul>
+	</dd>
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
             </dl>
     
 
@@ -1038,7 +1984,7 @@
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a>
 	
-		on 2016-10-20T15:46:03+08:00
+		on 2016-10-23T00:05:25+08:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
