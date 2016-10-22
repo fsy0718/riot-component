@@ -11,7 +11,7 @@
  * onChange 函数说明
  * @callback onChangeCall
  * @param {riot-date} date 当前被点击riot-date对象
- * @param {tag} tag 当前riot-calendar实例对象
+ * @param {calendarTag} tag 当前riot-calendar实例对象
  */
 /**
  * dateTimeFormat 函数说明
@@ -40,7 +40,7 @@
 /**
  * 扩展Tag实例
  * @see http://riotjs.com/api/#tag-instance
- * @typedef {object} tag
+ * @typedef {object} calendarTag
  * @extends external:Tag
  * @property {function} prevMonth  选择前一个月,不能传参数
  * @property {function} nextMonth  选择下一个月，不能传参数
@@ -87,7 +87,7 @@
  * @param {dateTimeFormatCall} [opts.dateTimeFormat]      自定义日历显示格式
  * @param {parseDateClassCall} [opts.parseDateClass]      自定义日历日期显示的className
  * @param {disabledDateCall}   [opts.disabledDate]    更精细的不可选日期控制函数 @since 0.0.2
- * @returns {tag}
+ * @returns {calendarTag}
  * @example
  *  riot.mount('riot-calendar', opts)
  */

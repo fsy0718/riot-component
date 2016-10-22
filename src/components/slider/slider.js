@@ -4,6 +4,14 @@
  * 实现ant-design的{@link https://ant.design/components/slider/ 滑动输入条}
  */
 /**
+ * 扩展Tag实例
+ * @see http://riotjs.com/api/#tag-instance
+ * @typedef {object} sliderTag
+ * @extends external:Tag
+ * @property {setControlCall} setControl 设置当前slider是否受控
+ */
+/**
+ * @inner
  * @typedef {object} riot-point
  * @property {number} key 当前的关键值
  * @property {number} mark 是否为mark 真为1
@@ -11,6 +19,11 @@
  * @property {number} precent point在track上left值
  * @property {boolean} dot  是否显示dot,默认为true
  * @property {number}  width 每个point的宽度 
+ */
+/**
+ * 设置slider是否受控回调函数说明
+ * @callback setControlCall
+ * @param {boolean} control 是否受控
  */
 /**
  * 滑动过程中的回调函数说明
@@ -29,6 +42,7 @@
  */
 /**
  * @todo 增加vertical的支持,设置point的order值，滑到时计算顺序，快速查找值
+ * @todo track select用scale与translateX做动画
  * @function riot-slider
  * @param {object} opts
  * @param {boolean} [opts.range=false] 双滑块模式
@@ -37,6 +51,7 @@
  * @param {number[]} [opts.value]  设置当前值，如果range，默认为[0,0],否则为[0]
  * @param {number|null} [opts.step] 步长，取值必须大于 0，并且可被 (max - min) 整除。当 marks 不为空对象时，可以设置 step 为 null，此时 Slider 的可选值仅有 marks 标出来的部分。
  * @param {boolean} [opts.dots=false] 是否只能拖到刻度上
+ * @param {boolean} [opts.control=false] 是否不能滑动只能展示值，与disable作用一样，但拥有正常slider的样式
  * @param {boolean} [opts.showMarkTip=true] 是否显示mark的提示
  * @param {boolean} [opts.showMarkDot=true] 是否显示mark的刻度
  * @param {boolean} [opts.allowCross=true] 在range时是否可以值是否可以互换
@@ -44,14 +59,18 @@
  * @param {boolean} [opts.showAllDots=false] 是否显示根据min max step计算出来的dot图标
  * @param {boolean} [opts.included=true]     值为 true 时表示值为包含关系，false 表示并列
  * @param {boolean} [opts.rangeValueShouldEqual=true] range变动过程中两个值是否可以相等
+ * @param {boolean} [opts.rangeGapFixed=false] range在变动过程中是否固定不变
  * @param {onChangeCall} [opts.onChange]     正在滑动时的回调函数
  * @param {onBeforeChangeCall} [opts.onBeforeChange] 滑动之前的回调函数
  * @param {onAfterChangeCall}  [opts.onAfterChangeCall] 滑动结束后的回调函数
+ * @return {sliderTag} 返回riot-slider的实例对象
  */
 import addEventListener from "../common/rc-util-dom-addEventListener"
 "use strict";
 let tag = this;
-let state = {};
+let state = {
+  control: opts.control || false
+};
 //slider根元素
 let sliderRootEle = null;
 //TODO 增加vertical为true的支持
@@ -78,11 +97,12 @@ const getMarkWidth = function (len) {
   return parseNumber(100 / (len - 1) * 0.9)
 }
 //计算可停靠值对象
-const getEnablePoint = function (min, max, step, marks) {
+const getEnablePoint = function (min, max, marks) {
   let points = [];
   let markPoints;
   let length = max - min;
   let w;
+  let step = opts.range ? opts.step : opts.step || 1;
   if (step > 0) {
     opts.showAllTips ? w = parseNumber(getMarkWidth(Math.ceil((max - min) / step))) : '';
     let i = min;
@@ -166,15 +186,22 @@ const getHandleRect = function (handle = sliderRootEle) {
 }
 //通过position来获取point
 const getClosetPointByPosition = function (position) {
-  const {range, step, dots} = opts;
+  const {range, dots} = opts;
   //precent需要先乘100并保留四位有效数字，求_value时再除以100,否则会造成3 => 2.999999999999999999999999的情况
-  let precent = parseNumber(getPrecentByPosition(position) * 100);
-  let _value = precent / 100 * (state.max - state.min) + state.min;
-  if (state.source) {
-    _value = getClosetValueByDichotomy(state.source, _value);
+  let precent = getPrecentByPosition(position);
+  let _value = precent * (state.max - state.min) + state.min;
+  if(opts.range && !opts.step){
+    _value = getClosetValueByDichotomy(state.cachePoint.marks,_value);
+  }else if(opts.dots){
+    _value = getClosetValueByDichotomy(state.cachePoint.points, _value);
+  }else{
+    _value = {
+      key: parseInt(_value), 
+    }
   }
   return {
-    precent: precent,
+    //precent小数点后可能不止四位，不用对外提供，不进行优化
+    precent: precent * 100,
     point: _value
   }
 }
@@ -187,15 +214,38 @@ const getPrecentByPosition = function (pos) {
   } else {
     v = (pos - coords.left) / coords.width;
   }
-  return v;
+  return v > 1 ? 1 : v < 0 ? 0 : v;
 }
 const setRangeValue = function (val) {
   if(!rangeValueShouldEqual && val === state.rangeStableValue){
     return false;
   }
+  //如果固定range的差值
+  if(opts.rangeGapFix){
+    //滑动方向 1表示向右 -1向左
+    let direction = val - state.value[state.rangeChangeHandle];
+    if(direction > 0){
+      direction = 1
+    }else if(direction < 0){
+      direction = -1;
+    }else{
+      //如果为0 直接不更新
+      return false;
+    }
+    let newVal = state.value[state.rangeChangeHandle ? 0 : 1] + direction * state.rangeGap;
+    let newValInPoint = state.cachePoint.points.some(function(point){
+      return point.key === newVal
+    })
+    if(newValInPoint){
+      state.value = state.rangeChangeHandle === 0 ? [val, newVal] : [newVal, val];
+      return true
+    }
+    return false;
+  }
   state.value = [val, state.rangeStableValue].sort(function (a, b) {
     return a - b;
   })
+  let diff = val - state.rangeStableValue
   if (!allowCross && (state.rangeChangeHandle === 0 && val > state.rangeStableValue || state.rangeChangeHandle === 1 && val < state.rangeStableValue)) {
     return false;
   }
@@ -255,21 +305,17 @@ const getClosetValueByDichotomy = function (source, val) {
 const getValue = function(){
   return opts.range ? state.value.concat() : state.value.slice(1,2);
 }
-//更新state.value值
+//更新state.value值，返回是否更新成功
 const updateStateValue = function(point){
   state.changePointKey = point.key;
+  let shouldUpdate ;
   if (opts.range) {
-    let result = setRangeValue(point.key);
-    if (!result) {
-      return;
-    }
+    shouldUpdate = setRangeValue(point.key);
   } else {
     state.value = [state.min, point.key];
+    shouldUpdate = true;
   }
-  tag.update();
-  if (opts.onChange) {
-    opts.onChange(getValue());
-  }
+  return shouldUpdate;
 }
 const onMouseMove = function (e) {
   let position = getMousePosition(e);
@@ -289,13 +335,17 @@ const onMove = function(position){
   let closetPoint = getClosetPointByPosition(position);
   let point = closetPoint.point;
   if (state.changePointKey !== point.key ) {
-    updateStateValue(point);
+    let shouldUpdate = updateStateValue(point);
+    if(shouldUpdate){
+      tag.update();
+      opts.onChange && opts.onChange(getValue());
+    }
   }
 }
 const end = function (type) {
   //TODO 需要值
-  state.handle = undefined;
-  state.oldVal = null;
+  state.rangeChangeHandle = undefined;
+  state.rangeStableValue = null;
   opts.onAfterChange && opts.onAfterChange(getValue());
   removeEvents(type);
 }
@@ -309,9 +359,15 @@ const onStart = function (position) {
   opts.onBeforeChange && opts.onBeforeChange(getValue());
   //如果点击的位置不在选中的结束或开始，则更新state.value
   if(state.value.indexOf(state.changePointKey) === -1){
-    updateStateValue(closetPoint.point);
+    let shouldUpdate = updateStateValue(closetPoint.point);
+    if(shouldUpdate){
+      opts.onChange && opts.onChange(getValue());
+    }
+    return shouldUpdate;
+  }else{
+    //手动禁止更新
+    return false;
   }
-
 }
 const pauseEvent = function (e) {
   e.stopPropagation();
@@ -342,7 +398,7 @@ const removeEvents = function (type) {
 }
 //初始化参数，before-mount会在update之后触发
 const init = function () {
-  let {marks, value, range, min = 0, max = 100, step = 1, dots} = opts;
+  let {marks, value, min = 0, max = 100} = opts;
   min = Math.max(0, min);
   //筛选不合规范的值
   let _value = [min, min];
@@ -351,7 +407,6 @@ const init = function () {
     _value = [Number(value) || min]
   }else if (value && value.length) {
     let _v = [];
-    
     value.forEach(function (v) {
       if (v >= min && v <= max) {
         _v.push(+v);
@@ -367,17 +422,18 @@ const init = function () {
   } else if (_valen < 2) {
     _value.unshift(min)
   }
-  //存储值，需要对value在dots下对值进行校验是否为mark中的
   state.value = _value;
   state.min = min;
   state.max = max;
-  let data = getEnablePoint(min, max, step, marks);
-  if (range && !step || dots) {
-    state.source = data.marks;
-  } else {
-    state.source = data.points;
+  state.cachePoint = getEnablePoint(min, max, marks);
+  //对rangeGapFixed进行提示; 如果gap为0且rangeGapFixed为true，则警告用户
+  if(opts.rangeGapFix){
+    state.rangeGap = state.value[1] - state.value[0];
+    if(!state.rangeGap){
+      console.warn('riot-slider实例类名为%s的rangeGap为0，会变为类似include=false的效果',opts.class || 'riot-slider');
+    }
   }
-  tag.marks = data.marks;
+  tag.marks = state.cachePoint.marks;
 }
 init();
 tag.noop = function (e) {
@@ -393,27 +449,34 @@ tag.parseMarkItemClass = function (mark, type) {
     }
   }
 }
+//是否受控
+tag.setControl = function(control){
+  state.control = control;
+;
+}
 //事件
 tag.onMouseDown = function (e) {
-  const {range, step} = opts;
-  if (e.button !== 0) {
+  const {range} = opts;
+  if (e.button !== 0 || state.control) {
     e.preventUpdate = true;
     return;
   }
   let position = getMousePosition(e);
-  onStart(position);
+  let shouldUpdate = onStart(position);
   pauseEvent(e);
   addDocumentEvents('mouse');
+  e.preventUpdate = !shouldUpdate
 }
 tag.onTouchStart = function(e){
-  if(isNotTouchEvent(e)){
+  if(isNotTouchEvent(e) || state.control){
     e.preventUpdate = true;
     return;
   }
   let position = getTouchPosition(e);
-  onStart(position);
+  let shouldUpdate = onStart(position);
   pauseEvent(e);
   addDocumentEvents('touch');
+  e.preventUpdate = !shouldUpdate;
 }
 //更新
 tag.on('update', function () {

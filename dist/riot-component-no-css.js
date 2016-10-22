@@ -729,7 +729,9 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
   "use strict";
 
   var tag = this;
-  var state = {};
+  var state = {
+    control: opts.control || false
+  };
 
   var sliderRootEle = null;
 
@@ -758,11 +760,12 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
     return parseNumber(100 / (len - 1) * 0.9);
   };
 
-  var getEnablePoint = function getEnablePoint(min, max, step, marks) {
+  var getEnablePoint = function getEnablePoint(min, max, marks) {
     var points = [];
     var markPoints = void 0;
     var length = max - min;
     var w = void 0;
+    var step = opts.range ? opts.step : opts.step || 1;
     if (step > 0) {
       opts.showAllTips ? w = parseNumber(getMarkWidth(Math.ceil((max - min) / step))) : '';
       var i = min;
@@ -849,17 +852,23 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
 
   var getClosetPointByPosition = function getClosetPointByPosition(position) {
     var range = opts.range;
-    var step = opts.step;
     var dots = opts.dots;
 
 
-    var precent = parseNumber(getPrecentByPosition(position) * 100);
-    var _value = precent / 100 * (state.max - state.min) + state.min;
-    if (state.source) {
-      _value = getClosetValueByDichotomy(state.source, _value);
+    var precent = getPrecentByPosition(position);
+    var _value = precent * (state.max - state.min) + state.min;
+    if (opts.range && !opts.step) {
+      _value = getClosetValueByDichotomy(state.cachePoint.marks, _value);
+    } else if (opts.dots) {
+      _value = getClosetValueByDichotomy(state.cachePoint.points, _value);
+    } else {
+      _value = {
+        key: parseInt(_value)
+      };
     }
     return {
-      precent: precent,
+
+      precent: precent * 100,
       point: _value
     };
   };
@@ -872,15 +881,48 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
     } else {
       v = (pos - coords.left) / coords.width;
     }
-    return v;
+    return v > 1 ? 1 : v < 0 ? 0 : v;
   };
   var setRangeValue = function setRangeValue(val) {
     if (!rangeValueShouldEqual && val === state.rangeStableValue) {
       return false;
     }
+
+    if (opts.rangeGapFix) {
+      var _ret = function () {
+
+        var direction = val - state.value[state.rangeChangeHandle];
+        if (direction > 0) {
+          direction = 1;
+        } else if (direction < 0) {
+          direction = -1;
+        } else {
+
+          return {
+            v: false
+          };
+        }
+        var newVal = state.value[state.rangeChangeHandle ? 0 : 1] + direction * state.rangeGap;
+        var newValInPoint = state.cachePoint.points.some(function (point) {
+          return point.key === newVal;
+        });
+        if (newValInPoint) {
+          state.value = state.rangeChangeHandle === 0 ? [val, newVal] : [newVal, val];
+          return {
+            v: true
+          };
+        }
+        return {
+          v: false
+        };
+      }();
+
+      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+    }
     state.value = [val, state.rangeStableValue].sort(function (a, b) {
       return a - b;
     });
+    var diff = val - state.rangeStableValue;
     if (!allowCross && (state.rangeChangeHandle === 0 && val > state.rangeStableValue || state.rangeChangeHandle === 1 && val < state.rangeStableValue)) {
       return false;
     }
@@ -943,18 +985,14 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
 
   var updateStateValue = function updateStateValue(point) {
     state.changePointKey = point.key;
+    var shouldUpdate = void 0;
     if (opts.range) {
-      var result = setRangeValue(point.key);
-      if (!result) {
-        return;
-      }
+      shouldUpdate = setRangeValue(point.key);
     } else {
       state.value = [state.min, point.key];
+      shouldUpdate = true;
     }
-    tag.update();
-    if (opts.onChange) {
-      opts.onChange(getValue());
-    }
+    return shouldUpdate;
   };
   var onMouseMove = function onMouseMove(e) {
     var position = getMousePosition(e);
@@ -974,13 +1012,17 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
     var closetPoint = getClosetPointByPosition(position);
     var point = closetPoint.point;
     if (state.changePointKey !== point.key) {
-      updateStateValue(point);
+      var shouldUpdate = updateStateValue(point);
+      if (shouldUpdate) {
+        tag.update();
+        opts.onChange && opts.onChange(getValue());
+      }
     }
   };
   var end = function end(type) {
 
-    state.handle = undefined;
-    state.oldVal = null;
+    state.rangeChangeHandle = undefined;
+    state.rangeStableValue = null;
     opts.onAfterChange && opts.onAfterChange(getValue());
     removeEvents(type);
   };
@@ -994,7 +1036,14 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
     opts.onBeforeChange && opts.onBeforeChange(getValue());
 
     if (state.value.indexOf(state.changePointKey) === -1) {
-      updateStateValue(closetPoint.point);
+      var shouldUpdate = updateStateValue(closetPoint.point);
+      if (shouldUpdate) {
+        opts.onChange && opts.onChange(getValue());
+      }
+      return shouldUpdate;
+    } else {
+
+      return false;
     }
   };
   var pauseEvent = function pauseEvent(e) {
@@ -1024,14 +1073,10 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
   var init = function init() {
     var marks = opts.marks;
     var value = opts.value;
-    var range = opts.range;
     var _opts$min = opts.min;
     var min = _opts$min === undefined ? 0 : _opts$min;
     var _opts$max = opts.max;
     var max = _opts$max === undefined ? 100 : _opts$max;
-    var _opts$step = opts.step;
-    var step = _opts$step === undefined ? 1 : _opts$step;
-    var dots = opts.dots;
 
     min = Math.max(0, min);
 
@@ -1042,7 +1087,6 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
     } else if (value && value.length) {
       (function () {
         var _v = [];
-
         value.forEach(function (v) {
           if (v >= min && v <= max) {
             _v.push(+v);
@@ -1059,17 +1103,18 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
     } else if (_valen < 2) {
       _value.unshift(min);
     }
-
     state.value = _value;
     state.min = min;
     state.max = max;
-    var data = getEnablePoint(min, max, step, marks);
-    if (range && !step || dots) {
-      state.source = data.marks;
-    } else {
-      state.source = data.points;
+    state.cachePoint = getEnablePoint(min, max, marks);
+
+    if (opts.rangeGapFix) {
+      state.rangeGap = state.value[1] - state.value[0];
+      if (!state.rangeGap) {
+        console.warn('riot-slider实例类名为%s的rangeGap为0，会变为类似include=false的效果', opts.class || 'riot-slider');
+      }
     }
-    tag.marks = data.marks;
+    tag.marks = state.cachePoint.marks;
   };
   init();
   tag.noop = function (e) {
@@ -1086,28 +1131,34 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
     }
   };
 
+  tag.setControl = function (control) {
+    state.control = control;
+    
+  };
+
   tag.onMouseDown = function (e) {
     var range = opts.range;
-    var step = opts.step;
 
-    if (e.button !== 0) {
+    if (e.button !== 0 || state.control) {
       e.preventUpdate = true;
       return;
     }
     var position = getMousePosition(e);
-    onStart(position);
+    var shouldUpdate = onStart(position);
     pauseEvent(e);
     addDocumentEvents('mouse');
+    e.preventUpdate = !shouldUpdate;
   };
   tag.onTouchStart = function (e) {
-    if (isNotTouchEvent(e)) {
+    if (isNotTouchEvent(e) || state.control) {
       e.preventUpdate = true;
       return;
     }
     var position = getTouchPosition(e);
-    onStart(position);
+    var shouldUpdate = onStart(position);
     pauseEvent(e);
     addDocumentEvents('touch');
+    e.preventUpdate = !shouldUpdate;
   };
 
   tag.on('update', function () {
