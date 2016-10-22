@@ -41,7 +41,7 @@
     "karma": "karma start test/karma.conf.js",
     "doc": "gulp doc",
     "build": "gulp build",
-    "build:noCss": "gulp build --withCss false & gulp css:noCss --withCss false",
+    "build:noCss": "gulp build:noCss --withCss false",
     "watch": "gulp watch",
     "server": "gulp server",
     "start": "gulp server:watch",
