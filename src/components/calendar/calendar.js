@@ -33,6 +33,13 @@
  * @returns {selectDateObj}
  */
 /**
+ * switchCalendarByDate 函数说明
+ * @callback switchCalendarByDateCall
+ * @since 0.0.3beta
+ * @param {date} 需要跳转的日期
+ * @return {boolean} 跳转是否成功，日期如果超出受限范围[rangeLimit/minDate/maxDate]且switchViewOverLimit=true，则跳转不成功，返回false， 如果跳转日期就是当前日历视图也不会跳转，返回false
+ */
+/**
  * disabledDate 不可选日期函数说明
  * @callback disabledDateCall
  * @param {riot-date} date 当前正在渲染的riot-date对象
@@ -45,6 +52,7 @@
  * @property {function} prevMonth  选择前一个月,不能传参数
  * @property {function} nextMonth  选择下一个月，不能传参数
  * @property {getSelectDatesCall} getSelectDates 返回当前选择日期对象
+ * @property {switchCalendarByDateCall} switchCalendarByDate 跳转到指定日期
  */
 /**
  * @typedef {object} selectDateObj
@@ -92,6 +100,7 @@
  *  riot.mount('riot-calendar', opts)
  */
 let tag = this;
+let state = {};
 const firstDay = Number(opts.firstDay) || 0;
 
 //一些帮助函数
@@ -279,18 +288,33 @@ const getCalendarViewDate = function (y, m) {
 }
 const changeView = function (direction) {
   switchDirection = direction;
-  lastY = curY;
-  lastM = curM;
-  curM += direction;
+  state.lastY = state.curY;
+  state.lastM = state.curM;
+  state.curM += direction;
 
-  if (curM < 1) {
-    curY--;
-    curM = 12;
+  if (state.curM < 1) {
+    state.curY--;
+    state.curM = 12;
   }
-  if (curM > 12) {
-    curM = 1;
-    curY++;
+  if (state.curM > 12) {
+    state.curM = 1;
+    state.curY++;
   }
+}
+const checkDateIsValid = function(y,m){
+  if (opts.switchViewOverLimit) {
+    let firstDateStr = formatDate3(y, m, 1);
+    let lastDateStr = formatDate3(y, m, getDatesInMonth(y, m));
+    if(opts.isRange){
+      if(rle && firstDateStr >= rle || rls && lastDateStr <= rls){
+        return false
+      }
+    }
+    if(mis && lastDateStr <= mis || mas && firstDateStr >= mas){
+      return false;
+    }
+  }
+  return true;
 }
 tag.prevMonth = function (e) {
   if (tag.prevMonthDisable) {
@@ -312,6 +336,22 @@ tag.nextMonth = function (e) {
   if (!e) {
     tag.update();
   }
+}
+tag.switchCalendarByDate = function(date){
+  let y = date.getFullYear();
+  let m = date.getMonth() + 1;
+  if(y === state.curY && m === state.curM){
+    return false;
+  }
+  let result = checkDateIsValid(y,m);
+  if(result){
+    switchDirection = (y + str2(m)) > ('' + state.curY + str2(state.curM)) ? 1 : -1;
+    state.curY = y;
+    state.curM = m;
+    tag.update()
+  }
+  return result;
+
 }
 //选择日期排序
 tag.getSelectDates = function () {
@@ -399,11 +439,6 @@ tag.parseDateClass = function (date) {
 let rs, re, rls, rle, selectDates, selectDateStr, mis, mas;
 //默认日期  配置日期  范围起点  选择日期最小的一个   今天
 let defaultDate
-//当前日历的年月
-let curY;
-let curM;
-let lastY;
-let lastM;
 let switchDirection;
 let rangeLimit = opts.rangeLimit || [];
 let switchWithAnimation = opts.switchWithAnimation === undefined && true || opts.switchWithAnimation;
@@ -428,8 +463,8 @@ const init = function () {
     re = formatDate3(selectDates[1].getFullYear(), selectDates[1].getMonth() + 1, selectDates[1].getDate());
   }
   defaultDate = opts.defaultDate || selectDates[0] || new Date();
-  curY = defaultDate.getFullYear();
-  curM = defaultDate.getMonth() + 1;
+  state.curY = defaultDate.getFullYear();
+  state.curM = defaultDate.getMonth() + 1;
 }
 
 //before-mount在update之后执行
@@ -437,9 +472,11 @@ const init = function () {
 init();
 //})
 tag.on('update', function () {
+  let curY = state.curY;
+  let curM = state.curM;
   if (switchWithAnimation && switchDirection) {
     tag.otherData = {
-      title: lastY + '年' + lastM + '月',
+      title: state.lastY + '年' + state.lastM + '月',
       weekdates: tag.curData.weekdates
     }
   }

@@ -133,7 +133,7 @@ riot.mount(c6, 'riot-calendar',{
             <a title="查看源码" class="view-source-target" href="javascript:;"></a>
           </div>
           <div class="code-source">
-            <textarea class="code" data-line="10">
+            <textarea class="code" data-line="14-21">
 var c15 = document.querySelector('.riot-calendar-1-5');
 var ipt15 = document.querySelector('.ipt-1-5');
 var today =  new Date();
@@ -276,6 +276,43 @@ riot.mount(c5, 'riot-calendar',{
 		ipt5.value = tag.getSelectDates().dateStr.join(',');
 	}
 })
+        		</textarea>
+            </div>
+          </div>
+          <div class="demo-card">
+            <h4>利用<code>switchCalendarByDate</code>跳转到指定的日期</h4>
+            <div class="riot-calendar-2-5"></div>
+            <div class="pure-g result">
+              <p class="pure-u-2-5"><button class="pure-button btn-2-5">返回今天</button></p>
+              <p class="pure-u-1-5">选择值:</p>
+              <p class="pure-u-2-5"><input class="ipt-2-5" type="text" /></p>
+            </div>
+            <div class="demo-desc"><p>利用<code>switchCalendarByDate</code>回调函数，可以跳转到指定日期<p>
+              <ul>
+                <li>1. 函数会返回跳转成功与否的结果 true | false</li>
+                <li>2. 日期如果超出受限范围[<code>rangeLimit</code>/<code>minDate</code>/<code>maxDate</code>]且<code>switchViewOverLimit=true</code>，则跳转不成功，返回<code>false</code></li>
+                <li>3. 如果跳转日期就是当前日历视图也不会跳转，返回<code>false</code></li>
+              </ul>
+            </div>
+            <div class="view-source">
+              <a title="查看源码" class="view-source-target" href="javascript:;"></a>
+            </div>
+            <div class="code-source">
+              <textarea class="code" data-line="4-7">
+var c25 = document.querySelector('.riot-calendar-2-5');
+var ipt25 = document.querySelector('.ipt-2-5');
+var btn25 = document.querySelector('.btn-2-5');
+btn25.onclick = function(e){
+  result = calendar25[0].switchCalendarByDate(new Date(2016,10,1));
+}
+var calendar25 = riot.mount(c25, 'riot-calendar',{
+	onChange: function(riotDate,tag){
+		ipt25.value = riotDate.select && riotDate.dateformat || '';
+	}
+});
+
+
+
         		</textarea>
             </div>
           </div>
