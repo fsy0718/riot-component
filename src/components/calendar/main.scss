@@ -2,6 +2,9 @@
 @import '../common/var';
 :scope/*calendar*/ {
   display: block;
+  riot-date{
+    display: block;
+  }
   .pure-u-1-8 {
     width: 14.285%;
     text-align: center;
@@ -113,12 +116,6 @@
     i {
       font-style: normal;
     }
-
-    // &.disable
-    //   color: $calendar-gray-text
-    span {
-      display: none;
-    }
   }
   .disable{
     color: $calendar-day-disable-color;
@@ -139,10 +136,9 @@
     left: 50%;
     margin-left: -16px;
     @include box-sizing;
-
     line-height: r-size(32);
     display: inline-block;
-    &:before{
+    .riot-date--animation{
       width: 100%;
       height: 100%;
       @include border-radius(50%);
@@ -152,7 +148,6 @@
       top: 0;
       left: 0;
       z-index: -1;
-
       animation-duration: 0.45s;
       animation-fill-mode: forwards;
       //animation-timing-function: cubic-bezier(0.445, 0.05, 0.55, 0.95);
@@ -160,7 +155,7 @@
       will-change: transform, opacity;
     }
     &.riot-calendar-scaleIn{
-      &:before{
+      .riot-date--animation{
         animation-name: riot-calendar-scaleIn;
       }
 
@@ -177,12 +172,10 @@
     &.disable{
       color: $calendar-day-disable-color;
     }
-
-    &:before{
+    .riot-date--animation{
       animation-name: riot-calendar-scaleOut;
     }
   }
-
   .range--area {
     background-color: $calendar-day-high-color;
     .day.enable{

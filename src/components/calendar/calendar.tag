@@ -18,14 +18,18 @@
 			<div if={otherData} class="riot-calendar__body--other">
 				<div class="pure-g" each={weekdates in otherData.weekdates}>
 					<div class="pure-u-1-8 {parseDateBoxClass(date)}" each={date in weekdates}>
-						<div class="day {parseDateClass(date)}" onclick={checkDate}>{date.d}</div>
+						<div class="day {parseDateClass(date)}" onclick={checkDate}>
+							<riot-date date={date}></riot-date>
+						</div>
 					</div>
 				</div>
 			</div>
 			<div class="riot-calendar__body--cur">
 				<div class="pure-g" each={weekdates in curData.weekdates}>
 					<div class="pure-u-1-8 {parseDateBoxClass(date)}" each={date in weekdates}>
-						<div class="day {parseDateClass(date)}" onclick={checkDate}>{date.d}</div>
+						<div class="day {parseDateClass(date)}" onclick={checkDate}>
+							<riot-date date={date}></riot-date>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -37,3 +41,4 @@
     </script>
 	</div>
 </riot-calendar>
+<!-- inject: ./_date.tag -->
