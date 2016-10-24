@@ -4,6 +4,88 @@ riot.tag2('riot-popver', '<yield></yield>', '', '', function (opts) {
   var tag = this;
 });
 
+/**https://github.com/madrobby/zepto/blob/master/src/zepto.js */
+var camelize = function camelize(str) {
+  return str.replace(/-+(.)?/g, function (match, chr) {
+    return chr ? chr.toUpperCase() : '';
+  });
+};
+var dasherize = function dasherize(str) {
+  return str.replace(/::/g, '/').replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2').replace(/([a-z\d])([A-Z])/g, '$1_$2').replace(/_/g, '-').toLowerCase();
+};
+var prefixProps = {
+  animation: 1
+};
+var maybePrefix = function maybePrefix(key, value) {
+  var css = '';
+  var key = dasherize(key);
+  var _key = key.split('-');
+  if (prefixProps[_key[0]]) {
+    css += '-webkit-' + key + ':' + value + ';';
+  }
+  css += key + ':' + value + ';';
+  return css;
+};
+var riotHelper = {
+  $: function $(selector) {
+    var context = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : document;
+
+    return context.querySelector(selector);
+  },
+  addClass: function addClass(dom, className) {
+    var _className = className.split(' ');
+    for (var i = 0, len = _className.length; i < len; i++) {
+      dom.classList.add(_className[i]);
+    }
+  },
+  removeClass: function removeClass(dom, className) {
+    var _className = className.split(' ');
+    for (var i = 0, len = _className.length; i < len; i++) {
+      dom.classList.remove(_className[i]);
+    }
+  },
+  hasClass: function hasClass(dom, className) {
+    return dom.classList.contains(className);
+  },
+  toggleClass: function toggleClass(dom, className) {
+    var _className = className.split(' ');
+    for (var i = 0, len = _className.length; i < len; i++) {
+      dom.classList.toggle(_className[i]);
+    }
+  },
+  css: function css(dom, property, value) {
+    if (arguments.length < 3) {
+      if (typeof property == 'string') {
+        return dom.style[camelize(property)] || getComputedStyle(dom, '').getPropertyValue(property);
+      } else if (isArray(property)) {
+        var props = {};
+        var computedStyle = getComputedStyle(dom, '');
+        property.forEach(function (prop) {
+          props[prop] = dom.style[camelize(prop)] || computedStyle.getPropertyValue(prop);
+        });
+        return props;
+      }
+    }
+    var css = '';
+    if (typeof property == 'string') {
+      if (!value && value !== 0) {
+        dom.style.removeProperty(dasherize(property));
+      } else {
+        css = maybePrefix(property, value);
+      }
+    } else {
+      for (key in property) {
+        if (!property[key] && property[key] !== 0) {
+          this.style.removeProperty(dasherize(key));
+        } else {
+          css += maybePrefix(key, property[key]);
+        }
+      }
+    }
+    return dom.style.cssText += ';' + css;
+  }
+};
+
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
@@ -204,9 +286,12 @@ var set = function set(object, property, value, receiver) {
   return value;
 };
 
-riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calendar__head"> <div class="pure-g control"> <a class="pure-u-1-5 prev {prevMonthDisable && \'disable\'}" href="javascript:;" onclick="{prevMonth}"><i></i></a> <div class="pure-u-3-5 title"> <div if="{otherData}" class="title__other">{otherData.title}</div> <div class="title__cur">{curData.title}</div> </div> <a class="pure-u-1-5 next {nextMonthDisable && \'disable\'}" href="javascript:;" onclick="{nextMonth}"><i></i></a> </div> <div class="pure-g weeks"> <div class="pure-u-1-8" each="{week in weekTitles}">{week}</div> </div> </div> <div class="riot-calendar__body"> <div if="{otherData}" class="riot-calendar__body--other"> <div class="pure-g" each="{weekdates in otherData.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div class="day {parseDateClass(date)}" onclick="{checkDate}">{date.d}</div> </div> </div> </div> <div class="riot-calendar__body--cur"> <div class="pure-g" each="{weekdates in curData.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div class="day {parseDateClass(date)}" onclick="{checkDate}">{date.d}</div> </div> </div> </div> </div> <div class="riot-calendar__foot"></div> </div>', '', '', function (opts) {
-
+riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calendar__head"> <div class="pure-g control"> <a class="pure-u-1-5 prev {prevMonthDisable && \'disable\'}" href="javascript:;" onclick="{prevMonth}"><i></i></a> <div class="pure-u-3-5 title"> <div if="{otherData}" class="title__other">{otherData.title}</div> <div class="title__cur">{curData.title}</div> </div> <a class="pure-u-1-5 next {nextMonthDisable && \'disable\'}" href="javascript:;" onclick="{nextMonth}"><i></i></a> </div> <div class="pure-g weeks"> <div class="pure-u-1-8" each="{week in weekTitles}">{week}</div> </div> </div> <div class="riot-calendar__body"> <div if="{otherData}" class="riot-calendar__body--other"> <div class="pure-g" each="{weekdates in otherData.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div class="day {parseDateClass(date)}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> <div class="riot-calendar__body--cur"> <div class="pure-g" each="{weekdates in curData.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div class="day {parseDateClass(date)}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> </div> <div class="riot-calendar__foot"></div> </div>', '', '', function (opts) {
+  var addClass = riotHelper.addClass;
+  var removeClass = riotHelper.removeClass;
+  var css = riotHelper.css;
   var tag = this;
+  var state = {};
   var firstDay = Number(opts.firstDay) || 0;
 
   var datesOfMonth = [31, null, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -341,9 +426,6 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
           _c = 1;
         }
         var _date = new Date(_y, _m - 1, _d);
-
-        _date._str = formatDate3(_y, _m, _d);
-
         var r = {
           current: _c,
           date: _date,
@@ -352,19 +434,20 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
           d: _d,
           w: _date.getDay(),
           dateformat: formatDate(_y, _m, _d),
-          disable: 0
+          disable: 0,
+          _format: formatDate3(_y, _m, _d)
         };
 
         if (opts.isRange) {
           if (rs) {
-            if (rs === r.date._str) {
+            if (rs === r._format) {
               r.range = -1;
               r.select = 1;
             } else if (re) {
-              if (r.date._str === re) {
+              if (r._format === re) {
                 r.range = 1;
                 r.select = 1;
-              } else if (r.date._str > rs && r.date._str < re) {
+              } else if (r._format > rs && r._format < re) {
                 r.range = 0;
               }
             }
@@ -374,9 +457,9 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
         }
         if (r.current) {
           r.disable = 1;
-        } else if (opts.isRange && rls && rls > r.date._str || rle && rle < r.date._str) {
+        } else if (opts.isRange && rls && rls > r._format || rle && rle < r._format) {
           r.disable = 2;
-        } else if (mis && mis > r.date._str || mas && mas < r.date._str) {
+        } else if (mis && mis > r._format || mas && mas < r._format) {
           r.disable = 3;
         }
         opts.disabledDate && opts.disabledDate(r);
@@ -394,18 +477,33 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
   };
   var changeView = function changeView(direction) {
     switchDirection = direction;
-    lastY = curY;
-    lastM = curM;
-    curM += direction;
+    state.lastY = state.curY;
+    state.lastM = state.curM;
+    state.curM += direction;
 
-    if (curM < 1) {
-      curY--;
-      curM = 12;
+    if (state.curM < 1) {
+      state.curY--;
+      state.curM = 12;
     }
-    if (curM > 12) {
-      curM = 1;
-      curY++;
+    if (state.curM > 12) {
+      state.curM = 1;
+      state.curY++;
     }
+  };
+  var checkDateIsValid = function checkDateIsValid(y, m) {
+    if (opts.switchViewOverLimit) {
+      var firstDateStr = formatDate3(y, m, 1);
+      var lastDateStr = formatDate3(y, m, getDatesInMonth(y, m));
+      if (opts.isRange) {
+        if (rle && firstDateStr >= rle || rls && lastDateStr <= rls) {
+          return false;
+        }
+      }
+      if (mis && lastDateStr <= mis || mas && firstDateStr >= mas) {
+        return false;
+      }
+    }
+    return true;
   };
   tag.prevMonth = function (e) {
     if (tag.prevMonthDisable) {
@@ -426,6 +524,21 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
     if (!e) {
       tag.update();
     }
+  };
+  tag.switchCalendarByDate = function (date) {
+    var y = date.getFullYear();
+    var m = date.getMonth() + 1;
+    if (y === state.curY && m === state.curM) {
+      return false;
+    }
+    var result = checkDateIsValid(y, m);
+    if (result) {
+      switchDirection = y + str2(m) > '' + state.curY + str2(state.curM) ? 1 : -1;
+      state.curY = y;
+      state.curM = m;
+      tag.update();
+    }
+    return result;
   };
 
   tag.getSelectDates = function () {
@@ -519,11 +632,6 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
       mas = void 0;
 
   var defaultDate = void 0;
-
-  var curY = void 0;
-  var curM = void 0;
-  var lastY = void 0;
-  var lastM = void 0;
   var switchDirection = void 0;
   var rangeLimit = opts.rangeLimit || [];
   var switchWithAnimation = opts.switchWithAnimation === undefined && true || opts.switchWithAnimation;
@@ -548,16 +656,18 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
       re = formatDate3(selectDates[1].getFullYear(), selectDates[1].getMonth() + 1, selectDates[1].getDate());
     }
     defaultDate = opts.defaultDate || selectDates[0] || new Date();
-    curY = defaultDate.getFullYear();
-    curM = defaultDate.getMonth() + 1;
+    state.curY = defaultDate.getFullYear();
+    state.curM = defaultDate.getMonth() + 1;
   };
 
   init();
 
   tag.on('update', function () {
+    var curY = state.curY;
+    var curM = state.curM;
     if (switchWithAnimation && switchDirection) {
       tag.otherData = {
-        title: lastY + '年' + lastM + '月',
+        title: state.lastY + '年' + state.lastM + '月',
         weekdates: tag.curData.weekdates
       };
     }
@@ -592,33 +702,25 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
     lastSelectDateStr = selectDateStr.concat();
     if (switchWithAnimation && switchDirection) {
       (function () {
-        var $cur = tag.root.querySelector('.riot-calendar__body--cur');
-        var $curT = tag.root.querySelector('.title__cur');
-        var $other = tag.root.querySelector('.riot-calendar__body--other');
-        var $otherT = tag.root.querySelector('.title__other');
+        var $cur = riotHelper.$('.riot-calendar__body--cur', tag.root);
+        var $curT = riotHelper.$('.title__cur', tag.root);
+        var $other = riotHelper.$('.riot-calendar__body--other', tag.root);
+        var $otherT = riotHelper.$('.title__other', tag.root);
         if (opts.animationTimingFunction) {
-          $cur.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
-          $other.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
-          $cur.style.animationTimingFunction = opts.animationTimingFunction;
-          $other.style.animationTimingFunction = opts.animationTimingFunction;
-          $curT.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
-          $otherT.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
-          $curT.style.animationTimingFunction = opts.animationTimingFunction;
-          $otherT.style.animationTimingFunction = opts.animationTimingFunction;
+          css($cur, 'animationTimingFunction', opts.animationTimingFunction);
+          css($other, 'animationTimingFunction', opts.animationTimingFunction);
+          css($curT, 'animationTimingFunction', opts.animationTimingFunction);
+          css($otherT, 'animationTimingFunction', opts.animationTimingFunction);
         }
         var duration = parseFloat(opts.animationDuration) || 0.45;
         var c1 = void 0;
         var c2 = void 0;
         if (duration !== 0.45) {
           var _duration = '' + duration + 's';
-          $cur.style.webkitAnimationDuration = _duration;
-          $other.style.webkitAnimationDuration = _duration;
-          $cur.style.animationDuration = _duration;
-          $other.style.animationDuration = _duration;
-          $curT.style.webkitAnimationDuration = _duration;
-          $otherT.style.webkitAnimationDuration = _duration;
-          $curT.style.animationDuration = _duration;
-          $otherT.style.animationDuration = _duration;
+          css($cur, 'animationDuration', _duration);
+          css($other, 'animationDuration', _duration);
+          css($curT, 'animationDuration', _duration);
+          css($otherT, 'animationDuration', _duration);
         }
         if (switchDirection === 1) {
           c1 = 'calendar-fadeInRight';
@@ -627,25 +729,17 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
           c1 = 'calendar-fadeInLeft';
           c2 = 'calendar-fadeOutLeft';
         }
-        $cur.classList.add('animation');
-        $cur.classList.add(c1);
-        $other.classList.add('animation');
-        $other.classList.add(c2);
-        $curT.classList.add('animation');
-        $curT.classList.add(c1);
-        $otherT.classList.add('animation');
-        $otherT.classList.add(c2);
+        addClass($cur, 'animation ' + c1);
+        addClass($other, 'animation ' + c2);
+        addClass($curT, 'animation ' + c1);
+        addClass($otherT, 'animation ' + c2);
         clearTimeout(timer);
         timer = setTimeout(function () {
           tag.otherData = null;
-          $other.classList.remove('animation');
-          $other.classList.remove(c2);
-          $cur.classList.remove('animation');
-          $cur.classList.remove(c1);
-          $otherT.classList.remove('animation');
-          $otherT.classList.remove(c2);
-          $curT.classList.remove('animation');
-          $curT.classList.remove(c1);
+          removeClass($cur, 'animation ' + c1);
+          removeClass($other, 'animation ' + c2);
+          removeClass($curT, 'animation ' + c1);
+          removeClass($otherT, 'animation ' + c2);
           clearTimeout(timer);
           switchDirection = undefined;
         }, duration * 1000);
@@ -669,20 +763,20 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
       }
     }
     if (opts.isRange) {
-      if (rs && !re && rs === date.date._str) {
+      if (rs && !re && rs === date._format) {
         selectDates = [];
         selectDateStr = [];
         rs = undefined;
         re = undefined;
-      } else if (!rs || rs && rs > date.date._str || re) {
+      } else if (!rs || rs && rs > date._format || re) {
         selectDates = [date.date];
         selectDateStr = [date.dateformat];
-        rs = date.date._str;
+        rs = date._format;
         re = undefined;
       } else {
         selectDates.push(date.date);
         selectDateStr.push(date.dateformat);
-        re = date.date._str;
+        re = date._format;
       }
     } else {
       if (date.select) {
@@ -701,6 +795,19 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
     }
     curChangeDateStr = date.dateformat;
   };
+});
+riot.tag2('riot-date', '<i class="riot-date--animation" if="{!replaceWithInnerHTML}"></i> <span if="{!replaceWithInnerHTML}">{opts.date.d}</span>', '', '', function (opts) {
+  var tag = this;
+  var _opts = tag.parent.opts;
+  tag.beforeShowDate = _opts.beforeShowDate;
+  var date = opts.date;
+  if (tag.beforeShowDate) {
+    var html = tag.beforeShowDate(date);
+    if (html) {
+      tag.replaceWithInnerHTML = true;
+      tag.root.innerHTML = html;
+    }
+  }
 });
 
 //https://github.com/react-component/util/blob/master/src/Dom/addEventListener.js
@@ -1171,7 +1278,7 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
 
 /**
  * @file riot-component.js |基于riot的组件
- * @version 0.0.2
+ * @version 0.0.3beta1
  * @author fsy0718 <fsy0718@gmail.com>
  * @license MIT
  * @copyright fsy0718 2016

@@ -1,5 +1,7 @@
 [data-is="riot-calendar"] {
   display: block; }
+  [data-is="riot-calendar"] riot-date {
+    display: block; }
   [data-is="riot-calendar"] .pure-u-1-8 {
     width: 14.285%;
     text-align: center; }
@@ -97,8 +99,6 @@
     cursor: default; }
     [data-is="riot-calendar"] .day i {
       font-style: normal; }
-    [data-is="riot-calendar"] .day span {
-      display: none; }
   [data-is="riot-calendar"] .disable {
     color: #c5c5c5; }
   [data-is="riot-calendar"] .enable {
@@ -116,7 +116,7 @@
     box-sizing: border-box;
     line-height: 2rem;
     display: inline-block; }
-    [data-is="riot-calendar"] .choice:before, [data-is="riot-calendar"] .riot-calendar-scaleOut:before {
+    [data-is="riot-calendar"] .choice .riot-date--animation, [data-is="riot-calendar"] .riot-calendar-scaleOut .riot-date--animation {
       width: 100%;
       height: 100%;
       border-radius: 50%;
@@ -133,7 +133,7 @@
       -webkit-animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
       animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
       will-change: transform, opacity; }
-    [data-is="riot-calendar"] .choice.riot-calendar-scaleIn:before, [data-is="riot-calendar"] .riot-calendar-scaleOut.riot-calendar-scaleIn:before {
+    [data-is="riot-calendar"] .choice.riot-calendar-scaleIn .riot-date--animation, [data-is="riot-calendar"] .riot-calendar-scaleOut.riot-calendar-scaleIn .riot-date--animation {
       -webkit-animation-name: riot-calendar-scaleIn;
       animation-name: riot-calendar-scaleIn; }
     [data-is="riot-calendar"] .choice.enable, [data-is="riot-calendar"] .riot-calendar-scaleOut.enable {
@@ -142,7 +142,7 @@
     color: #393836; }
   [data-is="riot-calendar"] .riot-calendar-scaleOut.disable {
     color: #c5c5c5; }
-  [data-is="riot-calendar"] .riot-calendar-scaleOut:before {
+  [data-is="riot-calendar"] .riot-calendar-scaleOut .riot-date--animation {
     -webkit-animation-name: riot-calendar-scaleOut;
     animation-name: riot-calendar-scaleOut; }
   [data-is="riot-calendar"] .range--area {

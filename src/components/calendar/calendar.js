@@ -99,6 +99,10 @@
  * @example
  *  riot.mount('riot-calendar', opts)
  */
+import f from "../common/common";
+const addClass = f.addClass;
+const removeClass = f.removeClass;
+const css = f.css;
 let tag = this;
 let state = {};
 const firstDay = Number(opts.firstDay) || 0;
@@ -235,9 +239,6 @@ const getCalendarViewDate = function (y, m) {
         _c = 1;
       }
       let _date = new Date(_y, _m - 1, _d);
-      //将YMD暂存，进行比较日期
-      _date._str = formatDate3(_y, _m, _d);
-
       let r = {
         current: _c,
         date: _date,
@@ -246,19 +247,20 @@ const getCalendarViewDate = function (y, m) {
         d: _d,
         w: _date.getDay(),
         dateformat: formatDate(_y, _m, _d),
-        disable: 0
+        disable: 0,
+        _format: formatDate3(_y, _m, _d)
       }
       //在范围中
       if (opts.isRange) {
         if (rs) {
-          if (rs === r.date._str) {
+          if (rs === r._format) {
             r.range = -1;
             r.select = 1;
           } else if (re) {
-            if (r.date._str === re) {
+            if (r._format === re) {
               r.range = 1;
               r.select = 1;
-            } else if (r.date._str > rs && r.date._str < re) {
+            } else if (r._format > rs && r._format < re) {
               r.range = 0;
             }
           }
@@ -268,9 +270,9 @@ const getCalendarViewDate = function (y, m) {
       }
       if (r.current) {
         r.disable = 1;
-      } else if (opts.isRange && (rls && rls > r.date._str) || (rle && rle < r.date._str)) {
+      } else if (opts.isRange && (rls && rls > r._format) || (rle && rle < r._format)) {
         r.disable = 2;
-      } else if ((mis && mis > r.date._str) || (mas && mas < r.date._str)) {
+      } else if ((mis && mis > r._format) || (mas && mas < r._format)) {
         r.disable = 3;
       }
       opts.disabledDate && opts.disabledDate(r);
@@ -510,33 +512,25 @@ let timer = null;
 tag.on('updated', function () {
   lastSelectDateStr = selectDateStr.concat();
   if (switchWithAnimation && switchDirection) {
-    let $cur = tag.root.querySelector('.riot-calendar__body--cur');
-    let $curT = tag.root.querySelector('.title__cur');
-    let $other = tag.root.querySelector('.riot-calendar__body--other');
-    let $otherT = tag.root.querySelector('.title__other');
+    let $cur = f.$('.riot-calendar__body--cur', tag.root);
+    let $curT = f.$('.title__cur', tag.root);
+    let $other = f.$('.riot-calendar__body--other', tag.root);
+    let $otherT = f.$('.title__other', tag.root);
     if (opts.animationTimingFunction) {
-      $cur.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
-      $other.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
-      $cur.style.animationTimingFunction = opts.animationTimingFunction;
-      $other.style.animationTimingFunction = opts.animationTimingFunction;
-      $curT.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
-      $otherT.style.webkitAnimationTimingFunction = opts.animationTimingFunction;
-      $curT.style.animationTimingFunction = opts.animationTimingFunction;
-      $otherT.style.animationTimingFunction = opts.animationTimingFunction;
+      css($cur,'animationTimingFunction', opts.animationTimingFunction);
+      css($other,'animationTimingFunction', opts.animationTimingFunction);
+      css($curT,'animationTimingFunction', opts.animationTimingFunction);
+      css($otherT,'animationTimingFunction', opts.animationTimingFunction);
     }
     let duration = parseFloat(opts.animationDuration) || 0.45;
     let c1;
     let c2;
     if (duration !== 0.45) {
       let _duration = '' + duration + 's';
-      $cur.style.webkitAnimationDuration = _duration;
-      $other.style.webkitAnimationDuration = _duration;
-      $cur.style.animationDuration = _duration;
-      $other.style.animationDuration = _duration;
-      $curT.style.webkitAnimationDuration = _duration;
-      $otherT.style.webkitAnimationDuration = _duration;
-      $curT.style.animationDuration = _duration;
-      $otherT.style.animationDuration = _duration;
+      css($cur,'animationDuration', _duration);
+      css($other,'animationDuration', _duration);
+      css($curT,'animationDuration', _duration);
+      css($otherT,'animationDuration', _duration);
     }
     if (switchDirection === 1) {
       c1 = 'calendar-fadeInRight';
@@ -545,25 +539,17 @@ tag.on('updated', function () {
       c1 = 'calendar-fadeInLeft';
       c2 = 'calendar-fadeOutLeft'
     }
-    $cur.classList.add('animation');
-    $cur.classList.add(c1);
-    $other.classList.add('animation');
-    $other.classList.add(c2);
-    $curT.classList.add('animation');
-    $curT.classList.add(c1);
-    $otherT.classList.add('animation');
-    $otherT.classList.add(c2);
+    addClass($cur, 'animation ' + c1);
+    addClass($other, 'animation ' + c2);
+    addClass($curT, 'animation ' + c1);
+    addClass($otherT, 'animation ' + c2);
     clearTimeout(timer);
     timer = setTimeout(function () {
       tag.otherData = null;
-      $other.classList.remove('animation');
-      $other.classList.remove(c2);
-      $cur.classList.remove('animation');
-      $cur.classList.remove(c1);
-      $otherT.classList.remove('animation');
-      $otherT.classList.remove(c2);
-      $curT.classList.remove('animation');
-      $curT.classList.remove(c1);
+      removeClass($cur, 'animation ' + c1);
+      removeClass($other, 'animation ' + c2);
+      removeClass($curT, 'animation ' + c1);
+      removeClass($otherT, 'animation ' + c2);
       clearTimeout(timer);
       switchDirection = undefined;
     }, duration * 1000)
@@ -586,20 +572,20 @@ tag.checkDate = function (e) {
     }
   }
   if (opts.isRange) {
-    if (rs && !re && rs === date.date._str) {
+    if (rs && !re && rs === date._format) {
       selectDates = [];
       selectDateStr = [];
       rs = undefined;
       re = undefined;
-    } else if (!rs || (rs && (rs > date.date._str) || re)) {
+    } else if (!rs || (rs && (rs > date._format) || re)) {
       selectDates = [date.date];
       selectDateStr = [date.dateformat];
-      rs = date.date._str;
+      rs = date._format;
       re = undefined;
     } else {
       selectDates.push(date.date);
       selectDateStr.push(date.dateformat);
-      re = date.date._str;
+      re = date._format;
     }
   } else {
     if (date.select) {
