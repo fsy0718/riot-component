@@ -4,6 +4,7 @@
   display: block;
   riot-date{
     display: block;
+    height: 100%;
   }
   .pure-u-1-8 {
     width: 14.285%;
@@ -107,11 +108,10 @@
     height: 100%;
   }
   
-  .day {
+  .date {
     height: rSize(64);
     line-height: rSize(64);
     text-align: center;
-
     cursor: default;
     i {
       font-style: normal;
@@ -128,57 +128,53 @@
     position: relative;
   }
 
-  .choice,.riot-calendar-scaleOut {
-    width: 32px;
-    height: 32px;
-    position: absolute;
-    z-index: 2;
-    left: 50%;
-    margin-left: -16px;
-    @include box-sizing;
-    line-height: r-size(32);
-    display: inline-block;
-    .riot-date--animation{
-      width: 100%;
-      height: 100%;
-      @include border-radius(50%);
-      content: '';
-      background-color: $main-color;
+  .choice,.change{
+    .date {
+      width: 32px;
+      height: 32px;
       position: absolute;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      animation-duration: 0.45s;
-      animation-fill-mode: forwards;
-      //animation-timing-function: cubic-bezier(0.445, 0.05, 0.55, 0.95);
-      animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
-      will-change: transform, opacity;
-    }
-    &.riot-calendar-scaleIn{
-      .riot-date--animation{
-        animation-name: riot-calendar-scaleIn;
+      z-index: 2;
+      left: 50%;
+      margin-left: -16px;
+      @include box-sizing;
+      line-height: r-size(32);
+      display: inline-block;
+      .riot-date--bg{
+        width: 100%;
+        height: 100%;
+        @include border-radius(50%);
+        content: '';
+        background-color: $main-color;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -1;
+        animation-duration: 0.45s;
+        animation-fill-mode: forwards;
+        //animation-timing-function: cubic-bezier(0.445, 0.05, 0.55, 0.95);
+        animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+        will-change: transform, opacity;
       }
+      &.riot-calendar-in{
+        .riot-date--bg{
+          animation-name: riot-calendar-scaleIn;
+        }
+      }
+      &.riot-calendar-out{
+        .riot-date--bg{
+          animation-name: riot-calendar-scaleOut;
+        }
+      }
+    }
 
-    }
-    &.enable{
-      color: #fff;
-    }
+  }
+  .choice.enable{
+    color: #fff;
   }
   
-  .riot-calendar-scaleOut{
-    &.enable{
-    color: $calendar-day-color;
-    }
-    &.disable{
-      color: $calendar-day-disable-color;
-    }
-    .riot-date--animation{
-      animation-name: riot-calendar-scaleOut;
-    }
-  }
   .range--area {
     background-color: $calendar-day-high-color;
-    .day.enable{
+    .enable .date{
       color: #fff;
     }
   }

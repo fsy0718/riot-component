@@ -13,9 +13,16 @@
     span.date-word{
       font-size: 0.6em;
     }
-    span.date-key-2016-10-1{
-      position: absolute;
+    .riot-calendar .choice .test-before-show-date.date,.riot-calendar .change .test-before-show-date.date{
+      font-size: 0.5rem;
+      letter-spacing: -1px;
+      width: 100%;
+      left: 0;
+      margin-left: 0;
     }
+  .riot-calendar .choice .test-before-show-date.date{
+    color: red;
+  }
   </style>
 </head>
 
@@ -151,7 +158,8 @@ riot.mount(c15, 'riot-calendar',{
     var wordKey = riotDate.y + '-' + riotDate.m + '-' + riotDate.d;
     var word = words[wordKey];
     if(word){
-      return '<i class="riot-date--animation"></i><span class="date-word date-key-' + wordKey + '">' + word + '</span>'
+      return {html:'<span class="date-word date-key-' + wordKey + '">' + word + '</span>',
+      className: 'test-before-show-date'}
     }
 	},
 	onChange: function(date,tag){

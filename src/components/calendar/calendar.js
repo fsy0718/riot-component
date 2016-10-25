@@ -21,13 +21,6 @@
  * @param {number} d 天数
  */
 /**
- * parseDateClass 函数说明
- * @callback parseDateClassCall
- * @param {riot-date} date 当前正在渲染的riot-date对象
- * @returns {string|string[]} 需要被添加类名
- */
-
-/**
  * getSelectDates 函数说明
  * @callback getSelectDatesCall
  * @returns {selectDateObj}
@@ -35,7 +28,7 @@
 /**
  * switchCalendarByDate 函数说明
  * @callback switchCalendarByDateCall
- * @since 0.0.3beta
+ * @since 0.0.3beta1
  * @param {date} 需要跳转的日期
  * @return {boolean} 跳转是否成功，日期如果超出受限范围[rangeLimit/minDate/maxDate]且switchViewOverLimit=true，则跳转不成功，返回false， 如果跳转日期就是当前日历视图也不会跳转，返回false
  */
@@ -43,6 +36,13 @@
  * disabledDate 不可选日期函数说明
  * @callback disabledDateCall
  * @param {riot-date} date 当前正在渲染的riot-date对象
+ */
+/**
+ * beforeShowDate 个性化日期显示
+ * @callback beforeShowDateClass
+ * @since 0.0.3beta1
+ * @param {riot-date} data当前正在渲染的riot-date对象
+ * @return {date-diy} 返回个性化后的html片段及类名，如果为string则为html
  */
 /**
  * 扩展Tag实例
@@ -58,6 +58,12 @@
  * @typedef {object} selectDateObj
  * @property {date[]} dates  被选中排序后的Date数组或空数组
  * @property {string[]} dateStr 被选中排序后并经过opts.dateTimeFormat格式化后的日期字符串或空数组
+ */
+/**
+ * @typedef {(object|string)} date-diy
+ * @property {string} html 个性化的日期html片段
+ * @property {string} className 个性化的日期类名，多个以空格分隔
+ * 
  */
 /**
  * @typedef {object} riot-date
@@ -93,8 +99,8 @@
  * @param {number}    [opts.animationDuration=0.45]       动画待续时间  默认为0.45s
  * @param {onChangeCall}  [opts.onChange]                 日期被点击时的回调函数
  * @param {dateTimeFormatCall} [opts.dateTimeFormat]      自定义日历显示格式
- * @param {parseDateClassCall} [opts.parseDateClass]      自定义日历日期显示的className
  * @param {disabledDateCall}   [opts.disabledDate]    更精细的不可选日期控制函数 @since 0.0.2
+ * @param {beforeShowDateCall} [opts.beforeShowDate]  个性自定义每日显示样式
  * @returns {calendarTag}
  * @example
  *  riot.mount('riot-calendar', opts)
@@ -276,6 +282,27 @@ const getCalendarViewDate = function (y, m) {
         r.disable = 3;
       }
       opts.disabledDate && opts.disabledDate(r);
+      //有当前变化值才会有上次选中值,动画值
+        if(curChangeDateStr){
+          //当前就是变化的日期
+          if(curChangeDateStr === r.dateformat){
+            r._animation = r.select === 1 ? 1 : -1;
+            r._change = 1;
+          }
+          else if(lastSelectDateStr.indexOf(r.dateformat) > -1){
+            if(opts.isRange){
+              if(selectDateStr.length === 1){
+                if(lastSelectDateStr.length === 1 || (lastSelectDateStr.length === 2 && (selectDateStr[0] !== lastSelectDateStr[0] || selectDateStr[0] !== lastSelectDateStr[1]))){
+                  r._animation = -1;
+                  r._change = 1;
+                }
+              }
+            }else if(!opts.isMultiple){
+              r._animation = -1
+              r._change = 1;
+            }
+          }
+        }
       j++;
       wd.push(r);
       viewDates[r.dateformat] = r;
