@@ -289,7 +289,7 @@ var set = function set(object, property, value, receiver) {
   return value;
 };
 
-riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calendar__head"> <div class="pure-g control"> <a class="pure-u-1-5 prev {prevMonthDisable && \'disable\'}" href="javascript:;" onclick="{prevMonth}"><i></i></a> <div class="pure-u-3-5 title"> <div if="{otherData}" class="title__other">{otherData.title}</div> <div class="title__cur">{curData.title}</div> </div> <a class="pure-u-1-5 next {nextMonthDisable && \'disable\'}" href="javascript:;" onclick="{nextMonth}"><i></i></a> </div> <div class="pure-g weeks"> <div class="pure-u-1-8" each="{week in weekTitles}">{week}</div> </div> </div> <div class="riot-calendar__body"> <div if="{otherData}" class="riot-calendar__body--other"> <div class="pure-g" each="{weekdates in otherData.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div class="day {parseDateClass(date)}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> <div class="riot-calendar__body--cur"> <div class="pure-g" each="{weekdates in curData.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div class="day {parseDateClass(date)}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> </div> <div class="riot-calendar__foot"></div> </div>', '', '', function (opts) {
+riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calendar__head"> <div class="pure-g control"> <a class="pure-u-1-5 prev {prevMonthDisable && \'disable\'}" href="javascript:;" onclick="{prevMonth}"><i></i></a> <div class="pure-u-3-5 title"> <div if="{otherData}" class="title__other">{otherData.title}</div> <div class="title__cur">{curData.title}</div> </div> <a class="pure-u-1-5 next {nextMonthDisable && \'disable\'}" href="javascript:;" onclick="{nextMonth}"><i></i></a> </div> <div class="pure-g weeks"> <div class="pure-u-1-8" each="{week in weekTitles}">{week}</div> </div> </div> <div class="riot-calendar__body"> <div if="{otherData}" class="riot-calendar__body--other"> <div class="pure-g" each="{weekdates in otherData.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div class="{date.disable === 0 && \'enable\' || \'disable\'} {date.select === 1 && \'choice\' || \'\'}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> <div class="riot-calendar__body--cur"> <div class="pure-g" each="{weekdates in curData.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div class="{date.disable === 0 && \'enable\' || \'disable\'} {date._change && \'change\'} {date.select === 1 && \'choice\' || \'\'}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> </div> <div class="riot-calendar__foot"></div> </div>', '', '', function (opts) {
   var addClass = riotHelper.addClass;
   var removeClass = riotHelper.removeClass;
   var css = riotHelper.css;
@@ -466,6 +466,26 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
           r.disable = 3;
         }
         opts.disabledDate && opts.disabledDate(r);
+
+        if (curChangeDateStr) {
+
+          if (curChangeDateStr === r.dateformat) {
+            r._animation = r.select === 1 ? 1 : -1;
+            r._change = 1;
+          } else if (lastSelectDateStr.indexOf(r.dateformat) > -1) {
+            if (opts.isRange) {
+              if (selectDateStr.length === 1) {
+                if (lastSelectDateStr.length === 1 || lastSelectDateStr.length === 2 && (selectDateStr[0] !== lastSelectDateStr[0] || selectDateStr[0] !== lastSelectDateStr[1])) {
+                  r._animation = -1;
+                  r._change = 1;
+                }
+              }
+            } else if (!opts.isMultiple) {
+              r._animation = -1;
+              r._change = 1;
+            }
+          }
+        }
         j++;
         wd.push(r);
         viewDates[r.dateformat] = r;
@@ -675,10 +695,6 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
       };
     }
     var _d = getCalendarViewDate(curY, curM);
-
-    if (opts.onChange && curChangeDateStr) {
-      opts.onChange(_d.viewDates[curChangeDateStr], tag);
-    }
     tag.curData = {
       title: curY + '年' + curM + '月',
       weekdates: _d.weekDates,
@@ -750,6 +766,7 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
     }
 
     if (opts.onChange && curChangeDateStr) {
+      opts.onChange(tag.curData.viewdates[curChangeDateStr], tag);
       curChangeDateStr = undefined;
     }
   });
@@ -799,18 +816,24 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
     curChangeDateStr = date.dateformat;
   };
 });
-riot.tag2('riot-date', '<i class="riot-date--animation" if="{!replaceWithInnerHTML}"></i> <span if="{!replaceWithInnerHTML}">{opts.date.d}</span>', '', '', function (opts) {
+riot.tag2('riot-date', '<i class="riot-date--bg" if="{!replaceWithInnerHTML}"></i> <span if="{!replaceWithInnerHTML}">{opts.date.d}</span>', '', 'class="date {className}"', function (opts) {
   var tag = this;
   var _opts = tag.parent.opts;
   tag.beforeShowDate = _opts.beforeShowDate;
   var date = opts.date;
+  var className = date._animation === 1 ? 'riot-calendar-in' : date._animation === -1 ? 'riot-calendar-out' : '';
   if (tag.beforeShowDate) {
     var html = tag.beforeShowDate(date);
     if (html) {
+      if ((typeof html === 'undefined' ? 'undefined' : _typeof(html)) === 'object') {
+        className = className + ' ' + (html.className || '');
+        html = html.html;
+      }
       tag.replaceWithInnerHTML = true;
       tag.root.innerHTML = html;
     }
   }
+  tag.className = className;
 });
 
 //https://github.com/react-component/util/blob/master/src/Dom/addEventListener.js

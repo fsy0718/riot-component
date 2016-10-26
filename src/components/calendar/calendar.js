@@ -510,10 +510,6 @@ tag.on('update', function () {
     }
   }
   let _d = getCalendarViewDate(curY, curM);
-  //在update时，检测是否需要触发onChange事件
-  if (opts.onChange && curChangeDateStr) {
-    opts.onChange(_d.viewDates[curChangeDateStr], tag);
-  }
   tag.curData = {
     title: curY + '年' + curM + '月',
     weekdates: _d.weekDates,
@@ -583,6 +579,7 @@ tag.on('updated', function () {
   }
   //在更新完毕后，需要把tag.curChangeDateStr清除
   if (opts.onChange && curChangeDateStr) {
+    opts.onChange(tag.curData.viewdates[curChangeDateStr], tag);
     curChangeDateStr = undefined;
   }
 })

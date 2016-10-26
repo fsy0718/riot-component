@@ -694,10 +694,6 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
       };
     }
     var _d = getCalendarViewDate(curY, curM);
-
-    if (opts.onChange && curChangeDateStr) {
-      opts.onChange(_d.viewDates[curChangeDateStr], tag);
-    }
     tag.curData = {
       title: curY + '年' + curM + '月',
       weekdates: _d.weekDates,
@@ -769,6 +765,7 @@ riot.tag2('riot-calendar', '<div class="riot-calendar"> <div class="riot-calenda
     }
 
     if (opts.onChange && curChangeDateStr) {
+      opts.onChange(tag.curData.viewdates[curChangeDateStr], tag);
       curChangeDateStr = undefined;
     }
   });
