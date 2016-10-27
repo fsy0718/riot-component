@@ -27,8 +27,8 @@
  */
 /**
  * switchCalendarByDate 函数说明
- * @callback switchCalendarByDateCall
  * @since 0.0.3beta1
+ * @callback switchCalendarByDateCall
  * @param {date} 需要跳转的日期
  * @return {boolean} 跳转是否成功，日期如果超出受限范围[rangeLimit/minDate/maxDate]且switchViewOverLimit=true，则跳转不成功，返回false， 如果跳转日期就是当前日历视图也不会跳转，返回false
  */
@@ -39,10 +39,17 @@
  */
 /**
  * beforeShowDate 个性化日期显示
- * @callback beforeShowDateClass
  * @since 0.0.3beta1
+ * @callback beforeShowDateClass
  * @param {riot-date} data当前正在渲染的riot-date对象
  * @return {date-diy} 返回个性化后的html片段及类名，如果为string则为html
+ */
+/**
+ * onRangeGapInvalid range时选择区间不合minRangeGap与maxRangeGap时回调函数，如果无参数，则默认将rangeEnd变为rangeStart
+ * @since 0.0.3beta1
+ * @callback rangeGapInvalidCall
+ * @param {string} invalidType 非法类型 'min'或'max'
+ * @return {boolean} 是否继续执行将rangeEnd替换成rangeStart
  */
 /**
  * 扩展Tag实例
@@ -89,7 +96,7 @@
  * @param {date[]}    [opts.rangeLimit]                  选择的范围
  * @param {boolean}   [opts.weekMode=false]              是否固定星期 true 固定
  * @param {number}    [opts.firstDay=0]                  每周的第一天
- * @param {boolean}   [opts.isMultiple                   是否为多选
+ * @param {boolean}   [opts.isMultiple]                  是否为多选
  * @param {date[]}    [opts.selectDates]                 选中的日期
  * @param {boolean}   [opts.switchViewByOtherMonth=false] 表示点击其它月份是否切换日历视图
  * @param {boolean}   [opts.switchViewOverLimit=false]   表示超出最小与最大日历是否能切换日历视图
@@ -101,6 +108,9 @@
  * @param {dateTimeFormatCall} [opts.dateTimeFormat]      自定义日历显示格式
  * @param {disabledDateCall}   [opts.disabledDate]    更精细的不可选日期控制函数 @since 0.0.2
  * @param {beforeShowDateCall} [opts.beforeShowDate]  个性自定义每日显示样式
+ * @param {number}        [opts.minRangeGap=1]        range时最小选择区间
+ * @param {number}        [opts.maxRangeGap]          range时最大选择区间
+ * @param {rangeGapInvalidCall} [opts.onRangeGapInvalid] range选择不合minRangeGap与maxRangeGap时回调函数
  * @returns {calendarTag}
  * @example
  *  riot.mount('riot-calendar', opts)
@@ -166,8 +176,21 @@ const getWeeksInYear = function (y, m, d) {
 const getWeekTitles = function () {
   tag.weekTitles = weekTitles.slice(firstDay, 7).concat(weekTitles.slice(0, firstDay));
 }
-const str2 = function (d) {
-  return (d > 9 ? '' : '0') + d;
+const cloneDate = function(date){
+  return new Date(date.getTime());
+};
+const cloneAsDate = function(date){
+  const clonedDate = cloneDate(date);
+  cloneDate.setHours(0,0,0,0);
+  return cloneDate;
+};
+const addDays = function(date, d){
+  const newDate = cloneDate(date);
+  newDate.setDate(date.getDate() + d);
+  return newDate;
+}
+const str2 = function (date) {
+  return (date > 9 ? '' : '0') + date;
 }
 //格式化日期
 const formatDate = function (y, m, d) {
@@ -176,11 +199,11 @@ const formatDate = function (y, m, d) {
   }
   return (y + '-' + str2(m)) + (d ? ('-' + str2(d)) : '');
 }
-const formatDate2 = function (d) {
-  if (typeof d === 'string') {
-    return d;
-  } else if (d) {
-    return formatDate(d.getFullYear(), d.getMonth() + 1, d.getDate())
+const formatDate2 = function (date) {
+  if (typeof date === 'string') {
+    return date;
+  } else if (date) {
+    return formatDate(date.getFullYear(), date.getMonth() + 1, date.getDate())
   }
   return '';
 }
@@ -495,7 +518,6 @@ const init = function () {
   state.curY = defaultDate.getFullYear();
   state.curM = defaultDate.getMonth() + 1;
 }
-
 //before-mount在update之后执行
 //tag.on('before-mount', function(){
 init();
@@ -583,6 +605,35 @@ tag.on('updated', function () {
     curChangeDateStr = undefined;
   }
 })
+
+const setRangeStart = function(date){
+  selectDates = [date.date];
+  selectDateStr = [date.dateformat];
+  rs = date._format;
+  re = undefined;
+}
+
+const checkRangeGapLimit = function(type,date){
+  //如果为1，则不用判断,
+  let rangeEnd = addDays(selectDates[0], opts[type === 'min' ? 'minRangeGap' : 'maxRangeGap'] - 1);//包含起始日期
+  let rangeEndStr = formatDate3(rangeEnd);
+  let diff = rangeEndStr - date._format;
+  var isMin = type === 'min';
+  if(isMin && diff > 0 || !isMin && diff < 0){
+    let continueNext = true;
+    if(opts.onRangeGapInvalid){
+      continueNext = opts.onRangeGapInvalid(type, rangeEnd);
+    }
+    if(continueNext){
+      setRangeStart(date)
+      return 0;
+    }else{
+      return -1;
+    }
+  }
+  return 1;
+}
+
 tag.checkDate = function (e) {
   let date = e.item.date;
   if (date.disable !== 0) {
@@ -596,20 +647,35 @@ tag.checkDate = function (e) {
     }
   }
   if (opts.isRange) {
-    if (rs && !re && rs === date._format) {
+    if (rs && !re && rs === date._format) { 
+      //如果只有rs且点击就是rs，取消选中rs
       selectDates = [];
       selectDateStr = [];
       rs = undefined;
       re = undefined;
     } else if (!rs || (rs && (rs > date._format) || re)) {
-      selectDates = [date.date];
-      selectDateStr = [date.dateformat];
-      rs = date._format;
-      re = undefined;
+      //如果无rs 或 选中日期小于rs 或  已有rs  re 则只有rs
+      setRangeStart(date)
     } else {
-      selectDates.push(date.date);
-      selectDateStr.push(date.dateformat);
-      re = date._format;
+      //选中re,增加minRangeGap与maxRangeGap判断
+      let addEnd1 = 1;
+      let addEnd2 = 1;
+      if(opts.minRangeGap > 1){
+        addEnd1 = checkRangeGapLimit('min', date);
+      }
+      if(opts.maxRangeGap){
+        addEnd2 = checkRangeGapLimit('max', date);
+      }
+      if(addEnd1 > 0 && addEnd2 > 0){
+        selectDates.push(date.date);
+        selectDateStr.push(date.dateformat);
+        re = date._format;
+      }
+      if(addEnd1 < 0 || addEnd2 < 0){
+        e.preventUpdate = true;
+        return
+      }
+
     }
   } else {
     if (date.select) {
