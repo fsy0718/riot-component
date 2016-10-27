@@ -100,7 +100,7 @@
  * @param {date[]}    [opts.selectDates]                 选中的日期
  * @param {boolean}   [opts.switchViewByOtherMonth=false] 表示点击其它月份是否切换日历视图
  * @param {boolean}   [opts.switchViewOverLimit=false]   表示超出最小与最大日历是否能切换日历视图
- * @param {boolean}   [opts.showOtherMonthDate=true]      是否显示其它月的日期
+ * @param {boolean}   [opts.showOtherMonthDates=true]      是否显示其它月的日期
  * @param {boolean}   [opts.switchWithAnimation=true]    切换时是否需要动画
  * @param {string}    [opts.animationTimingFunction=cubic-bezier(0.445, 0.05, 0.55, 0.95)]      动画函数
  * @param {number}    [opts.animationDuration=0.45]       动画待续时间  默认为0.45s
@@ -120,9 +120,9 @@ const addClass = f.addClass;
 const removeClass = f.removeClass;
 const css = f.css;
 let tag = this;
+tag.showOtherMonthDates = opts.showOtherMonthDates !== undefined ? opts.showOtherMonthDates : true;
 let state = {};
 const firstDay = Number(opts.firstDay) || 0;
-
 //一些帮助函数
 //天数
 const datesOfMonth = [31, null, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -176,15 +176,15 @@ const getWeeksInYear = function (y, m, d) {
 const getWeekTitles = function () {
   tag.weekTitles = weekTitles.slice(firstDay, 7).concat(weekTitles.slice(0, firstDay));
 }
-const cloneDate = function(date){
+const cloneDate = function (date) {
   return new Date(date.getTime());
 };
-const cloneAsDate = function(date){
+const cloneAsDate = function (date) {
   const clonedDate = cloneDate(date);
-  cloneDate.setHours(0,0,0,0);
+  cloneDate.setHours(0, 0, 0, 0);
   return cloneDate;
 };
-const addDays = function(date, d){
+const addDays = function (date, d) {
   const newDate = cloneDate(date);
   newDate.setDate(date.getDate() + d);
   return newDate;
@@ -228,6 +228,9 @@ const getCalendarViewDate = function (y, m) {
   let m3 = m;
   let d1 = d;
   let d3 = d;
+  //初始化值
+  rangeEndInOtherMonth = false;
+  rangeStartInOtherMonth = false;
   if (datesInPrevMonth) {
     if (m1 === 1) {
       --y1;
@@ -285,10 +288,16 @@ const getCalendarViewDate = function (y, m) {
           if (rs === r._format) {
             r.range = -1;
             r.select = 1;
+            if(r.current !== 0){
+              rangeStartInOtherMonth = true;
+            }
           } else if (re) {
             if (r._format === re) {
               r.range = 1;
               r.select = 1;
+              if(r.current !== 0){
+                rangeEndInOtherMonth = true;
+              }
             } else if (r._format > rs && r._format < re) {
               r.range = 0;
             }
@@ -306,26 +315,26 @@ const getCalendarViewDate = function (y, m) {
       }
       opts.disabledDate && opts.disabledDate(r);
       //有当前变化值才会有上次选中值,动画值
-        if(curChangeDateStr){
-          //当前就是变化的日期
-          if(curChangeDateStr === r.dateformat){
-            r._animation = r.select === 1 ? 1 : -1;
+      if (curChangeDateStr) {
+        //当前就是变化的日期
+        if (curChangeDateStr === r.dateformat) {
+          r._animation = r.select === 1 ? 1 : -1;
+          r._change = 1;
+        }
+        else if (lastSelectDateStr.indexOf(r.dateformat) > -1) {
+          if (opts.isRange) {
+            if (selectDateStr.length === 1) {
+              if (lastSelectDateStr.length === 1 || (lastSelectDateStr.length === 2 && (selectDateStr[0] !== lastSelectDateStr[0] || selectDateStr[0] !== lastSelectDateStr[1]))) {
+                r._animation = -1;
+                r._change = 1;
+              }
+            }
+          } else if (!opts.isMultiple) {
+            r._animation = -1
             r._change = 1;
           }
-          else if(lastSelectDateStr.indexOf(r.dateformat) > -1){
-            if(opts.isRange){
-              if(selectDateStr.length === 1){
-                if(lastSelectDateStr.length === 1 || (lastSelectDateStr.length === 2 && (selectDateStr[0] !== lastSelectDateStr[0] || selectDateStr[0] !== lastSelectDateStr[1]))){
-                  r._animation = -1;
-                  r._change = 1;
-                }
-              }
-            }else if(!opts.isMultiple){
-              r._animation = -1
-              r._change = 1;
-            }
-          }
         }
+      }
       j++;
       wd.push(r);
       viewDates[r.dateformat] = r;
@@ -353,16 +362,16 @@ const changeView = function (direction) {
     state.curY++;
   }
 }
-const checkDateIsValid = function(y,m){
+const checkDateIsValid = function (y, m) {
   if (opts.switchViewOverLimit) {
     let firstDateStr = formatDate3(y, m, 1);
     let lastDateStr = formatDate3(y, m, getDatesInMonth(y, m));
-    if(opts.isRange){
-      if(rle && firstDateStr >= rle || rls && lastDateStr <= rls){
+    if (opts.isRange) {
+      if (rle && firstDateStr >= rle || rls && lastDateStr <= rls) {
         return false
       }
     }
-    if(mis && lastDateStr <= mis || mas && firstDateStr >= mas){
+    if (mis && lastDateStr <= mis || mas && firstDateStr >= mas) {
       return false;
     }
   }
@@ -377,7 +386,6 @@ tag.prevMonth = function (e) {
   if (!e) {
     tag.update();
   }
-
 }
 tag.nextMonth = function (e) {
   if (tag.nextMonthDisable) {
@@ -389,14 +397,14 @@ tag.nextMonth = function (e) {
     tag.update();
   }
 }
-tag.switchCalendarByDate = function(date){
+tag.switchCalendarByDate = function (date) {
   let y = date.getFullYear();
   let m = date.getMonth() + 1;
-  if(y === state.curY && m === state.curM){
+  if (y === state.curY && m === state.curM) {
     return false;
   }
-  let result = checkDateIsValid(y,m);
-  if(result){
+  let result = checkDateIsValid(y, m);
+  if (result) {
     switchDirection = (y + str2(m)) > ('' + state.curY + str2(state.curM)) ? 1 : -1;
     state.curY = y;
     state.curM = m;
@@ -414,10 +422,10 @@ tag.getSelectDates = function () {
   selectDates = selectDates.filter(function (d) {
     var s = formatDate3(d);
     if (opts.isRange && ((rls && rls > s) || (rle && rle < s))) {
-      console.warn('riot-calendr实例类名为%s的value中%s由于不符合rangeLimit条件而被移除',opts.class || 'riot-calendar',d)
+      console.warn('riot-calendr实例类名为%s的value中%s由于不符合rangeLimit条件而被移除', opts.class || 'riot-calendar', d)
       return false
     } else if ((mis && mis > s) || (mas && mas < s)) {
-      console.warn('riot-calendr实例类名为%s的value中%s由于不符合minDate与maxDate条件而被移除',opts.class || 'riot-calendar',d)
+      console.warn('riot-calendr实例类名为%s的value中%s由于不符合minDate与maxDate条件而被移除', opts.class || 'riot-calendar', d)
       return false;
     }
     return true;
@@ -428,7 +436,6 @@ tag.getSelectDates = function () {
   selectDates.forEach(function (d) {
     selectDateStr.push(formatDate2(d));
   })
-
   if (opts.isRange) {
     selectDates = selectDates.slice(0, 2);
     selectDateStr = selectDateStr.slice(0, 2);
@@ -447,41 +454,19 @@ tag.parseDateBoxClass = function (date) {
   }
   let classNames = [];
   if (tag.opts.isRange && rs && re) {
-    if (date.range === -1) {
-      classNames.push('range--start');
-    }
-    if (date.range === 1) {
-      classNames.push('range--end');
-    }
-    if (date.range === 0) {
-      classNames.push('range--area');
-    }
-  }
-  return classNames.join(' ')
-}
-tag.parseDateClass = function (date) {
-  if (!date) {
-    return '';
-  }
-  let classNames = [];
-  //是否可用
-  classNames.push(date.disable === 0 ? 'enable' : 'disable');
-  date.select === 1 && classNames.push('choice');
-  //有当前变化值才会有上次选中值
-  if(curChangeDateStr){
-    //当前就是变化的日期
-    if(curChangeDateStr === date.dateformat){
-      classNames.push(date.select === 1 ? 'riot-calendar-scaleIn' : 'riot-calendar-scaleOut');
-    }
-    else if(lastSelectDateStr.indexOf(date.dateformat) > -1){
-      if(opts.isRange){
-        if(selectDateStr.length === 1){
-          if(lastSelectDateStr.length === 1 || (lastSelectDateStr.length === 2 && (selectDateStr[0] !== lastSelectDateStr[0] || selectDateStr[0] !== lastSelectDateStr[1]))){
-            classNames.push('riot-calendar-scaleOut');
-          }
-        }
-      }else if(!opts.isMultiple){
-        classNames.push('riot-calendar-scaleOut');
+    date.range === 0 && classNames.push('range--area');
+    if (tag.showOtherMonthDates) {
+      date.range === -1 && classNames.push('range--start');
+      date.range === 1 && classNames.push('range--end');
+    }else{
+      if((date.current === -1 && rangeStartInOtherMonth) || (date.current === 1 && rangeEndInOtherMonth)){
+        classNames.push('range--area');
+      }
+      if(!rangeStartInOtherMonth && date.range === -1){
+        classNames.push('range--start');
+      }
+      if(!rangeEndInOtherMonth && date.range === 1){
+        classNames.push('range--end');
       }
     }
   }
@@ -497,6 +482,9 @@ let switchWithAnimation = opts.switchWithAnimation === undefined && true || opts
 //curChangeDateStr，lastSelectDates 两个用处，一、记录用户当前点击日期，二、用于触发被选中日期的动画,
 let curChangeDateStr = undefined;
 let lastSelectDateStr = [];
+//记录range是否在其它月中
+let rangeStartInOtherMonth = false;
+let rangeEndInOtherMonth = false;
 const init = function () {
   rls = formatDate3(rangeLimit[0]);
   rle = formatDate3(rangeLimit[1]);
@@ -562,20 +550,20 @@ tag.on('updated', function () {
     let $other = f.$('.riot-calendar__body--other', tag.root);
     let $otherT = f.$('.title__other', tag.root);
     if (opts.animationTimingFunction) {
-      css($cur,'animationTimingFunction', opts.animationTimingFunction);
-      css($other,'animationTimingFunction', opts.animationTimingFunction);
-      css($curT,'animationTimingFunction', opts.animationTimingFunction);
-      css($otherT,'animationTimingFunction', opts.animationTimingFunction);
+      css($cur, 'animationTimingFunction', opts.animationTimingFunction);
+      css($other, 'animationTimingFunction', opts.animationTimingFunction);
+      css($curT, 'animationTimingFunction', opts.animationTimingFunction);
+      css($otherT, 'animationTimingFunction', opts.animationTimingFunction);
     }
     let duration = parseFloat(opts.animationDuration) || 0.45;
     let c1;
     let c2;
     if (duration !== 0.45) {
       let _duration = '' + duration + 's';
-      css($cur,'animationDuration', _duration);
-      css($other,'animationDuration', _duration);
-      css($curT,'animationDuration', _duration);
-      css($otherT,'animationDuration', _duration);
+      css($cur, 'animationDuration', _duration);
+      css($other, 'animationDuration', _duration);
+      css($curT, 'animationDuration', _duration);
+      css($otherT, 'animationDuration', _duration);
     }
     if (switchDirection === 1) {
       c1 = 'calendar-fadeInRight';
@@ -606,34 +594,33 @@ tag.on('updated', function () {
   }
 })
 
-const setRangeStart = function(date){
+const setRangeStart = function (date) {
   selectDates = [date.date];
   selectDateStr = [date.dateformat];
   rs = date._format;
   re = undefined;
 }
 
-const checkRangeGapLimit = function(type,date){
+const checkRangeGapLimit = function (type, date) {
   //如果为1，则不用判断,
   let rangeEnd = addDays(selectDates[0], opts[type === 'min' ? 'minRangeGap' : 'maxRangeGap'] - 1);//包含起始日期
   let rangeEndStr = formatDate3(rangeEnd);
   let diff = rangeEndStr - date._format;
   var isMin = type === 'min';
-  if(isMin && diff > 0 || !isMin && diff < 0){
+  if (isMin && diff > 0 || !isMin && diff < 0) {
     let continueNext = true;
-    if(opts.onRangeGapInvalid){
+    if (opts.onRangeGapInvalid) {
       continueNext = opts.onRangeGapInvalid(type, rangeEnd);
     }
-    if(continueNext){
+    if (continueNext) {
       setRangeStart(date)
       return 0;
-    }else{
+    } else {
       return -1;
     }
   }
   return 1;
 }
-
 tag.checkDate = function (e) {
   let date = e.item.date;
   if (date.disable !== 0) {
@@ -647,7 +634,7 @@ tag.checkDate = function (e) {
     }
   }
   if (opts.isRange) {
-    if (rs && !re && rs === date._format) { 
+    if (rs && !re && rs === date._format) {
       //如果只有rs且点击就是rs，取消选中rs
       selectDates = [];
       selectDateStr = [];
@@ -660,18 +647,18 @@ tag.checkDate = function (e) {
       //选中re,增加minRangeGap与maxRangeGap判断
       let addEnd1 = 1;
       let addEnd2 = 1;
-      if(opts.minRangeGap > 1){
+      if (opts.minRangeGap > 1) {
         addEnd1 = checkRangeGapLimit('min', date);
       }
-      if(opts.maxRangeGap){
+      if (opts.maxRangeGap) {
         addEnd2 = checkRangeGapLimit('max', date);
       }
-      if(addEnd1 > 0 && addEnd2 > 0){
+      if (addEnd1 > 0 && addEnd2 > 0) {
         selectDates.push(date.date);
         selectDateStr.push(date.dateformat);
         re = date._format;
       }
-      if(addEnd1 < 0 || addEnd2 < 0){
+      if (addEnd1 < 0 || addEnd2 < 0) {
         e.preventUpdate = true;
         return
       }

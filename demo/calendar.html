@@ -65,7 +65,7 @@ riot.mount(c3, 'riot-calendar',{
 	dateTimeFormat: function(y, m, d){
 		return '' + y + '年' + m + '月' + d + '日';
 	},
-	selectDates:[new Date(2016,8,28), new Date(2016,9,25)],
+	selectDates:[new Date(2016,9,10), new Date(2016,9,25)],
 	onChange: function(date,tag){
 		ipt3.value = tag.getSelectDates().dateStr.join(' - ')
 	}

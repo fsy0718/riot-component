@@ -10,8 +10,11 @@ if (tag.beforeShowDate) {
       className = className + ' ' + (html.className || '')
       html = html.html;
     }
-    tag.replaceWithInnerHTML = true;
-    tag.root.innerHTML = html;
+    if(typeof html === 'string'){
+      tag.replaceWithInnerHTML = true;
+      tag.root.innerHTML = html;
+    }
+
   }
 }
 tag.className = className;
