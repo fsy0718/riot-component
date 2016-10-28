@@ -6,6 +6,69 @@
     display: block;
     height: 100%;
   }
+  .riot-calendar{
+    &__box{
+      position: relative;
+      .prev,.next{
+        width: 20%;
+        position: absolute;
+        top: 0;
+        height: rSize(26*2);
+        line-height: 2;
+        i{
+          position: absolute;
+          width: rSize(16);
+          height: rSize(16);
+          top: 50%;
+          left: 50%;
+          margin-top: -1 * rSize(8);
+          margin-left: -1 * rSize(8);
+          border: {
+            top: none;
+            right: none;
+            left: 2px solid $main-color;
+            bottom: 2px solid $main-color;
+          }
+        }
+        &.disable i{
+          border-left-color: $calendar-disable-arrow-color;
+          border-bottom-color: $calendar-disable-arrow-color;
+        }
+      }
+      .prev{
+        left: 0;
+        i{
+          transform: rotate(45deg);
+        }
+
+      }
+      .next{
+        right: 0;
+        i {
+          transform: rotate(-135deg);
+        }
+
+      }
+    }
+    &--multiple{
+      &:before,&:after{
+        content: '';
+        display: table;
+      }
+      &:after{
+        clear: both;
+      }
+      .riot-calendar__items{
+        float: left;
+      }
+      &-i2{
+        .riot-calendar__items{
+          width: 50%
+        }
+      }
+    }
+  }
+
   .pure-u-1-8 {
     width: 14.285%;
     text-align: center;
@@ -27,45 +90,15 @@
       z-index: 2;
     } 
   }
-  .control{
+  .title{
     text-align: center;
-    .title{
-      color: $darkblack;
-      font-size: rSize(26);
-      line-height: 2;
-      position: relative;
-      height: rSize(26*2);
-      overflow: hidden;
-    }
-    .prev,.next{
-      position: relative;
-      i{
-        position: absolute;
-        width: rSize(16);
-        height: rSize(16);
-        top: 50%;
-        left: 50%;
-        margin-top: -1 * rSize(8);
-        margin-left: -1 * rSize(8);
-        border: {
-          top: none;
-          right: none;
-          left: 2px solid $main-color;
-          bottom: 2px solid $main-color;
-        }
-      }
-      &.disable i{
-        border-left-color: $calendar-disable-arrow-color;
-        border-bottom-color: $calendar-disable-arrow-color;
-      }
-    }
-    .prev i{
-      transform: rotate(45deg);
-    }
-    .next i{
-      transform: rotate(-135deg);
-    }
-    margin-bottom: rSize(16);
+    color: $darkblack;
+    font-size: rSize(26);
+    line-height: 2;
+    position: relative;
+    height: rSize(26*2);
+    overflow: hidden;
+    margin: 0 20% rSize(16) 20%;
   }
   .riot-calendar__body{
     padding: rSize(13) 0;

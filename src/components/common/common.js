@@ -1,4 +1,4 @@
-/**https://github.com/madrobby/zepto/blob/master/src/zepto.js */
+/*https://github.com/madrobby/zepto/blob/master/src/zepto.js */
 var camelize = function(str){ return str.replace(/-+(.)?/g, function(match, chr){ return chr ? chr.toUpperCase() : '' }) };
 var dasherize = function(str) {
     return str.replace(/::/g, '/')

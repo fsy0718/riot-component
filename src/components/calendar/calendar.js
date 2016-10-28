@@ -34,6 +34,7 @@
  */
 /**
  * disabledDate 不可选日期函数说明
+ * @since 0.0.2
  * @callback disabledDateCall
  * @param {riot-date} date 当前正在渲染的riot-date对象
  */
@@ -100,17 +101,18 @@
  * @param {date[]}    [opts.selectDates]                 选中的日期
  * @param {boolean}   [opts.switchViewByOtherMonth=false] 表示点击其它月份是否切换日历视图
  * @param {boolean}   [opts.switchViewOverLimit=false]   表示超出最小与最大日历是否能切换日历视图
- * @param {boolean}   [opts.showOtherMonthDates=true]      是否显示其它月的日期
+ * @param {boolean}   [opts.showOtherMonthDates=true]      是否显示其它月的日期 @since 0.0.3beta1
  * @param {boolean}   [opts.switchWithAnimation=true]    切换时是否需要动画
  * @param {string}    [opts.animationTimingFunction=cubic-bezier(0.445, 0.05, 0.55, 0.95)]      动画函数
  * @param {number}    [opts.animationDuration=0.45]       动画待续时间  默认为0.45s
  * @param {onChangeCall}  [opts.onChange]                 日期被点击时的回调函数
  * @param {dateTimeFormatCall} [opts.dateTimeFormat]      自定义日历显示格式
- * @param {disabledDateCall}   [opts.disabledDate]    更精细的不可选日期控制函数 @since 0.0.2
+ * @param {disabledDateCall}   [opts.disabledDate]    更精细的不可选日期控制函数
  * @param {beforeShowDateCall} [opts.beforeShowDate]  个性自定义每日显示样式
- * @param {number}        [opts.minRangeGap=1]        range时最小选择区间
+ * @param {number}        [opts.minRangeGap]        range时最小选择区间
  * @param {number}        [opts.maxRangeGap]          range时最大选择区间
  * @param {rangeGapInvalidCall} [opts.onRangeGapInvalid] range选择不合minRangeGap与maxRangeGap时回调函数
+ * @param {(number|number[])} [opts.numberOfMonths]   设置一次显示几个月  number 一行显示的月份数  number[] 显示的行数与列数
  * @returns {calendarTag}
  * @example
  *  riot.mount('riot-calendar', opts)
@@ -347,6 +349,32 @@ const getCalendarViewDate = function (y, m) {
     viewDates: viewDates
   }
 }
+const getViewItems = function(y,m){
+  state.viewItems = [{y: y, m: m}]
+  if(opts.numberOfMonths){
+    let num;
+    if(typeof opts.numberOfMonths === 'number'){
+      num = opts.numberOfMonths;
+    }else if(Object.prototype.toString.call(opts.numberOfMonths) === 'object Array'){
+      num = (Number(opts.numberOfMonths[0]) || 0) * Number(opts.numberOfMonths[1] || 0);
+    }
+    if(num > 1){
+      let i = 0;
+      while(i < num){
+        ++m;
+        if(m > 12){
+          m = 1;
+          y += 1;
+        }
+        state.viewItems.push({
+          y: y,
+          m: m
+        });
+        i++;
+      }
+    }
+  }
+}
 const changeView = function (direction) {
   switchDirection = direction;
   state.lastY = state.curY;
@@ -503,6 +531,7 @@ const init = function () {
     re = formatDate3(selectDates[1].getFullYear(), selectDates[1].getMonth() + 1, selectDates[1].getDate());
   }
   defaultDate = opts.defaultDate || selectDates[0] || new Date();
+
   state.curY = defaultDate.getFullYear();
   state.curM = defaultDate.getMonth() + 1;
 }
@@ -516,15 +545,16 @@ tag.on('update', function () {
   if (switchWithAnimation && switchDirection) {
     tag.otherData = {
       title: state.lastY + '年' + state.lastM + '月',
-      weekdates: tag.curData.weekdates
+      weekdates: tag.viewDatas.weekdates
     }
   }
   let _d = getCalendarViewDate(curY, curM);
-  tag.curData = {
+  
+  tag.viewDatas = [{
     title: curY + '年' + curM + '月',
     weekdates: _d.weekDates,
     viewdates: _d.viewDates
-  }
+  }]
   if (opts.switchViewOverLimit) {
     let firstDateStr = formatDate3(curY, curM, 1);
     let lastDateStr = formatDate3(curY, curM, getDatesInMonth(curY, curM));
@@ -589,7 +619,7 @@ tag.on('updated', function () {
   }
   //在更新完毕后，需要把tag.curChangeDateStr清除
   if (opts.onChange && curChangeDateStr) {
-    opts.onChange(tag.curData.viewdates[curChangeDateStr], tag);
+    opts.onChange(tag.viewDatas.viewdates[curChangeDateStr], tag);
     curChangeDateStr = undefined;
   }
 })

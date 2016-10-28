@@ -22,7 +22,6 @@
         <div class="demo-card">
           <h4>基本的riot-calendar弹框</h4>
           <div class="pure-u-g popver">
-            <input type="input" class="pop-ipt-1-1" />
             <div class="popver-calendar">
               <div class="riot-calendar-1-1"></div>
             </div>
@@ -61,16 +60,16 @@
     var calIpt = document.querySelector('.pop-ipt-1-1');
     var i = 0;
     var tag;
-    calIpt.onclick = function(e){
-      tag = riot.mount(document.querySelector('.riot-calendar-1-1'), 'riot-calendar', {
-        onChange: function(date){
-          if(date.select){
-            tag.unmount(true)
-          }
-        }
-      })[0];
 
-    }
+    tag = riot.mount(document.querySelector('.riot-calendar-1-1'), 'riot-calendar', {
+      onChange: function(date){
+        if(date.select){
+          tag.unmount(true)
+        }
+      },
+      numberOfMonths: 2
+    })[0];
+
   </script>
   <script src="./common.js"></script>
 </body>
