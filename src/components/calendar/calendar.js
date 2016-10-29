@@ -122,8 +122,23 @@ const addClass = f.addClass;
 const removeClass = f.removeClass;
 const css = f.css;
 let tag = this;
-tag.showOtherMonthDates = opts.showOtherMonthDates !== undefined ? opts.showOtherMonthDates : true;
 let state = {};
+tag.showOtherMonthDates = f.isUndefined(opts.showOtherMonthDates) ? true : opts.showOtherMonthDates;
+if(opts.numberOfMonths){
+  let col;
+  let row;
+  if(f.isNumber(opts.numberOfMonths)){
+    col = parseInt(opts.numberOfMonths);
+    row = 1;
+  }
+  if(f.isArray(opts.numberOfMonths)){
+    row = parseInt(opts.numberOfMonths[0]) || 0;
+    col = parseInt(opts.numberOfMonths[1]) || 0;
+  }
+  state.numberOfMonths = row * col;
+  tag.mutipleItems = col;
+}
+
 const firstDay = Number(opts.firstDay) || 0;
 //一些帮助函数
 //天数
@@ -216,7 +231,7 @@ const formatDate3 = function (y, m, d) {
   }
   return '' + y + str2(m) + str2(d);
 };
-const getCalendarViewDate = function (y, m) {
+const getViewDates = function (y, m, order) {
   let weekNum = opts.weekMode ? 6 : getWeeksInMonth(y, m);
   let datesInPrevMonth = getDatesInPrevMonth(y, m);
   let datesInNextMonth = getDatesInNextMonth(y, m);
@@ -282,7 +297,8 @@ const getCalendarViewDate = function (y, m) {
         w: _date.getDay(),
         dateformat: formatDate(_y, _m, _d),
         disable: 0,
-        _format: formatDate3(_y, _m, _d)
+        _format: formatDate3(_y, _m, _d),
+        _i: order
       }
       //在范围中
       if (opts.isRange) {
@@ -351,44 +367,39 @@ const getCalendarViewDate = function (y, m) {
 }
 const getViewItems = function(y,m){
   state.viewItems = [{y: y, m: m}]
-  if(opts.numberOfMonths){
-    let num;
-    if(typeof opts.numberOfMonths === 'number'){
-      num = opts.numberOfMonths;
-    }else if(Object.prototype.toString.call(opts.numberOfMonths) === 'object Array'){
-      num = (Number(opts.numberOfMonths[0]) || 0) * Number(opts.numberOfMonths[1] || 0);
-    }
-    if(num > 1){
-      let i = 0;
-      while(i < num){
-        ++m;
-        if(m > 12){
-          m = 1;
-          y += 1;
-        }
-        state.viewItems.push({
-          y: y,
-          m: m
-        });
-        i++;
+  if(state.numberOfMonths > 1){
+    let i = 1;
+    while(i < state.numberOfMonths){
+      ++m;
+      if(m > 12){
+        m = 1;
+        y += 1;
       }
+      state.viewItems.push({
+        y: y,
+        m: m
+      });
+      i++;
     }
   }
 }
 const changeView = function (direction) {
-  switchDirection = direction;
-  state.lastY = state.curY;
-  state.lastM = state.curM;
-  state.curM += direction;
+  let isPrev = direction === -1;
+  let item = state.viewItems[isPrev ? 0 : state.viewItems.length - 1]
 
-  if (state.curM < 1) {
-    state.curY--;
-    state.curM = 12;
+  let m = item.m + direction;
+  let y = item.y;
+  if(isPrev && m < 1){
+    --y;
+    m =  12;
+  }else if(m > 12){
+    ++y;
+    m = 1;
   }
-  if (state.curM > 12) {
-    state.curM = 1;
-    state.curY++;
-  }
+  //清除不显示的月份并更新新的月份
+  state.viewItems[isPrev ? 'pop' : 'shift']();
+  state.viewItems[isPrev ? 'unshift' : 'push']({y:y,m:m})
+  state.viewDirection = direction;
 }
 const checkDateIsValid = function (y, m) {
   if (opts.switchViewOverLimit) {
@@ -433,7 +444,7 @@ tag.switchCalendarByDate = function (date) {
   }
   let result = checkDateIsValid(y, m);
   if (result) {
-    switchDirection = (y + str2(m)) > ('' + state.curY + str2(state.curM)) ? 1 : -1;
+    state.viewDirection = (y + str2(m)) > ('' + state.curY + str2(state.curM)) ? 1 : -1;
     state.curY = y;
     state.curM = m;
     tag.update()
@@ -504,12 +515,12 @@ tag.parseDateBoxClass = function (date) {
 let rs, re, rls, rle, selectDates, selectDateStr, mis, mas;
 //默认日期  配置日期  范围起点  选择日期最小的一个   今天
 let defaultDate
-let switchDirection;
 let rangeLimit = opts.rangeLimit || [];
 let switchWithAnimation = opts.switchWithAnimation === undefined && true || opts.switchWithAnimation;
 //curChangeDateStr，lastSelectDates 两个用处，一、记录用户当前点击日期，二、用于触发被选中日期的动画,
 let curChangeDateStr = undefined;
 let lastSelectDateStr = [];
+let lastChangeViewItemsOrder = undefined;
 //记录range是否在其它月中
 let rangeStartInOtherMonth = false;
 let rangeEndInOtherMonth = false;
@@ -531,33 +542,32 @@ const init = function () {
     re = formatDate3(selectDates[1].getFullYear(), selectDates[1].getMonth() + 1, selectDates[1].getDate());
   }
   defaultDate = opts.defaultDate || selectDates[0] || new Date();
-
-  state.curY = defaultDate.getFullYear();
-  state.curM = defaultDate.getMonth() + 1;
+  getViewItems(defaultDate.getFullYear(), defaultDate.getMonth() + 1);
 }
 //before-mount在update之后执行
 //tag.on('before-mount', function(){
 init();
 //})
 tag.on('update', function () {
-  let curY = state.curY;
-  let curM = state.curM;
-  if (switchWithAnimation && switchDirection) {
-    tag.otherData = {
-      title: state.lastY + '年' + state.lastM + '月',
-      weekdates: tag.viewDatas.weekdates
-    }
+  if (switchWithAnimation && state.viewDirection) {
+    tag.otherViewDatas = tag.viewDatas
   }
-  let _d = getCalendarViewDate(curY, curM);
-  
-  tag.viewDatas = [{
-    title: curY + '年' + curM + '月',
-    weekdates: _d.weekDates,
-    viewdates: _d.viewDates
-  }]
+  tag.viewDatas = [];
+  state.viewItems.forEach(function(item,index){
+    let _d = getViewDates(item.y, item.m, index);
+    tag.viewDatas.push({
+      title: item.y + '年' + item.m + '月',
+      weekdates: _d.weekDates,
+      viewdates: _d.viewDates,
+    });
+  })
   if (opts.switchViewOverLimit) {
-    let firstDateStr = formatDate3(curY, curM, 1);
-    let lastDateStr = formatDate3(curY, curM, getDatesInMonth(curY, curM));
+    let y1 = state.viewItems[0].y;
+    let m1 = state.viewItems[0].m;
+    let y2 = state.viewItems[state.viewItems.length - 1].y;
+    let m2 = state.viewItems[state.viewItems.length - 1].y;
+    let firstDateStr = formatDate3(y1, m1, 1);
+    let lastDateStr = formatDate3(y2, m2, getDatesInMonth(y2, m2));
     if (opts.isRange && firstDateStr <= rls || firstDateStr <= mis) {
       tag.prevMonthDisable = true;
     } else {
@@ -573,12 +583,13 @@ tag.on('update', function () {
 let timer = null;
 //动画
 tag.on('updated', function () {
+  //增加多个的animation
   lastSelectDateStr = selectDateStr.concat();
-  if (switchWithAnimation && switchDirection) {
-    let $cur = f.$('.riot-calendar__body--cur', tag.root);
-    let $curT = f.$('.title__cur', tag.root);
-    let $other = f.$('.riot-calendar__body--other', tag.root);
-    let $otherT = f.$('.title__other', tag.root);
+  if (switchWithAnimation && state.viewDirection) {
+    let $cur = f.$$('.riot-calendar__body--cur', tag.root);
+    let $curT = f.$$('.title__cur', tag.root);
+    let $other = f.$$('.riot-calendar__body--other', tag.root);
+    let $otherT = f.$$('.title__other', tag.root);
     if (opts.animationTimingFunction) {
       css($cur, 'animationTimingFunction', opts.animationTimingFunction);
       css($other, 'animationTimingFunction', opts.animationTimingFunction);
@@ -595,7 +606,7 @@ tag.on('updated', function () {
       css($curT, 'animationDuration', _duration);
       css($otherT, 'animationDuration', _duration);
     }
-    if (switchDirection === 1) {
+    if (state.viewDirection === 1) {
       c1 = 'calendar-fadeInRight';
       c2 = 'calendar-fadeOutRight';
     } else {
@@ -614,23 +625,22 @@ tag.on('updated', function () {
       removeClass($curT, 'animation ' + c1);
       removeClass($otherT, 'animation ' + c2);
       clearTimeout(timer);
-      switchDirection = undefined;
+      delete state.viewDirection;
     }, duration * 1000)
   }
   //在更新完毕后，需要把tag.curChangeDateStr清除
   if (opts.onChange && curChangeDateStr) {
-    opts.onChange(tag.viewDatas.viewdates[curChangeDateStr], tag);
+    opts.onChange(tag.viewDatas[lastChangeViewItemsOrder].viewdates[curChangeDateStr], tag);
     curChangeDateStr = undefined;
+    lastChangeViewItemsOrder = undefined;
   }
 })
-
 const setRangeStart = function (date) {
   selectDates = [date.date];
   selectDateStr = [date.dateformat];
   rs = date._format;
   re = undefined;
 }
-
 const checkRangeGapLimit = function (type, date) {
   //如果为1，则不用判断,
   let rangeEnd = addDays(selectDates[0], opts[type === 'min' ? 'minRangeGap' : 'maxRangeGap'] - 1);//包含起始日期
@@ -710,4 +720,5 @@ tag.checkDate = function (e) {
     }
   }
   curChangeDateStr = date.dateformat;
+  lastChangeViewItemsOrder = date._i;
 }

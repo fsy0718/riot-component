@@ -28,32 +28,30 @@ var maybePrefix = function maybePrefix(key, value) {
   css += key + ':' + value + ';';
   return css;
 };
+var _slice = [].slice;
+var _toString = Object.prototype.toString;
+var each = function each(dom, callback) {
+  var args = [].slice.call(arguments, 2);
+  if (dom.length > 1) {
+    var _dom = _slice.call(dom);
+    _dom.forEach(function (d) {
+      callback.apply(d, args);
+    });
+  } else {
+    callback.apply(dom[0], args);
+  }
+};
+
 var riotHelper = {
   $: function $(selector) {
     var context = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : document;
 
     return context.querySelector(selector);
   },
-  addClass: function addClass(dom, className) {
-    var _className = className.split(' ');
-    for (var i = 0, len = _className.length; i < len; i++) {
-      dom.classList.add(_className[i]);
-    }
-  },
-  removeClass: function removeClass(dom, className) {
-    var _className = className.split(' ');
-    for (var i = 0, len = _className.length; i < len; i++) {
-      dom.classList.remove(_className[i]);
-    }
-  },
-  hasClass: function hasClass(dom, className) {
-    return dom.classList.contains(className);
-  },
-  toggleClass: function toggleClass(dom, className) {
-    var _className = className.split(' ');
-    for (var i = 0, len = _className.length; i < len; i++) {
-      dom.classList.toggle(_className[i]);
-    }
+  $$: function $$(selector) {
+    var context = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : document;
+
+    return context.querySelectorAll(selector);
   },
   css: function css(dom, property, value) {
     if (arguments.length < 3) {
@@ -87,6 +85,23 @@ var riotHelper = {
     return dom.style.cssText += ';' + css;
   }
 };
+var methods = ['add', 'remove', 'toggle', 'contains'];
+['addClass', 'removeClass', 'toggleClass', 'hasClass'].forEach(function (method, index) {
+  riotHelper[method] = function (dom, className) {
+    var call = function call(_className) {
+      _className = _className.split(' ');
+      for (var i = 0, len = _className.length; i < len; i++) {
+        this.classList[methods[index]](_className[i]);
+      }
+    };
+    return each(dom, call, className);
+  };
+});
+['String', 'Number', 'Object', 'Date', 'Array', 'Function', 'Undefined'].forEach(function (method) {
+  riotHelper['is' + method] = function (param) {
+    return _toString.call(param) === '[object ' + method + ']';
+  };
+});
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
@@ -288,13 +303,28 @@ var set = function set(object, property, value, receiver) {
   return value;
 };
 
-riot.tag2('riot-calendar', '<div class="riot-calendar__box {(viewDatas.length > 1 && \'riot-calendar--multiple riot-calendar--multiple-i\' + viewDatas.length)}"> <a class="prev {prevMonthDisable && \'disable\'}" href="javascript:;" onclick="{prevMonth}"><i></i></a> <a class="next {nextMonthDisable && \'disable\'}" href="javascript:;" onclick="{nextMonth}"><i></i></a> <div class="riot-calendar__items" each="{items, index in viewDatas}"> <div class="riot-calendar__head"> <div class="control title"> <div if="{otherData}" class="title__other">{otherData.title}</div> <div class="title__cur">{items.title}</div> </div> <div class="pure-g weeks"> <div class="pure-u-1-8" each="{week in weekTitles}">{week}</div> </div> </div> <div class="riot-calendar__body"> <div if="{otherData}" class="riot-calendar__body--other"> <div class="pure-g" each="{weekdates in otherData.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div class="{date.disable === 0 && \'enable\' || \'disable\'} {date.select === 1 && \'choice\' || \'\'}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> <div class="riot-calendar__body--cur"> <div class="pure-g" each="{weekdates in items.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div if="{showOtherMonthDates || (showOtherMonthDates===f alse && date.current===0 )}" class="{date.disable === 0 && \'enable\' || \'disable\'} {date._change && \'change\'} {date.select === 1 && \'choice\' || \'\'}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> </div> </div> </div> <div class="riot-calendar__foot"></div>', 'riot-calendar,[riot-tag="riot-calendar"],[data-is="riot-calendar"]{ display: block; } riot-calendar riot-date,[riot-tag="riot-calendar"] riot-date,[data-is="riot-calendar"] riot-date{ display: block; height: 100%; } riot-calendar .riot-calendar__box,[riot-tag="riot-calendar"] .riot-calendar__box,[data-is="riot-calendar"] .riot-calendar__box{ position: relative; } riot-calendar .riot-calendar__box .prev,[riot-tag="riot-calendar"] .riot-calendar__box .prev,[data-is="riot-calendar"] .riot-calendar__box .prev,riot-calendar .riot-calendar__box .next,[riot-tag="riot-calendar"] .riot-calendar__box .next,[data-is="riot-calendar"] .riot-calendar__box .next{ width: 20%; position: absolute; top: 0; height: 1.625rem; line-height: 2; } riot-calendar .riot-calendar__box .prev i,[riot-tag="riot-calendar"] .riot-calendar__box .prev i,[data-is="riot-calendar"] .riot-calendar__box .prev i,riot-calendar .riot-calendar__box .next i,[riot-tag="riot-calendar"] .riot-calendar__box .next i,[data-is="riot-calendar"] .riot-calendar__box .next i{ position: absolute; width: 0.5rem; height: 0.5rem; top: 50%; left: 50%; margin-top: -0.25rem; margin-left: -0.25rem; border-top: none; border-right: none; border-left: 2px solid #7f1f59; border-bottom: 2px solid #7f1f59; } riot-calendar .riot-calendar__box .prev.disable i,[riot-tag="riot-calendar"] .riot-calendar__box .prev.disable i,[data-is="riot-calendar"] .riot-calendar__box .prev.disable i,riot-calendar .riot-calendar__box .next.disable i,[riot-tag="riot-calendar"] .riot-calendar__box .next.disable i,[data-is="riot-calendar"] .riot-calendar__box .next.disable i{ border-left-color: #b8b8b8; border-bottom-color: #b8b8b8; } riot-calendar .riot-calendar__box .prev,[riot-tag="riot-calendar"] .riot-calendar__box .prev,[data-is="riot-calendar"] .riot-calendar__box .prev{ left: 0; } riot-calendar .riot-calendar__box .prev i,[riot-tag="riot-calendar"] .riot-calendar__box .prev i,[data-is="riot-calendar"] .riot-calendar__box .prev i{ -webkit-transform: rotate(45deg); transform: rotate(45deg); } riot-calendar .riot-calendar__box .next,[riot-tag="riot-calendar"] .riot-calendar__box .next,[data-is="riot-calendar"] .riot-calendar__box .next{ right: 0; } riot-calendar .riot-calendar__box .next i,[riot-tag="riot-calendar"] .riot-calendar__box .next i,[data-is="riot-calendar"] .riot-calendar__box .next i{ -webkit-transform: rotate(-135deg); transform: rotate(-135deg); } riot-calendar .riot-calendar--multiple:before,[riot-tag="riot-calendar"] .riot-calendar--multiple:before,[data-is="riot-calendar"] .riot-calendar--multiple:before,riot-calendar .riot-calendar--multiple:after,[riot-tag="riot-calendar"] .riot-calendar--multiple:after,[data-is="riot-calendar"] .riot-calendar--multiple:after{ content: \'\'; display: table; } riot-calendar .riot-calendar--multiple:after,[riot-tag="riot-calendar"] .riot-calendar--multiple:after,[data-is="riot-calendar"] .riot-calendar--multiple:after{ clear: both; } riot-calendar .riot-calendar--multiple .riot-calendar__items,[riot-tag="riot-calendar"] .riot-calendar--multiple .riot-calendar__items,[data-is="riot-calendar"] .riot-calendar--multiple .riot-calendar__items{ float: left; } riot-calendar .riot-calendar--multiple-i2 .riot-calendar__items,[riot-tag="riot-calendar"] .riot-calendar--multiple-i2 .riot-calendar__items,[data-is="riot-calendar"] .riot-calendar--multiple-i2 .riot-calendar__items{ width: 50%; } riot-calendar .pure-u-1-8,[riot-tag="riot-calendar"] .pure-u-1-8,[data-is="riot-calendar"] .pure-u-1-8{ width: 14.285%; text-align: center; } riot-calendar .weeks,[riot-tag="riot-calendar"] .weeks,[data-is="riot-calendar"] .weeks{ font-size: 0.8125rem; color: #333333; line-height: 2.1875rem; position: relative; } riot-calendar .weeks:after,[riot-tag="riot-calendar"] .weeks:after,[data-is="riot-calendar"] .weeks:after{ position: absolute; content: \'\'; width: 90.625%; height: 1px; background-color: #efebea; opacity: 0.97; left: 4.6875%; bottom: 0; z-index: 2; } riot-calendar .title,[riot-tag="riot-calendar"] .title,[data-is="riot-calendar"] .title{ text-align: center; color: #333333; font-size: 0.8125rem; line-height: 2; position: relative; height: 1.625rem; overflow: hidden; margin: 0 20% 0.5rem 20%; } riot-calendar .riot-calendar__body,[riot-tag="riot-calendar"] .riot-calendar__body,[data-is="riot-calendar"] .riot-calendar__body{ padding: 0.40625rem 0; position: relative; min-height: 15rem; overflow: hidden; } riot-calendar .riot-calendar__body .pure-g,[riot-tag="riot-calendar"] .riot-calendar__body .pure-g,[data-is="riot-calendar"] .riot-calendar__body .pure-g{ margin-top: 0.5rem; } riot-calendar .riot-calendar__body--cur,[riot-tag="riot-calendar"] .riot-calendar__body--cur,[data-is="riot-calendar"] .riot-calendar__body--cur,riot-calendar .riot-calendar__body--other,[riot-tag="riot-calendar"] .riot-calendar__body--other,[data-is="riot-calendar"] .riot-calendar__body--other,riot-calendar .title__cur,[riot-tag="riot-calendar"] .title__cur,[data-is="riot-calendar"] .title__cur,riot-calendar .title__other,[riot-tag="riot-calendar"] .title__other,[data-is="riot-calendar"] .title__other{ will-change: transform, opacity; position: absolute; width: 100%; left: 0; background: #fff; -webkit-animation-play-state: paused; animation-play-state: paused; -webkit-animation-duration: 0.45s; animation-duration: 0.45s; -webkit-animation-fill-mode: forwards; animation-fill-mode: forwards; -webkit-animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1); animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1); } riot-calendar .riot-calendar__body--cur.calendar-fadeInLeft,[riot-tag="riot-calendar"] .riot-calendar__body--cur.calendar-fadeInLeft,[data-is="riot-calendar"] .riot-calendar__body--cur.calendar-fadeInLeft,riot-calendar .riot-calendar__body--other.calendar-fadeInLeft,[riot-tag="riot-calendar"] .riot-calendar__body--other.calendar-fadeInLeft,[data-is="riot-calendar"] .riot-calendar__body--other.calendar-fadeInLeft,riot-calendar .title__cur.calendar-fadeInLeft,[riot-tag="riot-calendar"] .title__cur.calendar-fadeInLeft,[data-is="riot-calendar"] .title__cur.calendar-fadeInLeft,riot-calendar .title__other.calendar-fadeInLeft,[riot-tag="riot-calendar"] .title__other.calendar-fadeInLeft,[data-is="riot-calendar"] .title__other.calendar-fadeInLeft{ -webkit-animation-name: riot-calendar-fadeInFromLeft; animation-name: riot-calendar-fadeInFromLeft; } riot-calendar .riot-calendar__body--cur.calendar-fadeInRight,[riot-tag="riot-calendar"] .riot-calendar__body--cur.calendar-fadeInRight,[data-is="riot-calendar"] .riot-calendar__body--cur.calendar-fadeInRight,riot-calendar .riot-calendar__body--other.calendar-fadeInRight,[riot-tag="riot-calendar"] .riot-calendar__body--other.calendar-fadeInRight,[data-is="riot-calendar"] .riot-calendar__body--other.calendar-fadeInRight,riot-calendar .title__cur.calendar-fadeInRight,[riot-tag="riot-calendar"] .title__cur.calendar-fadeInRight,[data-is="riot-calendar"] .title__cur.calendar-fadeInRight,riot-calendar .title__other.calendar-fadeInRight,[riot-tag="riot-calendar"] .title__other.calendar-fadeInRight,[data-is="riot-calendar"] .title__other.calendar-fadeInRight{ -webkit-animation-name: riot-calendar-fadeInFromRight; animation-name: riot-calendar-fadeInFromRight; } riot-calendar .riot-calendar__body--cur.calendar-fadeOutLeft,[riot-tag="riot-calendar"] .riot-calendar__body--cur.calendar-fadeOutLeft,[data-is="riot-calendar"] .riot-calendar__body--cur.calendar-fadeOutLeft,riot-calendar .riot-calendar__body--other.calendar-fadeOutLeft,[riot-tag="riot-calendar"] .riot-calendar__body--other.calendar-fadeOutLeft,[data-is="riot-calendar"] .riot-calendar__body--other.calendar-fadeOutLeft,riot-calendar .title__cur.calendar-fadeOutLeft,[riot-tag="riot-calendar"] .title__cur.calendar-fadeOutLeft,[data-is="riot-calendar"] .title__cur.calendar-fadeOutLeft,riot-calendar .title__other.calendar-fadeOutLeft,[riot-tag="riot-calendar"] .title__other.calendar-fadeOutLeft,[data-is="riot-calendar"] .title__other.calendar-fadeOutLeft{ -webkit-animation-name: riot-calendar-fadeOutFromLeft; animation-name: riot-calendar-fadeOutFromLeft; } riot-calendar .riot-calendar__body--cur.calendar-fadeOutRight,[riot-tag="riot-calendar"] .riot-calendar__body--cur.calendar-fadeOutRight,[data-is="riot-calendar"] .riot-calendar__body--cur.calendar-fadeOutRight,riot-calendar .riot-calendar__body--other.calendar-fadeOutRight,[riot-tag="riot-calendar"] .riot-calendar__body--other.calendar-fadeOutRight,[data-is="riot-calendar"] .riot-calendar__body--other.calendar-fadeOutRight,riot-calendar .title__cur.calendar-fadeOutRight,[riot-tag="riot-calendar"] .title__cur.calendar-fadeOutRight,[data-is="riot-calendar"] .title__cur.calendar-fadeOutRight,riot-calendar .title__other.calendar-fadeOutRight,[riot-tag="riot-calendar"] .title__other.calendar-fadeOutRight,[data-is="riot-calendar"] .title__other.calendar-fadeOutRight{ -webkit-animation-name: riot-calendar-fadeOutFromRight; animation-name: riot-calendar-fadeOutFromRight; } riot-calendar .riot-calendar__body--cur.animation,[riot-tag="riot-calendar"] .riot-calendar__body--cur.animation,[data-is="riot-calendar"] .riot-calendar__body--cur.animation,riot-calendar .riot-calendar__body--other.animation,[riot-tag="riot-calendar"] .riot-calendar__body--other.animation,[data-is="riot-calendar"] .riot-calendar__body--other.animation,riot-calendar .title__cur.animation,[riot-tag="riot-calendar"] .title__cur.animation,[data-is="riot-calendar"] .title__cur.animation,riot-calendar .title__other.animation,[riot-tag="riot-calendar"] .title__other.animation,[data-is="riot-calendar"] .title__other.animation{ -webkit-animation-play-state: running; animation-play-state: running; } riot-calendar .riot-calendar__body--cur,[riot-tag="riot-calendar"] .riot-calendar__body--cur,[data-is="riot-calendar"] .riot-calendar__body--cur,riot-calendar .riot-calendar__body--other,[riot-tag="riot-calendar"] .riot-calendar__body--other,[data-is="riot-calendar"] .riot-calendar__body--other{ top: 0.25rem; height: 100%; } riot-calendar .date,[riot-tag="riot-calendar"] .date,[data-is="riot-calendar"] .date{ height: 2rem; line-height: 2rem; text-align: center; cursor: default; } riot-calendar .date i,[riot-tag="riot-calendar"] .date i,[data-is="riot-calendar"] .date i{ font-style: normal; } riot-calendar .disable,[riot-tag="riot-calendar"] .disable,[data-is="riot-calendar"] .disable{ color: #c5c5c5; } riot-calendar .enable,[riot-tag="riot-calendar"] .enable,[data-is="riot-calendar"] .enable{ color: #393836; } riot-calendar .pure-u-1-8,[riot-tag="riot-calendar"] .pure-u-1-8,[data-is="riot-calendar"] .pure-u-1-8{ position: relative; } riot-calendar .choice .date,[riot-tag="riot-calendar"] .choice .date,[data-is="riot-calendar"] .choice .date,riot-calendar .change .date,[riot-tag="riot-calendar"] .change .date,[data-is="riot-calendar"] .change .date{ width: 32px; height: 32px; position: absolute; z-index: 2; left: 50%; margin-left: -16px; -ms-box-sizing: border-box; box-sizing: border-box; line-height: 2rem; display: inline-block; } riot-calendar .choice .date .riot-date--bg,[riot-tag="riot-calendar"] .choice .date .riot-date--bg,[data-is="riot-calendar"] .choice .date .riot-date--bg,riot-calendar .change .date .riot-date--bg,[riot-tag="riot-calendar"] .change .date .riot-date--bg,[data-is="riot-calendar"] .change .date .riot-date--bg{ width: 100%; height: 100%; border-radius: 50%; content: \'\'; background-color: #7f1f59; position: absolute; top: 0; left: 0; z-index: -1; -webkit-animation-duration: 0.45s; animation-duration: 0.45s; -webkit-animation-fill-mode: forwards; animation-fill-mode: forwards; -webkit-animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1); animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1); will-change: transform, opacity; } riot-calendar .choice .date.riot-calendar-in .riot-date--bg,[riot-tag="riot-calendar"] .choice .date.riot-calendar-in .riot-date--bg,[data-is="riot-calendar"] .choice .date.riot-calendar-in .riot-date--bg,riot-calendar .change .date.riot-calendar-in .riot-date--bg,[riot-tag="riot-calendar"] .change .date.riot-calendar-in .riot-date--bg,[data-is="riot-calendar"] .change .date.riot-calendar-in .riot-date--bg{ -webkit-animation-name: riot-calendar-scaleIn; animation-name: riot-calendar-scaleIn; } riot-calendar .choice .date.riot-calendar-out .riot-date--bg,[riot-tag="riot-calendar"] .choice .date.riot-calendar-out .riot-date--bg,[data-is="riot-calendar"] .choice .date.riot-calendar-out .riot-date--bg,riot-calendar .change .date.riot-calendar-out .riot-date--bg,[riot-tag="riot-calendar"] .change .date.riot-calendar-out .riot-date--bg,[data-is="riot-calendar"] .change .date.riot-calendar-out .riot-date--bg{ -webkit-animation-name: riot-calendar-scaleOut; animation-name: riot-calendar-scaleOut; } riot-calendar .choice.enable,[riot-tag="riot-calendar"] .choice.enable,[data-is="riot-calendar"] .choice.enable{ color: #fff; } riot-calendar .range--area,[riot-tag="riot-calendar"] .range--area,[data-is="riot-calendar"] .range--area{ background-color: #eee2e9; } riot-calendar .range--area .enable .date,[riot-tag="riot-calendar"] .range--area .enable .date,[data-is="riot-calendar"] .range--area .enable .date{ color: #fff; } riot-calendar .checkoutrange,[riot-tag="riot-calendar"] .checkoutrange,[data-is="riot-calendar"] .checkoutrange{ font-weight: bold; } riot-calendar .range--start:before,[riot-tag="riot-calendar"] .range--start:before,[data-is="riot-calendar"] .range--start:before,riot-calendar .range--end:before,[riot-tag="riot-calendar"] .range--end:before,[data-is="riot-calendar"] .range--end:before{ width: 50%; height: 100%; position: absolute; top: 0; left: 50%; background-color: #eee2e9; content: ""; } riot-calendar .range--end:before,[riot-tag="riot-calendar"] .range--end:before,[data-is="riot-calendar"] .range--end:before{ left: 0; } @-webkit-keyframes riot-calendar-fadeInFromLeft { 0% { -webkit-transform: translateX(-100%); transform: translateX(-100%); opacity: 0; } 100% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } } @keyframes riot-calendar-fadeInFromLeft { 0% { -webkit-transform: translateX(-100%); transform: translateX(-100%); opacity: 0; } 100% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } } @-webkit-keyframes riot-calendar-fadeOutFromLeft { 0% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } 100% { -webkit-transform: translateX(100%); transform: translateX(100%); opacity: 0; } } @keyframes riot-calendar-fadeOutFromLeft { 0% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } 100% { -webkit-transform: translateX(100%); transform: translateX(100%); opacity: 0; } } @-webkit-keyframes riot-calendar-fadeInFromRight { 0% { -webkit-transform: translateX(100%); transform: translateX(100%); opacity: 0; } 100% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } } @keyframes riot-calendar-fadeInFromRight { 0% { -webkit-transform: translateX(100%); transform: translateX(100%); opacity: 0; } 100% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } } @-webkit-keyframes riot-calendar-fadeOutFromRight { 0% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } 100% { -webkit-transform: translateX(-100%); transform: translateX(-100%); opacity: 1; } } @keyframes riot-calendar-fadeOutFromRight { 0% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } 100% { -webkit-transform: translateX(-100%); transform: translateX(-100%); opacity: 1; } } @-webkit-keyframes riot-calendar-scaleIn { 0% { -webkit-transform: scale(0); transform: scale(0); opacity: 0; } 100% { -webkit-transform: scale(1); transform: scale(1); opacith: 1; } } @keyframes riot-calendar-scaleIn { 0% { -webkit-transform: scale(0); transform: scale(0); opacity: 0; } 100% { -webkit-transform: scale(1); transform: scale(1); opacith: 1; } } @-webkit-keyframes riot-calendar-scaleOut { 0% { -webkit-transform: scale(1); transform: scale(1); opacity: 1; } 100% { -webkit-transform: scale(0); transform: scale(0); opacity: 0; } } @keyframes riot-calendar-scaleOut { 0% { -webkit-transform: scale(1); transform: scale(1); opacity: 1; } 100% { -webkit-transform: scale(0); transform: scale(0); opacity: 0; } }', '', function (opts) {
+riot.tag2('riot-calendar', '<div class="riot-calendar__box {(mutipleItems > 1 && \'riot-calendar--multiple riot-calendar--multiple-i\' + mutipleItems)}"> <a class="prev {prevMonthDisable && \'disable\'}" href="javascript:;" onclick="{prevMonth}"><i></i></a> <a class="next {nextMonthDisable && \'disable\'}" href="javascript:;" onclick="{nextMonth}"><i></i></a> <div class="riot-calendar__items" each="{items, index in viewDatas}"> <div class="riot-calendar__head"> <div class="control title"> <div if="{otherViewDatas}" class="title__other">{otherViewDatas[index].title}</div> <div class="title__cur">{items.title}</div> </div> <div class="pure-g weeks"> <div class="pure-u-1-8" each="{week in weekTitles}">{week}</div> </div> </div> <div class="riot-calendar__body"> <div if="{otherViewDatas}" class="riot-calendar__body--other"> <div class="pure-g" each="{weekdates in otherViewDatas[index].weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div class="{date.disable === 0 && \'enable\' || \'disable\'} {date.select === 1 && \'choice\' || \'\'}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> <div class="riot-calendar__body--cur"> <div class="pure-g" each="{weekdates in items.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div if="{showOtherMonthDates || (showOtherMonthDates===false && date.current===0 )}" class="{date.disable === 0 && \'enable\' || \'disable\'} {date._change && \'change\'} {date.select === 1 && \'choice\' || \'\'}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> </div> </div> </div> <div class="riot-calendar__foot"></div>', 'riot-calendar,[riot-tag="riot-calendar"],[data-is="riot-calendar"]{ display: block; } riot-calendar riot-date,[riot-tag="riot-calendar"] riot-date,[data-is="riot-calendar"] riot-date{ display: block; height: 100%; } riot-calendar .riot-calendar__box,[riot-tag="riot-calendar"] .riot-calendar__box,[data-is="riot-calendar"] .riot-calendar__box{ position: relative; } riot-calendar .riot-calendar__box .prev,[riot-tag="riot-calendar"] .riot-calendar__box .prev,[data-is="riot-calendar"] .riot-calendar__box .prev,riot-calendar .riot-calendar__box .next,[riot-tag="riot-calendar"] .riot-calendar__box .next,[data-is="riot-calendar"] .riot-calendar__box .next{ width: 20%; position: absolute; top: 0; height: 1.625rem; line-height: 2; z-index: 2; } riot-calendar .riot-calendar__box .prev i,[riot-tag="riot-calendar"] .riot-calendar__box .prev i,[data-is="riot-calendar"] .riot-calendar__box .prev i,riot-calendar .riot-calendar__box .next i,[riot-tag="riot-calendar"] .riot-calendar__box .next i,[data-is="riot-calendar"] .riot-calendar__box .next i{ position: absolute; width: 0.5rem; height: 0.5rem; top: 50%; left: 50%; margin-top: -0.40625rem; margin-left: -0.25rem; border-top: none; border-right: none; border-left: 2px solid #7f1f59; border-bottom: 2px solid #7f1f59; } riot-calendar .riot-calendar__box .prev.disable i,[riot-tag="riot-calendar"] .riot-calendar__box .prev.disable i,[data-is="riot-calendar"] .riot-calendar__box .prev.disable i,riot-calendar .riot-calendar__box .next.disable i,[riot-tag="riot-calendar"] .riot-calendar__box .next.disable i,[data-is="riot-calendar"] .riot-calendar__box .next.disable i{ border-left-color: #b8b8b8; border-bottom-color: #b8b8b8; } riot-calendar .riot-calendar__box .prev,[riot-tag="riot-calendar"] .riot-calendar__box .prev,[data-is="riot-calendar"] .riot-calendar__box .prev{ left: 0; } riot-calendar .riot-calendar__box .prev i,[riot-tag="riot-calendar"] .riot-calendar__box .prev i,[data-is="riot-calendar"] .riot-calendar__box .prev i{ -webkit-transform: rotate(45deg); transform: rotate(45deg); } riot-calendar .riot-calendar__box .next,[riot-tag="riot-calendar"] .riot-calendar__box .next,[data-is="riot-calendar"] .riot-calendar__box .next{ right: 0; } riot-calendar .riot-calendar__box .next i,[riot-tag="riot-calendar"] .riot-calendar__box .next i,[data-is="riot-calendar"] .riot-calendar__box .next i{ -webkit-transform: rotate(-135deg); transform: rotate(-135deg); } riot-calendar .riot-calendar--multiple:before,[riot-tag="riot-calendar"] .riot-calendar--multiple:before,[data-is="riot-calendar"] .riot-calendar--multiple:before,riot-calendar .riot-calendar--multiple:after,[riot-tag="riot-calendar"] .riot-calendar--multiple:after,[data-is="riot-calendar"] .riot-calendar--multiple:after{ content: \'\'; display: table; } riot-calendar .riot-calendar--multiple:after,[riot-tag="riot-calendar"] .riot-calendar--multiple:after,[data-is="riot-calendar"] .riot-calendar--multiple:after{ clear: both; } riot-calendar .riot-calendar--multiple .riot-calendar__items,[riot-tag="riot-calendar"] .riot-calendar--multiple .riot-calendar__items,[data-is="riot-calendar"] .riot-calendar--multiple .riot-calendar__items{ float: left; } riot-calendar .riot-calendar--multiple .prev,[riot-tag="riot-calendar"] .riot-calendar--multiple .prev,[data-is="riot-calendar"] .riot-calendar--multiple .prev,riot-calendar .riot-calendar--multiple .next,[riot-tag="riot-calendar"] .riot-calendar--multiple .next,[data-is="riot-calendar"] .riot-calendar--multiple .next{ width: 15%; } riot-calendar .riot-calendar--multiple-i2 .riot-calendar__items,[riot-tag="riot-calendar"] .riot-calendar--multiple-i2 .riot-calendar__items,[data-is="riot-calendar"] .riot-calendar--multiple-i2 .riot-calendar__items{ width: 50%; } riot-calendar .riot-calendar--multiple-i3 .riot-calendar__items,[riot-tag="riot-calendar"] .riot-calendar--multiple-i3 .riot-calendar__items,[data-is="riot-calendar"] .riot-calendar--multiple-i3 .riot-calendar__items{ width: 33.33333%; } riot-calendar .riot-calendar--multiple-i4 .riot-calendar__items,[riot-tag="riot-calendar"] .riot-calendar--multiple-i4 .riot-calendar__items,[data-is="riot-calendar"] .riot-calendar--multiple-i4 .riot-calendar__items{ width: 25%; } riot-calendar .riot-calendar--multiple-i5 .riot-calendar__items,[riot-tag="riot-calendar"] .riot-calendar--multiple-i5 .riot-calendar__items,[data-is="riot-calendar"] .riot-calendar--multiple-i5 .riot-calendar__items{ width: 20%; } riot-calendar .riot-calendar--multiple-i6 .riot-calendar__items,[riot-tag="riot-calendar"] .riot-calendar--multiple-i6 .riot-calendar__items,[data-is="riot-calendar"] .riot-calendar--multiple-i6 .riot-calendar__items{ width: 16.66667%; } riot-calendar .pure-u-1-8,[riot-tag="riot-calendar"] .pure-u-1-8,[data-is="riot-calendar"] .pure-u-1-8{ width: 14.285%; text-align: center; } riot-calendar .weeks,[riot-tag="riot-calendar"] .weeks,[data-is="riot-calendar"] .weeks{ font-size: 0.8125rem; color: #333333; line-height: 2.1875rem; position: relative; } riot-calendar .weeks:after,[riot-tag="riot-calendar"] .weeks:after,[data-is="riot-calendar"] .weeks:after{ position: absolute; content: \'\'; width: 90.625%; height: 1px; background-color: #efebea; opacity: 0.97; left: 4.6875%; bottom: 0; z-index: 2; } riot-calendar .title,[riot-tag="riot-calendar"] .title,[data-is="riot-calendar"] .title{ text-align: center; color: #333333; font-size: 0.8125rem; line-height: 2; position: relative; height: 1.625rem; overflow: hidden; margin: 0 20% 0.5rem 20%; } riot-calendar .riot-calendar__body,[riot-tag="riot-calendar"] .riot-calendar__body,[data-is="riot-calendar"] .riot-calendar__body{ padding: 0.40625rem 0; position: relative; min-height: 15rem; overflow: hidden; } riot-calendar .riot-calendar__body .pure-g,[riot-tag="riot-calendar"] .riot-calendar__body .pure-g,[data-is="riot-calendar"] .riot-calendar__body .pure-g{ margin-top: 0.5rem; } riot-calendar .riot-calendar__body--cur,[riot-tag="riot-calendar"] .riot-calendar__body--cur,[data-is="riot-calendar"] .riot-calendar__body--cur,riot-calendar .riot-calendar__body--other,[riot-tag="riot-calendar"] .riot-calendar__body--other,[data-is="riot-calendar"] .riot-calendar__body--other,riot-calendar .title__cur,[riot-tag="riot-calendar"] .title__cur,[data-is="riot-calendar"] .title__cur,riot-calendar .title__other,[riot-tag="riot-calendar"] .title__other,[data-is="riot-calendar"] .title__other{ will-change: transform, opacity; position: absolute; width: 100%; left: 0; background: #fff; -webkit-animation-play-state: paused; animation-play-state: paused; -webkit-animation-duration: 0.45s; animation-duration: 0.45s; -webkit-animation-fill-mode: forwards; animation-fill-mode: forwards; -webkit-animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1); animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1); } riot-calendar .riot-calendar__body--cur.calendar-fadeInLeft,[riot-tag="riot-calendar"] .riot-calendar__body--cur.calendar-fadeInLeft,[data-is="riot-calendar"] .riot-calendar__body--cur.calendar-fadeInLeft,riot-calendar .riot-calendar__body--other.calendar-fadeInLeft,[riot-tag="riot-calendar"] .riot-calendar__body--other.calendar-fadeInLeft,[data-is="riot-calendar"] .riot-calendar__body--other.calendar-fadeInLeft,riot-calendar .title__cur.calendar-fadeInLeft,[riot-tag="riot-calendar"] .title__cur.calendar-fadeInLeft,[data-is="riot-calendar"] .title__cur.calendar-fadeInLeft,riot-calendar .title__other.calendar-fadeInLeft,[riot-tag="riot-calendar"] .title__other.calendar-fadeInLeft,[data-is="riot-calendar"] .title__other.calendar-fadeInLeft{ -webkit-animation-name: riot-calendar-fadeInFromLeft; animation-name: riot-calendar-fadeInFromLeft; } riot-calendar .riot-calendar__body--cur.calendar-fadeInRight,[riot-tag="riot-calendar"] .riot-calendar__body--cur.calendar-fadeInRight,[data-is="riot-calendar"] .riot-calendar__body--cur.calendar-fadeInRight,riot-calendar .riot-calendar__body--other.calendar-fadeInRight,[riot-tag="riot-calendar"] .riot-calendar__body--other.calendar-fadeInRight,[data-is="riot-calendar"] .riot-calendar__body--other.calendar-fadeInRight,riot-calendar .title__cur.calendar-fadeInRight,[riot-tag="riot-calendar"] .title__cur.calendar-fadeInRight,[data-is="riot-calendar"] .title__cur.calendar-fadeInRight,riot-calendar .title__other.calendar-fadeInRight,[riot-tag="riot-calendar"] .title__other.calendar-fadeInRight,[data-is="riot-calendar"] .title__other.calendar-fadeInRight{ -webkit-animation-name: riot-calendar-fadeInFromRight; animation-name: riot-calendar-fadeInFromRight; } riot-calendar .riot-calendar__body--cur.calendar-fadeOutLeft,[riot-tag="riot-calendar"] .riot-calendar__body--cur.calendar-fadeOutLeft,[data-is="riot-calendar"] .riot-calendar__body--cur.calendar-fadeOutLeft,riot-calendar .riot-calendar__body--other.calendar-fadeOutLeft,[riot-tag="riot-calendar"] .riot-calendar__body--other.calendar-fadeOutLeft,[data-is="riot-calendar"] .riot-calendar__body--other.calendar-fadeOutLeft,riot-calendar .title__cur.calendar-fadeOutLeft,[riot-tag="riot-calendar"] .title__cur.calendar-fadeOutLeft,[data-is="riot-calendar"] .title__cur.calendar-fadeOutLeft,riot-calendar .title__other.calendar-fadeOutLeft,[riot-tag="riot-calendar"] .title__other.calendar-fadeOutLeft,[data-is="riot-calendar"] .title__other.calendar-fadeOutLeft{ -webkit-animation-name: riot-calendar-fadeOutFromLeft; animation-name: riot-calendar-fadeOutFromLeft; } riot-calendar .riot-calendar__body--cur.calendar-fadeOutRight,[riot-tag="riot-calendar"] .riot-calendar__body--cur.calendar-fadeOutRight,[data-is="riot-calendar"] .riot-calendar__body--cur.calendar-fadeOutRight,riot-calendar .riot-calendar__body--other.calendar-fadeOutRight,[riot-tag="riot-calendar"] .riot-calendar__body--other.calendar-fadeOutRight,[data-is="riot-calendar"] .riot-calendar__body--other.calendar-fadeOutRight,riot-calendar .title__cur.calendar-fadeOutRight,[riot-tag="riot-calendar"] .title__cur.calendar-fadeOutRight,[data-is="riot-calendar"] .title__cur.calendar-fadeOutRight,riot-calendar .title__other.calendar-fadeOutRight,[riot-tag="riot-calendar"] .title__other.calendar-fadeOutRight,[data-is="riot-calendar"] .title__other.calendar-fadeOutRight{ -webkit-animation-name: riot-calendar-fadeOutFromRight; animation-name: riot-calendar-fadeOutFromRight; } riot-calendar .riot-calendar__body--cur.animation,[riot-tag="riot-calendar"] .riot-calendar__body--cur.animation,[data-is="riot-calendar"] .riot-calendar__body--cur.animation,riot-calendar .riot-calendar__body--other.animation,[riot-tag="riot-calendar"] .riot-calendar__body--other.animation,[data-is="riot-calendar"] .riot-calendar__body--other.animation,riot-calendar .title__cur.animation,[riot-tag="riot-calendar"] .title__cur.animation,[data-is="riot-calendar"] .title__cur.animation,riot-calendar .title__other.animation,[riot-tag="riot-calendar"] .title__other.animation,[data-is="riot-calendar"] .title__other.animation{ -webkit-animation-play-state: running; animation-play-state: running; } riot-calendar .riot-calendar__body--cur,[riot-tag="riot-calendar"] .riot-calendar__body--cur,[data-is="riot-calendar"] .riot-calendar__body--cur,riot-calendar .riot-calendar__body--other,[riot-tag="riot-calendar"] .riot-calendar__body--other,[data-is="riot-calendar"] .riot-calendar__body--other{ top: 0.25rem; height: 100%; } riot-calendar .date,[riot-tag="riot-calendar"] .date,[data-is="riot-calendar"] .date{ height: 2rem; line-height: 2rem; text-align: center; cursor: default; } riot-calendar .date i,[riot-tag="riot-calendar"] .date i,[data-is="riot-calendar"] .date i{ font-style: normal; } riot-calendar .disable,[riot-tag="riot-calendar"] .disable,[data-is="riot-calendar"] .disable{ color: #c5c5c5; } riot-calendar .enable,[riot-tag="riot-calendar"] .enable,[data-is="riot-calendar"] .enable{ color: #393836; } riot-calendar .pure-u-1-8,[riot-tag="riot-calendar"] .pure-u-1-8,[data-is="riot-calendar"] .pure-u-1-8{ position: relative; } riot-calendar .choice .date,[riot-tag="riot-calendar"] .choice .date,[data-is="riot-calendar"] .choice .date,riot-calendar .change .date,[riot-tag="riot-calendar"] .change .date,[data-is="riot-calendar"] .change .date{ width: 32px; height: 32px; position: absolute; z-index: 2; left: 50%; margin-left: -16px; -ms-box-sizing: border-box; box-sizing: border-box; line-height: 2rem; display: inline-block; } riot-calendar .choice .date .riot-date--bg,[riot-tag="riot-calendar"] .choice .date .riot-date--bg,[data-is="riot-calendar"] .choice .date .riot-date--bg,riot-calendar .change .date .riot-date--bg,[riot-tag="riot-calendar"] .change .date .riot-date--bg,[data-is="riot-calendar"] .change .date .riot-date--bg{ width: 100%; height: 100%; border-radius: 50%; content: \'\'; background-color: #7f1f59; position: absolute; top: 0; left: 0; z-index: -1; -webkit-animation-duration: 0.45s; animation-duration: 0.45s; -webkit-animation-fill-mode: forwards; animation-fill-mode: forwards; -webkit-animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1); animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1); will-change: transform, opacity; } riot-calendar .choice .date.riot-calendar-in .riot-date--bg,[riot-tag="riot-calendar"] .choice .date.riot-calendar-in .riot-date--bg,[data-is="riot-calendar"] .choice .date.riot-calendar-in .riot-date--bg,riot-calendar .change .date.riot-calendar-in .riot-date--bg,[riot-tag="riot-calendar"] .change .date.riot-calendar-in .riot-date--bg,[data-is="riot-calendar"] .change .date.riot-calendar-in .riot-date--bg{ -webkit-animation-name: riot-calendar-scaleIn; animation-name: riot-calendar-scaleIn; } riot-calendar .choice .date.riot-calendar-out .riot-date--bg,[riot-tag="riot-calendar"] .choice .date.riot-calendar-out .riot-date--bg,[data-is="riot-calendar"] .choice .date.riot-calendar-out .riot-date--bg,riot-calendar .change .date.riot-calendar-out .riot-date--bg,[riot-tag="riot-calendar"] .change .date.riot-calendar-out .riot-date--bg,[data-is="riot-calendar"] .change .date.riot-calendar-out .riot-date--bg{ -webkit-animation-name: riot-calendar-scaleOut; animation-name: riot-calendar-scaleOut; } riot-calendar .choice.enable,[riot-tag="riot-calendar"] .choice.enable,[data-is="riot-calendar"] .choice.enable{ color: #fff; } riot-calendar .range--area,[riot-tag="riot-calendar"] .range--area,[data-is="riot-calendar"] .range--area{ background-color: #eee2e9; } riot-calendar .range--area .enable .date,[riot-tag="riot-calendar"] .range--area .enable .date,[data-is="riot-calendar"] .range--area .enable .date{ color: #fff; } riot-calendar .checkoutrange,[riot-tag="riot-calendar"] .checkoutrange,[data-is="riot-calendar"] .checkoutrange{ font-weight: bold; } riot-calendar .range--start:before,[riot-tag="riot-calendar"] .range--start:before,[data-is="riot-calendar"] .range--start:before,riot-calendar .range--end:before,[riot-tag="riot-calendar"] .range--end:before,[data-is="riot-calendar"] .range--end:before{ width: 50%; height: 100%; position: absolute; top: 0; left: 50%; background-color: #eee2e9; content: ""; } riot-calendar .range--end:before,[riot-tag="riot-calendar"] .range--end:before,[data-is="riot-calendar"] .range--end:before{ left: 0; } @-webkit-keyframes riot-calendar-fadeInFromLeft { 0% { -webkit-transform: translateX(-100%); transform: translateX(-100%); opacity: 0; } 100% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } } @keyframes riot-calendar-fadeInFromLeft { 0% { -webkit-transform: translateX(-100%); transform: translateX(-100%); opacity: 0; } 100% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } } @-webkit-keyframes riot-calendar-fadeOutFromLeft { 0% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } 100% { -webkit-transform: translateX(100%); transform: translateX(100%); opacity: 0; } } @keyframes riot-calendar-fadeOutFromLeft { 0% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } 100% { -webkit-transform: translateX(100%); transform: translateX(100%); opacity: 0; } } @-webkit-keyframes riot-calendar-fadeInFromRight { 0% { -webkit-transform: translateX(100%); transform: translateX(100%); opacity: 0; } 100% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } } @keyframes riot-calendar-fadeInFromRight { 0% { -webkit-transform: translateX(100%); transform: translateX(100%); opacity: 0; } 100% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } } @-webkit-keyframes riot-calendar-fadeOutFromRight { 0% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } 100% { -webkit-transform: translateX(-100%); transform: translateX(-100%); opacity: 1; } } @keyframes riot-calendar-fadeOutFromRight { 0% { -webkit-transform: translateX(0); transform: translateX(0); opacity: 1; } 100% { -webkit-transform: translateX(-100%); transform: translateX(-100%); opacity: 1; } } @-webkit-keyframes riot-calendar-scaleIn { 0% { -webkit-transform: scale(0); transform: scale(0); opacity: 0; } 100% { -webkit-transform: scale(1); transform: scale(1); opacith: 1; } } @keyframes riot-calendar-scaleIn { 0% { -webkit-transform: scale(0); transform: scale(0); opacity: 0; } 100% { -webkit-transform: scale(1); transform: scale(1); opacith: 1; } } @-webkit-keyframes riot-calendar-scaleOut { 0% { -webkit-transform: scale(1); transform: scale(1); opacity: 1; } 100% { -webkit-transform: scale(0); transform: scale(0); opacity: 0; } } @keyframes riot-calendar-scaleOut { 0% { -webkit-transform: scale(1); transform: scale(1); opacity: 1; } 100% { -webkit-transform: scale(0); transform: scale(0); opacity: 0; } }', '', function (opts) {
   var addClass = riotHelper.addClass;
   var removeClass = riotHelper.removeClass;
   var css = riotHelper.css;
   var tag = this;
-  tag.showOtherMonthDates = opts.showOtherMonthDates !== undefined ? opts.showOtherMonthDates : true;
   var state = {};
+  tag.showOtherMonthDates = riotHelper.isUndefined(opts.showOtherMonthDates) ? true : opts.showOtherMonthDates;
+  if (opts.numberOfMonths) {
+    var col = void 0;
+    var row = void 0;
+    if (riotHelper.isNumber(opts.numberOfMonths)) {
+      col = parseInt(opts.numberOfMonths);
+      row = 1;
+    }
+    if (riotHelper.isArray(opts.numberOfMonths)) {
+      row = parseInt(opts.numberOfMonths[0]) || 0;
+      col = parseInt(opts.numberOfMonths[1]) || 0;
+    }
+    state.numberOfMonths = row * col;
+    tag.mutipleItems = col;
+  }
+
   var firstDay = Number(opts.firstDay) || 0;
 
   var datesOfMonth = [31, null, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
@@ -386,7 +416,7 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(viewDatas.length > 
     }
     return '' + y + str2(m) + str2(d);
   };
-  var getCalendarViewDate = function getCalendarViewDate(y, m) {
+  var getViewDates = function getViewDates(y, m, order) {
     var weekNum = opts.weekMode ? 6 : getWeeksInMonth(y, m);
     var datesInPrevMonth = getDatesInPrevMonth(y, m);
     var datesInNextMonth = getDatesInNextMonth(y, m);
@@ -454,7 +484,8 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(viewDatas.length > 
           w: _date.getDay(),
           dateformat: formatDate(_y, _m, _d),
           disable: 0,
-          _format: formatDate3(_y, _m, _d)
+          _format: formatDate3(_y, _m, _d),
+          _i: order
         };
 
         if (opts.isRange) {
@@ -522,44 +553,39 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(viewDatas.length > 
   };
   var getViewItems = function getViewItems(y, m) {
     state.viewItems = [{ y: y, m: m }];
-    if (opts.numberOfMonths) {
-      var num = void 0;
-      if (typeof opts.numberOfMonths === 'number') {
-        num = opts.numberOfMonths;
-      } else if (Object.prototype.toString.call(opts.numberOfMonths) === 'object Array') {
-        num = (Number(opts.numberOfMonths[0]) || 0) * Number(opts.numberOfMonths[1] || 0);
-      }
-      if (num > 1) {
-        var i = 0;
-        while (i < num) {
-          ++m;
-          if (m > 12) {
-            m = 1;
-            y += 1;
-          }
-          state.viewItems.push({
-            y: y,
-            m: m
-          });
-          i++;
+    if (state.numberOfMonths > 1) {
+      var i = 1;
+      while (i < state.numberOfMonths) {
+        ++m;
+        if (m > 12) {
+          m = 1;
+          y += 1;
         }
+        state.viewItems.push({
+          y: y,
+          m: m
+        });
+        i++;
       }
     }
   };
   var changeView = function changeView(direction) {
-    switchDirection = direction;
-    state.lastY = state.curY;
-    state.lastM = state.curM;
-    state.curM += direction;
+    var isPrev = direction === -1;
+    var item = state.viewItems[isPrev ? 0 : state.viewItems.length - 1];
 
-    if (state.curM < 1) {
-      state.curY--;
-      state.curM = 12;
+    var m = item.m + direction;
+    var y = item.y;
+    if (isPrev && m < 1) {
+      --y;
+      m = 12;
+    } else if (m > 12) {
+      ++y;
+      m = 1;
     }
-    if (state.curM > 12) {
-      state.curM = 1;
-      state.curY++;
-    }
+
+    state.viewItems[isPrev ? 'pop' : 'shift']();
+    state.viewItems[isPrev ? 'unshift' : 'push']({ y: y, m: m });
+    state.viewDirection = direction;
   };
   var checkDateIsValid = function checkDateIsValid(y, m) {
     if (opts.switchViewOverLimit) {
@@ -604,7 +630,7 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(viewDatas.length > 
     }
     var result = checkDateIsValid(y, m);
     if (result) {
-      switchDirection = y + str2(m) > '' + state.curY + str2(state.curM) ? 1 : -1;
+      state.viewDirection = y + str2(m) > '' + state.curY + str2(state.curM) ? 1 : -1;
       state.curY = y;
       state.curM = m;
       tag.update();
@@ -681,12 +707,12 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(viewDatas.length > 
       mas = void 0;
 
   var defaultDate = void 0;
-  var switchDirection = void 0;
   var rangeLimit = opts.rangeLimit || [];
   var switchWithAnimation = opts.switchWithAnimation === undefined && true || opts.switchWithAnimation;
 
   var curChangeDateStr = undefined;
   var lastSelectDateStr = [];
+  var lastChangeViewItemsOrder = undefined;
 
   var rangeStartInOtherMonth = false;
   var rangeEndInOtherMonth = false;
@@ -708,32 +734,31 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(viewDatas.length > 
       re = formatDate3(selectDates[1].getFullYear(), selectDates[1].getMonth() + 1, selectDates[1].getDate());
     }
     defaultDate = opts.defaultDate || selectDates[0] || new Date();
-
-    state.curY = defaultDate.getFullYear();
-    state.curM = defaultDate.getMonth() + 1;
+    getViewItems(defaultDate.getFullYear(), defaultDate.getMonth() + 1);
   };
 
   init();
 
   tag.on('update', function () {
-    var curY = state.curY;
-    var curM = state.curM;
-    if (switchWithAnimation && switchDirection) {
-      tag.otherData = {
-        title: state.lastY + '年' + state.lastM + '月',
-        weekdates: tag.viewDatas.weekdates
-      };
+    if (switchWithAnimation && state.viewDirection) {
+      tag.otherViewDatas = tag.viewDatas;
     }
-    var _d = getCalendarViewDate(curY, curM);
-
-    tag.viewDatas = [{
-      title: curY + '年' + curM + '月',
-      weekdates: _d.weekDates,
-      viewdates: _d.viewDates
-    }];
+    tag.viewDatas = [];
+    state.viewItems.forEach(function (item, index) {
+      var _d = getViewDates(item.y, item.m, index);
+      tag.viewDatas.push({
+        title: item.y + '年' + item.m + '月',
+        weekdates: _d.weekDates,
+        viewdates: _d.viewDates
+      });
+    });
     if (opts.switchViewOverLimit) {
-      var firstDateStr = formatDate3(curY, curM, 1);
-      var lastDateStr = formatDate3(curY, curM, getDatesInMonth(curY, curM));
+      var y1 = state.viewItems[0].y;
+      var m1 = state.viewItems[0].m;
+      var y2 = state.viewItems[state.viewItems.length - 1].y;
+      var m2 = state.viewItems[state.viewItems.length - 1].y;
+      var firstDateStr = formatDate3(y1, m1, 1);
+      var lastDateStr = formatDate3(y2, m2, getDatesInMonth(y2, m2));
       if (opts.isRange && firstDateStr <= rls || firstDateStr <= mis) {
         tag.prevMonthDisable = true;
       } else {
@@ -749,13 +774,14 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(viewDatas.length > 
   var timer = null;
 
   tag.on('updated', function () {
+
     lastSelectDateStr = selectDateStr.concat();
-    if (switchWithAnimation && switchDirection) {
+    if (switchWithAnimation && state.viewDirection) {
       (function () {
-        var $cur = riotHelper.$('.riot-calendar__body--cur', tag.root);
-        var $curT = riotHelper.$('.title__cur', tag.root);
-        var $other = riotHelper.$('.riot-calendar__body--other', tag.root);
-        var $otherT = riotHelper.$('.title__other', tag.root);
+        var $cur = riotHelper.$$('.riot-calendar__body--cur', tag.root);
+        var $curT = riotHelper.$$('.title__cur', tag.root);
+        var $other = riotHelper.$$('.riot-calendar__body--other', tag.root);
+        var $otherT = riotHelper.$$('.title__other', tag.root);
         if (opts.animationTimingFunction) {
           css($cur, 'animationTimingFunction', opts.animationTimingFunction);
           css($other, 'animationTimingFunction', opts.animationTimingFunction);
@@ -772,7 +798,7 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(viewDatas.length > 
           css($curT, 'animationDuration', _duration);
           css($otherT, 'animationDuration', _duration);
         }
-        if (switchDirection === 1) {
+        if (state.viewDirection === 1) {
           c1 = 'calendar-fadeInRight';
           c2 = 'calendar-fadeOutRight';
         } else {
@@ -791,24 +817,23 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(viewDatas.length > 
           removeClass($curT, 'animation ' + c1);
           removeClass($otherT, 'animation ' + c2);
           clearTimeout(timer);
-          switchDirection = undefined;
+          delete state.viewDirection;
         }, duration * 1000);
       })();
     }
 
     if (opts.onChange && curChangeDateStr) {
-      opts.onChange(tag.viewDatas.viewdates[curChangeDateStr], tag);
+      opts.onChange(tag.viewDatas[lastChangeViewItemsOrder].viewdates[curChangeDateStr], tag);
       curChangeDateStr = undefined;
+      lastChangeViewItemsOrder = undefined;
     }
   });
-
   var setRangeStart = function setRangeStart(date) {
     selectDates = [date.date];
     selectDateStr = [date.dateformat];
     rs = date._format;
     re = undefined;
   };
-
   var checkRangeGapLimit = function checkRangeGapLimit(type, date) {
 
     var rangeEnd = addDays(selectDates[0], opts[type === 'min' ? 'minRangeGap' : 'maxRangeGap'] - 1);
@@ -887,6 +912,7 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(viewDatas.length > 
       }
     }
     curChangeDateStr = date.dateformat;
+    lastChangeViewItemsOrder = date._i;
   };
 });
 riot.tag2('riot-date', '<i class="riot-date--bg" if="{!replaceWithInnerHTML}"></i> <span if="{!replaceWithInnerHTML}">{opts.date.d}</span>', '', 'class="date {className}"', function (opts) {

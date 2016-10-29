@@ -32,6 +32,44 @@
           </div>
           <div class="code-source">
             <textarea class="code">
+var calIpt = document.querySelector('.pop-ipt-1-1');
+var i = 0;
+var tag;
+
+tag = riot.mount(document.querySelector('.riot-calendar-1-1'), 'riot-calendar', {
+  onChange: function(date){
+    if(date.select){
+      //tag.unmount(true)
+    }
+  },
+  numberOfMonths: 2,
+  isRange: true,
+  selectDates: [new Date(2016,8,30), new Date(2016,10,12)]
+
+})[0];
+            </textarea>
+          </div>
+        </div>
+      </div>
+      <div class="pure-u-1-2">
+        <div class="demo-card">
+          <h4>基本的riot-calendar弹框</h4>
+          <div class="pure-u-g popver">
+            <div class="popver-calendar">
+              <div class="riot-calendar-1-2"></div>
+            </div>
+          </div>
+          <div class="demo-desc">最基本的用法</div>
+          <div class="view-source">
+            <a title="查看源码" class="view-source-target" href="javascript:;"></a>
+          </div>
+          <div class="code-source">
+            <textarea class="code">
+riot.mount(document.querySelector('.riot-calendar-1-2'), 'riot-calendar', {
+  isRange: true,
+  selectDates: [new Date(2016,8,30), new Date(2016,10,12)],
+  showOtherMonthDates: false
+})              
             </textarea>
           </div>
         </div>
@@ -51,24 +89,12 @@
 			if(hightline){
 				pre.dataset.line = hightline;
 			}
-
 			pre.className = 'line-numbers language-javascript';
 			pre.innerHTML = '<code class="language-javascript">' + _code + '</code>';
 			ipt.parentNode.appendChild(pre);
     })
     //
-    var calIpt = document.querySelector('.pop-ipt-1-1');
-    var i = 0;
-    var tag;
 
-    tag = riot.mount(document.querySelector('.riot-calendar-1-1'), 'riot-calendar', {
-      onChange: function(date){
-        if(date.select){
-          tag.unmount(true)
-        }
-      },
-      numberOfMonths: 2
-    })[0];
 
   </script>
   <script src="./common.js"></script>

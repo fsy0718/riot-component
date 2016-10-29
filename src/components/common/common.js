@@ -20,30 +20,26 @@ var maybePrefix = function(key, value){
   css += key + ':' + value + ';'
   return css;
 }
+var _slice = [].slice;
+var _toString = Object.prototype.toString;
+var each = function(dom,callback){
+  let args = [].slice.call(arguments,2);
+  if(dom.length > 1){
+    let _dom = _slice.call(dom);
+    _dom.forEach(function(d){
+      callback.apply(d,args)
+    });
+  }else{
+    callback.apply(dom[0],args);
+  }
+};
+
 var riotHelper = {
   $: function(selector, context=document){
     return context.querySelector(selector);
   },
-  addClass: function (dom, className) {
-    let _className = className.split(' ');
-    for (let i = 0, len = _className.length; i < len; i++) {
-      dom.classList.add(_className[i])
-    }
-  },
-  removeClass: function (dom, className) {
-    let _className = className.split(' ');
-    for (let i = 0, len = _className.length; i < len; i++) {
-      dom.classList.remove(_className[i]);
-    }
-  },
-  hasClass: function (dom, className) {
-    return dom.classList.contains(className);
-  },
-  toggleClass: function (dom, className) {
-    let _className = className.split(' ');
-    for (let i = 0, len = _className.length; i < len; i++) {
-      dom.classList.toggle(_className[i]);
-    }
+  $$: function(selector, context=document){
+    return context.querySelectorAll(selector);
   },
   css: function (dom, property, value) {
     if (arguments.length < 3) {
@@ -78,4 +74,21 @@ var riotHelper = {
     return dom.style.cssText += ';' + css;
   }
 }
+const methods = ['add','remove','toggle','contains'];
+['addClass','removeClass','toggleClass','hasClass'].forEach(function(method,index){
+  riotHelper[method] = function(dom, className){
+    let call = function(_className){
+      _className = _className.split(' ');
+      for (let i = 0, len = _className.length; i < len; i++) {
+        this.classList[methods[index]](_className[i]);
+      }
+    };
+    return each(dom, call,className);
+  }
+});
+['String','Number','Object', 'Date', 'Array', 'Function','Undefined'].forEach(function(method){
+  riotHelper['is' + method] = function(param){
+    return _toString.call(param) === '[object ' + method + ']'
+  }
+})
 export default riotHelper;

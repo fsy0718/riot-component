@@ -3,6 +3,59 @@
   [data-is="riot-calendar"] riot-date {
     display: block;
     height: 100%; }
+  [data-is="riot-calendar"] .riot-calendar__box {
+    position: relative; }
+    [data-is="riot-calendar"] .riot-calendar__box .prev, [data-is="riot-calendar"] .riot-calendar__box .next {
+      width: 20%;
+      position: absolute;
+      top: 0;
+      height: 1.625rem;
+      line-height: 2;
+      z-index: 2; }
+      [data-is="riot-calendar"] .riot-calendar__box .prev i, [data-is="riot-calendar"] .riot-calendar__box .next i {
+        position: absolute;
+        width: 0.5rem;
+        height: 0.5rem;
+        top: 50%;
+        left: 50%;
+        margin-top: -0.40625rem;
+        margin-left: -0.25rem;
+        border-top: none;
+        border-right: none;
+        border-left: 2px solid #7f1f59;
+        border-bottom: 2px solid #7f1f59; }
+      [data-is="riot-calendar"] .riot-calendar__box .prev.disable i, [data-is="riot-calendar"] .riot-calendar__box .next.disable i {
+        border-left-color: #b8b8b8;
+        border-bottom-color: #b8b8b8; }
+    [data-is="riot-calendar"] .riot-calendar__box .prev {
+      left: 0; }
+      [data-is="riot-calendar"] .riot-calendar__box .prev i {
+        -webkit-transform: rotate(45deg);
+        transform: rotate(45deg); }
+    [data-is="riot-calendar"] .riot-calendar__box .next {
+      right: 0; }
+      [data-is="riot-calendar"] .riot-calendar__box .next i {
+        -webkit-transform: rotate(-135deg);
+        transform: rotate(-135deg); }
+  [data-is="riot-calendar"] .riot-calendar--multiple:before, [data-is="riot-calendar"] .riot-calendar--multiple:after {
+    content: '';
+    display: table; }
+  [data-is="riot-calendar"] .riot-calendar--multiple:after {
+    clear: both; }
+  [data-is="riot-calendar"] .riot-calendar--multiple .riot-calendar__items {
+    float: left; }
+  [data-is="riot-calendar"] .riot-calendar--multiple .prev, [data-is="riot-calendar"] .riot-calendar--multiple .next {
+    width: 15%; }
+  [data-is="riot-calendar"] .riot-calendar--multiple-i2 .riot-calendar__items {
+    width: 50%; }
+  [data-is="riot-calendar"] .riot-calendar--multiple-i3 .riot-calendar__items {
+    width: 33.33333%; }
+  [data-is="riot-calendar"] .riot-calendar--multiple-i4 .riot-calendar__items {
+    width: 25%; }
+  [data-is="riot-calendar"] .riot-calendar--multiple-i5 .riot-calendar__items {
+    width: 20%; }
+  [data-is="riot-calendar"] .riot-calendar--multiple-i6 .riot-calendar__items {
+    width: 16.66667%; }
   [data-is="riot-calendar"] .pure-u-1-8 {
     width: 14.285%;
     text-align: center; }
@@ -21,39 +74,15 @@
       left: 4.6875%;
       bottom: 0;
       z-index: 2; }
-  [data-is="riot-calendar"] .control {
+  [data-is="riot-calendar"] .title {
     text-align: center;
-    margin-bottom: 0.5rem; }
-    [data-is="riot-calendar"] .control .title {
-      color: #333333;
-      font-size: 0.8125rem;
-      line-height: 2;
-      position: relative;
-      height: 1.625rem;
-      overflow: hidden; }
-    [data-is="riot-calendar"] .control .prev, [data-is="riot-calendar"] .control .next {
-      position: relative; }
-      [data-is="riot-calendar"] .control .prev i, [data-is="riot-calendar"] .control .next i {
-        position: absolute;
-        width: 0.5rem;
-        height: 0.5rem;
-        top: 50%;
-        left: 50%;
-        margin-top: -0.25rem;
-        margin-left: -0.25rem;
-        border-top: none;
-        border-right: none;
-        border-left: 2px solid #7f1f59;
-        border-bottom: 2px solid #7f1f59; }
-      [data-is="riot-calendar"] .control .prev.disable i, [data-is="riot-calendar"] .control .next.disable i {
-        border-left-color: #b8b8b8;
-        border-bottom-color: #b8b8b8; }
-    [data-is="riot-calendar"] .control .prev i {
-      -webkit-transform: rotate(45deg);
-      transform: rotate(45deg); }
-    [data-is="riot-calendar"] .control .next i {
-      -webkit-transform: rotate(-135deg);
-      transform: rotate(-135deg); }
+    color: #333333;
+    font-size: 0.8125rem;
+    line-height: 2;
+    position: relative;
+    height: 1.625rem;
+    overflow: hidden;
+    margin: 0 20% 0.5rem 20%; }
   [data-is="riot-calendar"] .riot-calendar__body {
     padding: 0.40625rem 0;
     position: relative;
