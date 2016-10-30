@@ -112,7 +112,7 @@
  * @param {number}        [opts.minRangeGap]        range时最小选择区间
  * @param {number}        [opts.maxRangeGap]          range时最大选择区间
  * @param {rangeGapInvalidCall} [opts.onRangeGapInvalid] range选择不合minRangeGap与maxRangeGap时回调函数
- * @param {(number|number[])} [opts.numberOfMonths]   设置一次显示几个月  number 一行显示的月份数  number[] 显示的行数与列数
+ * @param {(number|number[])} [opts.numberOfMonths]   设置一次显示几个月  number 一行显示的月份数  number[] 显示的行数与列数，设置opts.numberOfMonths则默认opts.showOtherMonthDates为false
  * @returns {calendarTag}
  * @example
  *  riot.mount('riot-calendar', opts)
@@ -135,6 +135,7 @@ if(opts.numberOfMonths){
     row = parseInt(opts.numberOfMonths[0]) || 0;
     col = parseInt(opts.numberOfMonths[1]) || 0;
   }
+  tag.showOtherMonthDates = false;
   state.numberOfMonths = row * col;
   tag.mutipleItems = col;
 }
@@ -246,8 +247,8 @@ const getViewDates = function (y, m, order) {
   let d1 = d;
   let d3 = d;
   //初始化值
-  rangeEndInOtherMonth = false;
-  rangeStartInOtherMonth = false;
+  let rangeEndInOtherMonth = false;
+  let rangeStartInOtherMonth = false;
   if (datesInPrevMonth) {
     if (m1 === 1) {
       --y1;
@@ -362,7 +363,9 @@ const getViewDates = function (y, m, order) {
   }
   return {
     weekDates: weekDates,
-    viewDates: viewDates
+    viewDates: viewDates,
+    rangeStartInOtherMonth: rangeStartInOtherMonth,
+    rangeEndInOtherMonth: rangeEndInOtherMonth
   }
 }
 const getViewItems = function(y,m){
@@ -505,13 +508,15 @@ tag.parseDateBoxClass = function (date) {
       date.range === -1 && classNames.push('range--start');
       date.range === 1 && classNames.push('range--end');
     }else{
-      if((date.current === -1 && rangeStartInOtherMonth) || (date.current === 1 && rangeEndInOtherMonth)){
+      let rso = tag.viewDatas[date._i].rangeStartInOtherMonth;
+      let reo = tag.viewDatas[date._i].rangeEndInOtherMonth;
+      if((date.current === -1 && rso) || (date.current === 1 && reo)){
         classNames.push('range--area');
       }
-      if(!rangeStartInOtherMonth && date.range === -1){
+      if(!rso && date.range === -1){
         classNames.push('range--start');
       }
-      if(!rangeEndInOtherMonth && date.range === 1){
+      if(!reo && date.range === 1){
         classNames.push('range--end');
       }
     }
@@ -528,9 +533,6 @@ let switchWithAnimation = opts.switchWithAnimation === undefined && true || opts
 let curChangeDateStr = undefined;
 let lastSelectDateStr = [];
 let lastChangeViewItemsOrder = undefined;
-//记录range是否在其它月中
-let rangeStartInOtherMonth = false;
-let rangeEndInOtherMonth = false;
 const init = function () {
   rls = formatDate3(rangeLimit[0]);
   rle = formatDate3(rangeLimit[1]);
@@ -566,6 +568,8 @@ tag.on('update', function () {
       title: item.y + '年' + item.m + '月',
       weekdates: _d.weekDates,
       viewdates: _d.viewDates,
+      rangeEndInOtherMonth: _d.rangeEndInOtherMonth,
+      rangeStartInOtherMonth: _d.rangeStartInOtherMonth
     });
   })
   if (opts.switchViewOverLimit) {

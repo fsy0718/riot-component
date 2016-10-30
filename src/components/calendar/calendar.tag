@@ -25,6 +25,7 @@
         <div class="riot-calendar__body--cur">
           <div class="pure-g" each={weekdates in items.weekdates}>
             <div class="pure-u-1-8 {parseDateBoxClass(date)}" each={date in weekdates}>
+              <span class="date-placeholder" if={!showOtherMonthDates && date.current}></span>
               <div if={showOtherMonthDates || (showOtherMonthDates===false && date.current===0 )} class="{date.disable === 0 && 'enable' || 'disable'} {date._change && 'change'} {date.select === 1 && 'choice' || ''}"
                 onclick={checkDate}>
                 <riot-date date={date}></riot-date>

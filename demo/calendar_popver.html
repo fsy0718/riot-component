@@ -10,7 +10,6 @@
   <link rel="stylesheet" href="./common.css">
   <link rel="stylesheet" href="./prism.css">
   <style>
-
   </style>
 </head>
 
@@ -42,9 +41,11 @@ tag = riot.mount(document.querySelector('.riot-calendar-1-1'), 'riot-calendar', 
       //tag.unmount(true)
     }
   },
-  numberOfMonths: 2,
+  numberOfMonths: 1,
   isRange: true,
-  selectDates: [new Date(2016,8,30), new Date(2016,10,12)]
+  selectDates: [new Date(2016,8,30), new Date(2016,10,12)],
+  rangeLimit: [new Date()],
+  switchViewOverLimit: true
 
 })[0];
             </textarea>
