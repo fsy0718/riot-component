@@ -39,7 +39,7 @@
             <a title="查看源码" class="view-source-target" href="javascript:;"></a>
           </div>
           <div class="code-source">
-            <textarea class="code">
+            <textarea class="code" date-line="2">
 var c1 = document.querySelector('riot-calendar');
 riot.mount(c1, 'riot-calendar')
         		</textarea>
@@ -204,6 +204,23 @@ riot.mount(c16, 'riot-calendar',{
         </textarea>
           </div>
         </div>
+        <div class="demo-card">
+          <h4>是否显示其它月份日期</h4>
+          <div class="riot-calendar-1-7"></div>
+          <div class="demo-desc">opts.showOtherMonthDates控制是否显示其它月份
+          </div>
+          <div class="view-source">
+            <a title="查看源码" class="view-source-target" href="javascript:;"></a>
+          </div>
+          <div class="code-source">
+            <textarea class="code" date-line="3">
+var c17 = document.querySelector('.riot-calendar-1-7');
+riot.mount(c17, 'riot-calendar',{
+  showOtherMonthDates: false
+})
+        		</textarea>
+          </div>
+        </div>
       </div>
       <div class="pure-u-1-2">
         <div class="demo-card">
@@ -356,6 +373,28 @@ var calendar25 = riot.mount(c25, 'riot-calendar',{
         		</textarea>
             </div>
           </div>
+        <div class="demo-card">
+          <h4>多视图日历</h4>
+          <div class="riot-calendar-2-6"></div>
+          <div class="demo-desc">opts.numberOfMonths控制显示多个月
+            <ul>
+              <li>opts.numberOfMonths参数为number,一行显示多列日历</li>
+              <li>opts.numberOfMonths参数为[number,number], 第一个参数表示行数，第二个参数表示列数</li>
+              <li><strong>设置opts.numberOfMonths后opts.showOtherMonthDates默认为false</strong></li>
+            </ul>
+          </div>
+          <div class="view-source">
+            <a title="查看源码" class="view-source-target" href="javascript:;"></a>
+          </div>
+          <div class="code-source">
+            <textarea class="code" data-line="3">
+var c17 = document.querySelector('.riot-calendar-2-6');
+riot.mount(c17, 'riot-calendar',{
+  numberOfMonths: [3,1]
+})
+        		</textarea>
+          </div>
+        </div>
         </div>
       </div>
       <script src="./riot.min.js"></script>

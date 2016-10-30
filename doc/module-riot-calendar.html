@@ -562,6 +562,8 @@
             
                 <td class="attributes">
                 
+                    &lt;optional><br>
+                
 
                 
 
@@ -700,7 +702,7 @@
 
         <tr>
             
-                <td class="name"><code>showOtherMonthDate</code></td>
+                <td class="name"><code>showOtherMonthDates</code></td>
             
 
             <td class="type">
@@ -733,7 +735,7 @@
                 </td>
             
 
-            <td class="description last">是否显示其它月的日期</td>
+            <td class="description last">是否显示其它月的日期 @since 0.0.3beta1</td>
         </tr>
 
     
@@ -936,44 +938,6 @@
 
         <tr>
             
-                <td class="name"><code>parseDateClass</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">parseDateClassCall</span>
-
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-                <td class="default">
-                
-                </td>
-            
-
-            <td class="description last">自定义日历日期显示的className</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>disabledDate</code></td>
             
 
@@ -1005,7 +969,200 @@
                 </td>
             
 
-            <td class="description last">更精细的不可选日期控制函数 @since 0.0.2</td>
+            <td class="description last">更精细的不可选日期控制函数</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>beforeShowDate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">beforeShowDateCall</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">个性自定义每日显示样式</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>minRangeGap</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">range时最小选择区间</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>maxRangeGap</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">range时最大选择区间</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>onRangeGapInvalid</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">rangeGapInvalidCall</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">range选择不合minRangeGap与maxRangeGap时回调函数</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>numberOfMonths</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">Array.&lt;number></span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last">设置一次显示几个月  number 一行显示的月份数  number[] 显示的行数与列数，设置opts.numberOfMonths则默认opts.showOtherMonthDates为false</td>
         </tr>
 
     
@@ -1109,6 +1266,165 @@
         <h3 class="subsection-title">Type Definitions</h3>
 
         <dl>
+                
+<hr>
+<dt>
+    <h4 class="name" id="~beforeShowDateClass"><span class="type-signature"></span>beforeShowDateClass(data当前正在渲染的riot-date对象)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        beforeShowDate 个性化日期显示
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>data当前正在渲染的riot-date对象</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">riot-date</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+	<dt class="tag-since method-doc-label method-doc-details-label">Since:</dt>
+	<dd class="tag-since">
+		<ul class="dummy">
+			<li>0.0.3beta1</li>
+		</ul>
+	</dd>
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    返回个性化后的html片段及类名，如果为string则为html
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">date-diy</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+            
                 
 <hr>
 <dt class="name" id="~calendarTag">
@@ -1235,6 +1551,30 @@
         </tr>
 
     
+
+        <tr>
+            
+                <td class="name"><code>switchCalendarByDate</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">switchCalendarByDateCall</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">跳转到指定日期</td>
+        </tr>
+
+    
     </tbody>
 </table>
 </dl>
@@ -1278,6 +1618,153 @@
 			<li><a href="http://riotjs.com/api/#tag-instance">http://riotjs.com/api/#tag-instance</a></li>
 			</ul>
 	</dd>
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+            
+                
+<hr>
+<dt class="name" id="~date-diy">
+    <h4 id="~date-diy">date-diy</h4>
+
+    
+</dt>
+<dd>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+|
+
+<span class="param-type">string</span>
+
+
+
+            </li>
+        </ul>
+    
+
+    
+<dl class="details">
+    
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    <dl>
+
+<table class="props table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>html</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">个性化的日期html片段</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>className</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">个性化的日期类名，多个以空格分隔</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+</dl>
+
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
 	
 
 	
@@ -1542,6 +2029,13 @@
 
 	
 
+	
+	<dt class="tag-since method-doc-label method-doc-details-label">Since:</dt>
+	<dd class="tag-since">
+		<ul class="dummy">
+			<li>0.0.2</li>
+		</ul>
+	</dd>
 	
 
 	
@@ -1845,7 +2339,7 @@
                 
 <hr>
 <dt>
-    <h4 class="name" id="~parseDateClassCall"><span class="type-signature"></span>parseDateClassCall(date)</h4>
+    <h4 class="name" id="~rangeGapInvalidCall"><span class="type-signature"></span>rangeGapInvalidCall(invalidType)</h4>
     
     
 </dt>
@@ -1853,7 +2347,7 @@
 
     
     <div class="description">
-        parseDateClass 函数说明
+        onRangeGapInvalid range时选择区间不合minRangeGap与maxRangeGap时回调函数，如果无参数，则默认将rangeEnd变为rangeStart
     </div>
     
 
@@ -1888,13 +2382,13 @@
 
         <tr>
             
-                <td class="name"><code>date</code></td>
+                <td class="name"><code>invalidType</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">riot-date</span>
+<span class="param-type">string</span>
 
 
 
@@ -1905,7 +2399,7 @@
 
             
 
-            <td class="description last">当前正在渲染的riot-date对象</td>
+            <td class="description last">非法类型 'min'或'max'</td>
         </tr>
 
     
@@ -1920,6 +2414,13 @@
 
 	
 
+	
+	<dt class="tag-since method-doc-label method-doc-details-label">Since:</dt>
+	<dd class="tag-since">
+		<ul class="dummy">
+			<li>0.0.3beta1</li>
+		</ul>
+	</dd>
 	
 
 	
@@ -1969,7 +2470,7 @@
     
             
 <div class="param-desc">
-    需要被添加类名
+    是否继续执行将rangeEnd替换成rangeStart
 </div>
 
 
@@ -1980,10 +2481,7 @@
     </dt>
     <dd>
         
-<span class="param-type">string</span>
-|
-
-<span class="param-type">Array.&lt;string></span>
+<span class="param-type">boolean</span>
 
 
 
@@ -2542,6 +3040,165 @@
     
 </dd>
 
+            
+                
+<hr>
+<dt>
+    <h4 class="name" id="~switchCalendarByDateCall"><span class="type-signature"></span>switchCalendarByDateCall(需要跳转的日期)</h4>
+    
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        switchCalendarByDate 函数说明
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>需要跳转的日期</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">date</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+	<dt class="tag-since method-doc-label method-doc-details-label">Since:</dt>
+	<dd class="tag-since">
+		<ul class="dummy">
+			<li>0.0.3beta1</li>
+		</ul>
+	</dd>
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    跳转是否成功，日期如果超出受限范围[rangeLimit/minDate/maxDate]且switchViewOverLimit=true，则跳转不成功，返回false， 如果跳转日期就是当前日历视图也不会跳转，返回false
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">boolean</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
             </dl>
     
 
@@ -2590,7 +3247,7 @@
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.2</a>
 	
-		on 2016-10-23T00:05:25+08:00
+		on 2016-10-30T22:48:12+08:00
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
