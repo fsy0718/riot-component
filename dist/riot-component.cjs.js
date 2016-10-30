@@ -433,14 +433,21 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(mutipleItems > 1 &&
   tag.switchCalendarByDate = function (date) {
     var y = date.getFullYear();
     var m = date.getMonth() + 1;
-    if (y === state.curY && m === state.curM) {
+    var viewItemsStart = state.viewItems[0];
+    var viewItemsEnd = state.viewItems[state.viewItems.length - 1];
+    var s1 = viewItemsStart.y + str2(viewItemsStart.m);
+    var s2 = viewItemsEnd.y + str2(viewItemsEnd.m);
+    var s3 = y + str2(m);
+    if (s3 < s1) {
+      state.viewDirection = -1;
+    } else if (s3 > s2) {
+      state.viewDirection = 1;
+    } else {
       return false;
     }
     var result = checkDateIsValid(y, m);
     if (result) {
-      state.viewDirection = y + str2(m) > '' + state.curY + str2(state.curM) ? 1 : -1;
-      state.curY = y;
-      state.curM = m;
+      getViewItems(y, m);
       tag.update();
     }
     return result;

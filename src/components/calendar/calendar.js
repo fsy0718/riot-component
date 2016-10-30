@@ -439,14 +439,21 @@ tag.nextMonth = function (e) {
 tag.switchCalendarByDate = function (date) {
   let y = date.getFullYear();
   let m = date.getMonth() + 1;
-  if (y === state.curY && m === state.curM) {
+  let viewItemsStart = state.viewItems[0];
+  let viewItemsEnd = state.viewItems[state.viewItems.length - 1];
+  let s1 = viewItemsStart.y + str2(viewItemsStart.m);
+  let s2 = viewItemsEnd.y + str2(viewItemsEnd.m);
+  let s3 = y + str2(m);
+  if(s3 < s1){
+    state.viewDirection = -1;
+  }else if(s3 > s2){
+    state.viewDirection = 1;
+  }else{
     return false;
   }
   let result = checkDateIsValid(y, m);
   if (result) {
-    state.viewDirection = (y + str2(m)) > ('' + state.curY + str2(state.curM)) ? 1 : -1;
-    state.curY = y;
-    state.curM = m;
+    getViewItems(y,m);
     tag.update()
   }
   return result;
