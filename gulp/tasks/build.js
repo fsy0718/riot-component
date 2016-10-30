@@ -77,6 +77,16 @@ gulp.task('build:noCss', function(){
     console.log('build done!');
   })
 })
+gulp.task('build:uglify', function(){
+  var uglify = require('gulp-uglify');
+  var rename = require('gulp-rename');
+  return gulp.src([`${config.destpath}/riot-component.js`])
+    .pipe(uglify())
+    .pipe(rename({
+      suffix: '-min'
+    }))
+    .pipe(gulp.dest(config.destpath));
+})
 gulp.task('build', function () {
   gulpSequence('build:clean', 'css', ['riot:copy', 'riot:tag'], 'build:riot', 'build:clean')(function () {
     console.log('build done!');

@@ -664,10 +664,8 @@ const checkRangeGapLimit = function (type, date) {
 tag.checkDate = function (e) {
   let date = e.item.date;
   if (date.disable !== 0) {
-    if (opts.switchViewByOtherMonth) {
-      if ((date.current === -1 && !tag.prevMonthDisable) || (date.current === 1 && !tag.nextMonthDisable)) {
-        changeView(date.current);
-      }
+    if (opts.switchViewByOtherMonth && ((date.current === -1 && !tag.prevMonthDisable) || (date.current === 1 && !tag.nextMonthDisable))) {
+      changeView(date.current);
     } else {
       e.preventUpdate = true;
       return;

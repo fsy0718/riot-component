@@ -29,7 +29,7 @@ gulp.task('css',['scss:copy'], function(){
       autoprefixer(config.autoprefixer)
     )
     .pipe(gulp.dest(config.cachepath + '/components'))
-    .pipe(gulpIf(!config.options.withCss, concat('riot-comment.css')))
+    .pipe(gulpIf(!config.options.withCss, concat('riot-component.css')))
 })
 
 gulp.task('css:noCss',['scss:copy'], function(){
@@ -38,6 +38,6 @@ gulp.task('css:noCss',['scss:copy'], function(){
     .pipe(
       autoprefixer(config.autoprefixer)
     )
-    .pipe(concat('riot-comment.css'))
+    .pipe(concat('riot-component.css'))
     .pipe(gulp.dest(config.destpath))
 });

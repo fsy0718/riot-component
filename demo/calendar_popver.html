@@ -50,8 +50,6 @@ tag = riot.mount(document.querySelector('.riot-calendar-1-1'), 'riot-calendar', 
             </textarea>
           </div>
         </div>
-      </div>
-      <div class="pure-u-1-2">
         <div class="demo-card">
           <h4>基本的riot-calendar弹框</h4>
           <div class="pure-u-g popver">
@@ -65,7 +63,35 @@ tag = riot.mount(document.querySelector('.riot-calendar-1-1'), 'riot-calendar', 
           </div>
           <div class="code-source">
             <textarea class="code">
-riot.mount(document.querySelector('.riot-calendar-1-2'), 'riot-calendar', {
+var calIpt = document.querySelector('.pop-ipt-1-2');
+var i = 0;
+var tag;
+
+tag = riot.mount(document.querySelector('.riot-calendar-1-2'), 'riot-calendar', {
+  switchViewByOtherMonth: true,
+  isRange: true,
+  rangeLimit: [new Date()],
+  switchViewOverLimit: true
+})[0];
+            </textarea>
+          </div>
+        </div>
+      </div>
+      <div class="pure-u-1-2">
+        <div class="demo-card">
+          <h4>基本的riot-calendar弹框</h4>
+          <div class="pure-u-g popver">
+            <div class="popver-calendar">
+              <div class="riot-calendar-2-1"></div>
+            </div>
+          </div>
+          <div class="demo-desc">最基本的用法</div>
+          <div class="view-source">
+            <a title="查看源码" class="view-source-target" href="javascript:;"></a>
+          </div>
+          <div class="code-source">
+            <textarea class="code">
+riot.mount(document.querySelector('.riot-calendar-2-1'), 'riot-calendar', {
   isRange: true,
   selectDates: [new Date(2016,8,30), new Date(2016,10,12)],
   showOtherMonthDates: false
