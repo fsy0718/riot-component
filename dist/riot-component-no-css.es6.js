@@ -104,204 +104,10 @@ var methods = ['add', 'remove', 'toggle', 'contains'];
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
   return typeof obj;
 } : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
+  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
 };
 
-
-
-
-
-var asyncGenerator = function () {
-  function AwaitValue(value) {
-    this.value = value;
-  }
-
-  function AsyncGenerator(gen) {
-    var front, back;
-
-    function send(key, arg) {
-      return new Promise(function (resolve, reject) {
-        var request = {
-          key: key,
-          arg: arg,
-          resolve: resolve,
-          reject: reject,
-          next: null
-        };
-
-        if (back) {
-          back = back.next = request;
-        } else {
-          front = back = request;
-          resume(key, arg);
-        }
-      });
-    }
-
-    function resume(key, arg) {
-      try {
-        var result = gen[key](arg);
-        var value = result.value;
-
-        if (value instanceof AwaitValue) {
-          Promise.resolve(value.value).then(function (arg) {
-            resume("next", arg);
-          }, function (arg) {
-            resume("throw", arg);
-          });
-        } else {
-          settle(result.done ? "return" : "normal", result.value);
-        }
-      } catch (err) {
-        settle("throw", err);
-      }
-    }
-
-    function settle(type, value) {
-      switch (type) {
-        case "return":
-          front.resolve({
-            value: value,
-            done: true
-          });
-          break;
-
-        case "throw":
-          front.reject(value);
-          break;
-
-        default:
-          front.resolve({
-            value: value,
-            done: false
-          });
-          break;
-      }
-
-      front = front.next;
-
-      if (front) {
-        resume(front.key, front.arg);
-      } else {
-        back = null;
-      }
-    }
-
-    this._invoke = send;
-
-    if (typeof gen.return !== "function") {
-      this.return = undefined;
-    }
-  }
-
-  if (typeof Symbol === "function" && Symbol.asyncIterator) {
-    AsyncGenerator.prototype[Symbol.asyncIterator] = function () {
-      return this;
-    };
-  }
-
-  AsyncGenerator.prototype.next = function (arg) {
-    return this._invoke("next", arg);
-  };
-
-  AsyncGenerator.prototype.throw = function (arg) {
-    return this._invoke("throw", arg);
-  };
-
-  AsyncGenerator.prototype.return = function (arg) {
-    return this._invoke("return", arg);
-  };
-
-  return {
-    wrap: function (fn) {
-      return function () {
-        return new AsyncGenerator(fn.apply(this, arguments));
-      };
-    },
-    await: function (value) {
-      return new AwaitValue(value);
-    }
-  };
-}();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var get = function get(object, property, receiver) {
-  if (object === null) object = Function.prototype;
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent === null) {
-      return undefined;
-    } else {
-      return get(parent, property, receiver);
-    }
-  } else if ("value" in desc) {
-    return desc.value;
-  } else {
-    var getter = desc.get;
-
-    if (getter === undefined) {
-      return undefined;
-    }
-
-    return getter.call(receiver);
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-var set = function set(object, property, value, receiver) {
-  var desc = Object.getOwnPropertyDescriptor(object, property);
-
-  if (desc === undefined) {
-    var parent = Object.getPrototypeOf(object);
-
-    if (parent !== null) {
-      set(parent, property, value, receiver);
-    }
-  } else if ("value" in desc && desc.writable) {
-    desc.value = value;
-  } else {
-    var setter = desc.set;
-
-    if (setter !== undefined) {
-      setter.call(receiver, value);
-    }
-  }
-
-  return value;
-};
-
-riot.tag2('riot-calendar', '<div class="riot-calendar__box {(mutipleItems > 1 && \'riot-calendar--multiple riot-calendar--multiple-i\' + mutipleItems)}"> <a class="prev {prevMonthDisable && \'disable\'}" href="javascript:;" onclick="{prevMonth}"><i></i></a> <a class="next {nextMonthDisable && \'disable\'}" href="javascript:;" onclick="{nextMonth}"><i></i></a> <div class="riot-calendar__items" each="{items, index in viewDatas}"> <div class="riot-calendar__head"> <div class="control title"> <div if="{otherViewDatas}" class="title__other">{otherViewDatas[index].title}</div> <div class="title__cur">{items.title}</div> </div> <div class="pure-g weeks"> <div class="pure-u-1-8" each="{week in weekTitles}">{week}</div> </div> </div> <div class="riot-calendar__body"> <div if="{otherViewDatas}" class="riot-calendar__body--other"> <div class="pure-g" each="{weekdates in otherViewDatas[index].weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div class="{date.disable === 0 && \'enable\' || \'disable\'} {date.select === 1 && \'choice\' || \'\'}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> <div class="riot-calendar__body--cur"> <div class="pure-g" each="{weekdates in items.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div if="{showOtherMonthDates || (showOtherMonthDates===false && date.current===0 )}" class="{date.disable === 0 && \'enable\' || \'disable\'} {date._change && \'change\'} {date.select === 1 && \'choice\' || \'\'}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> </div> </div> </div> <div class="riot-calendar__foot"></div>', '', '', function (opts) {
+riot.tag2('riot-calendar', '<div class="riot-calendar__box {(mutipleItems > 1 && \'riot-calendar--multiple riot-calendar--multiple-i\' + mutipleItems)}"> <a class="prev {prevMonthDisable && \'disable\'}" href="javascript:;" onclick="{prevMonth}"><i></i></a> <a class="next {nextMonthDisable && \'disable\'}" href="javascript:;" onclick="{nextMonth}"><i></i></a> <div class="riot-calendar__items" each="{items, index in viewDatas}"> <div class="riot-calendar__head"> <div class="control title"> <div if="{otherViewDatas}" class="title__other">{otherViewDatas[index].title}</div> <div class="title__cur">{items.title}</div> </div> <div class="pure-g weeks"> <div class="pure-u-1-8" each="{week in weekTitles}">{week}</div> </div> </div> <div class="riot-calendar__body"> <div if="{otherViewDatas}" class="riot-calendar__body--other"> <div class="pure-g" each="{weekdates in otherViewDatas[index].weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <div class="{date.disable === 0 && \'enable\' || \'disable\'} {date.select === 1 && \'choice\' || \'\'}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> <div class="riot-calendar__body--cur"> <div class="pure-g" each="{weekdates in items.weekdates}"> <div class="pure-u-1-8 {parseDateBoxClass(date)}" each="{date in weekdates}"> <span class="date-placeholder" if="{!showOtherMonthDates && date.current}"></span> <div if="{showOtherMonthDates || (showOtherMonthDates===false && date.current===0 )}" class="{date.disable === 0 && \'enable\' || \'disable\'} {date._change && \'change\'} {date.select === 1 && \'choice\' || \'\'}" onclick="{checkDate}"> <riot-date date="{date}"></riot-date> </div> </div> </div> </div> </div> </div> </div> <div class="riot-calendar__foot"></div>', '', '', function (opts) {
   var addClass = riotHelper.addClass;
   var removeClass = riotHelper.removeClass;
   var css = riotHelper.css;
@@ -319,6 +125,7 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(mutipleItems > 1 &&
       row = parseInt(opts.numberOfMonths[0]) || 0;
       col = parseInt(opts.numberOfMonths[1]) || 0;
     }
+    tag.showOtherMonthDates = false;
     state.numberOfMonths = row * col;
     tag.mutipleItems = col;
   }
@@ -429,8 +236,8 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(mutipleItems > 1 &&
     var d1 = d;
     var d3 = d;
 
-    rangeEndInOtherMonth = false;
-    rangeStartInOtherMonth = false;
+    var rangeEndInOtherMonth = false;
+    var rangeStartInOtherMonth = false;
     if (datesInPrevMonth) {
       if (m1 === 1) {
         --y1;
@@ -546,7 +353,9 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(mutipleItems > 1 &&
     }
     return {
       weekDates: weekDates,
-      viewDates: viewDates
+      viewDates: viewDates,
+      rangeStartInOtherMonth: rangeStartInOtherMonth,
+      rangeEndInOtherMonth: rangeEndInOtherMonth
     };
   };
   var getViewItems = function getViewItems(y, m) {
@@ -623,14 +432,21 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(mutipleItems > 1 &&
   tag.switchCalendarByDate = function (date) {
     var y = date.getFullYear();
     var m = date.getMonth() + 1;
-    if (y === state.curY && m === state.curM) {
+    var viewItemsStart = state.viewItems[0];
+    var viewItemsEnd = state.viewItems[state.viewItems.length - 1];
+    var s1 = viewItemsStart.y + str2(viewItemsStart.m);
+    var s2 = viewItemsEnd.y + str2(viewItemsEnd.m);
+    var s3 = y + str2(m);
+    if (s3 < s1) {
+      state.viewDirection = -1;
+    } else if (s3 > s2) {
+      state.viewDirection = 1;
+    } else {
       return false;
     }
     var result = checkDateIsValid(y, m);
     if (result) {
-      state.viewDirection = y + str2(m) > '' + state.curY + str2(state.curM) ? 1 : -1;
-      state.curY = y;
-      state.curM = m;
+      getViewItems(y, m);
       tag.update();
     }
     return result;
@@ -681,13 +497,15 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(mutipleItems > 1 &&
         date.range === -1 && classNames.push('range--start');
         date.range === 1 && classNames.push('range--end');
       } else {
-        if (date.current === -1 && rangeStartInOtherMonth || date.current === 1 && rangeEndInOtherMonth) {
+        var rso = tag.viewDatas[date._i].rangeStartInOtherMonth;
+        var reo = tag.viewDatas[date._i].rangeEndInOtherMonth;
+        if (date.current === -1 && rso || date.current === 1 && reo) {
           classNames.push('range--area');
         }
-        if (!rangeStartInOtherMonth && date.range === -1) {
+        if (!rso && date.range === -1) {
           classNames.push('range--start');
         }
-        if (!rangeEndInOtherMonth && date.range === 1) {
+        if (!reo && date.range === 1) {
           classNames.push('range--end');
         }
       }
@@ -711,9 +529,6 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(mutipleItems > 1 &&
   var curChangeDateStr = undefined;
   var lastSelectDateStr = [];
   var lastChangeViewItemsOrder = undefined;
-
-  var rangeStartInOtherMonth = false;
-  var rangeEndInOtherMonth = false;
   var init = function init() {
     rls = formatDate3(rangeLimit[0]);
     rle = formatDate3(rangeLimit[1]);
@@ -747,7 +562,9 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(mutipleItems > 1 &&
       tag.viewDatas.push({
         title: item.y + '年' + item.m + '月',
         weekdates: _d.weekDates,
-        viewdates: _d.viewDates
+        viewdates: _d.viewDates,
+        rangeEndInOtherMonth: _d.rangeEndInOtherMonth,
+        rangeStartInOtherMonth: _d.rangeStartInOtherMonth
       });
     });
     if (opts.switchViewOverLimit) {
@@ -855,10 +672,8 @@ riot.tag2('riot-calendar', '<div class="riot-calendar__box {(mutipleItems > 1 &&
   tag.checkDate = function (e) {
     var date = e.item.date;
     if (date.disable !== 0) {
-      if (opts.switchViewByOtherMonth) {
-        if (date.current === -1 && !tag.prevMonthDisable || date.current === 1 && !tag.nextMonthDisable) {
-          changeView(date.current);
-        }
+      if (opts.switchViewByOtherMonth && (date.current === -1 && !tag.prevMonthDisable || date.current === 1 && !tag.nextMonthDisable)) {
+        changeView(date.current);
       } else {
         e.preventUpdate = true;
         return;
@@ -952,7 +767,7 @@ function addEventListener(target, eventType, callback) {
       }
     };
   }
-}
+};
 
 riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slider--disable\'} {!included && \'riot-slider--independent\'}" onmousedown="{opts.disabled ? noop : onMouseDown}" ontouchstart="{opts.disabled ? noop : onTouchStart}"> <div class="riot-slider__track"></div> <div class="riot-slider__track--select" if="{included}" riot-style="left:{selectTrack.left + \'%\'};width:{selectTrack.width + \'%\'}"></div> <div class="riot-slider__handler riot-slider__handler--1" riot-style="left:{(opts.range ?selectTrack.left : selectTrack.width) + \'%\'}" data-key="{selectTrack.left}"></div> <div class="riot-slider__handler riot-slider__handler--2" if="{opts.range}" riot-style="left: {(selectTrack.left + selectTrack.width) + \'%\'}" data-key="{selectTrack.left + selectTrack.width}"></div> <div class="riot-slider__marks" if="{opts.marks || opts.showAllDots}"> <div each="{mark,index in marks}" class="riot-slider__marks--items {parseMarkItemClass(mark)}"> <span class="riot-slider__marks--items-dot" data-key="{index}" riot-style="left:{mark.precent + \'%\'}" if="{mark.dot}"></span> <span class="riot-slider__marks--items-tip" data-key="{index}" riot-style="width:{mark.width + \'%\'};margin-left:{(-0.5 * mark.width) + \'%\'};left:{mark.precent + \'%\'}" if="{mark.tip}">{mark.label}</span> </div> </div> </div>', '', '', function (opts) {
   "use strict";
@@ -989,7 +804,10 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
     return parseNumber(100 / (len - 1) * 0.9);
   };
 
-  var getEnablePoint = function getEnablePoint(min, max, marks) {
+  var getEnablePoint = function getEnablePoint(marks) {
+    var min = state.min;
+    var max = state.max;
+
     var points = [];
     var markPoints = void 0;
     var length = max - min;
@@ -1146,7 +964,7 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
         };
       }();
 
-      if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+      if ((typeof _ret === "undefined" ? "undefined" : _typeof(_ret)) === "object") return _ret.v;
     }
     state.value = [val, state.rangeStableValue].sort(function (a, b) {
       return a - b;
@@ -1299,18 +1117,13 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
     }
   };
 
-  var init = function init() {
-    var marks = opts.marks;
-    var value = opts.value;
-    var _opts$min = opts.min;
-    var min = _opts$min === undefined ? 0 : _opts$min;
-    var _opts$max = opts.max;
-    var max = _opts$max === undefined ? 100 : _opts$max;
+  var parseValue = function parseValue(value) {
+    var min = state.min;
+    var max = state.max;
 
-    min = Math.max(0, min);
 
-    var _value = [min, min];
-    if (value !== undefined && Object.prototype.toString.call(value) !== '[object Array]') {
+    var _value = [state.min, min];
+    if (riotHelper.isNumber(value)) {
       console.warn('riot-slider实例类名为%s的opts.value不为数组，将强制转为数组', opts.class || 'riot-slider');
       _value = [Number(value) || min];
     } else if (value && value.length) {
@@ -1332,10 +1145,22 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
     } else if (_valen < 2) {
       _value.unshift(min);
     }
-    state.value = _value;
+    return _value;
+  };
+
+  var init = function init() {
+    var marks = opts.marks;
+    var value = opts.value;
+    var _opts$min = opts.min;
+    var min = _opts$min === undefined ? 0 : _opts$min;
+    var _opts$max = opts.max;
+    var max = _opts$max === undefined ? 100 : _opts$max;
+
+    min = Math.max(0, min);
     state.min = min;
     state.max = max;
-    state.cachePoint = getEnablePoint(min, max, marks);
+    state.value = parseValue(value);
+    state.cachePoint = getEnablePoint(marks);
 
     if (opts.rangeGapFix) {
       state.rangeGap = state.value[1] - state.value[0];
@@ -1362,7 +1187,7 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
 
   tag.setControl = function (control) {
     state.control = control;
-    
+    ;
   };
 
   tag.onMouseDown = function (e) {
@@ -1396,15 +1221,14 @@ riot.tag2('riot-slider', '<div class="riot-slider {opts.disabled && \'riot-slide
       width: parseNumber((state.value[1] - state.value[0]) / (state.max - state.min) * 100)
     };
   });
+
+  tag.setValue = function (value) {
+    var _value = parseValue(value);
+    state.value = _value;
+    tag.update();
+  };
+
   tag.on('mount', function () {
     sliderRootEle = tag.root.querySelector('.riot-slider');
   });
 });
-
-/**
- * @file riot-component.js |基于riot的组件
- * @version 0.0.3beta1
- * @author fsy0718 <fsy0718@gmail.com>
- * @license MIT
- * @copyright fsy0718 2016
- */

@@ -9,6 +9,7 @@
  * @typedef {object} sliderTag
  * @extends external:Tag
  * @property {setControlCall} setControl 设置当前slider是否受控
+ * @property {setValueCall} setValue 设置当前slider的值
  */
 /**
  * @inner
@@ -24,6 +25,11 @@
  * 设置slider是否受控回调函数说明
  * @callback setControlCall
  * @param {boolean} control 是否受控
+ */
+/**
+ * 设置slider的选中值
+ * @since 0.0.3beta2
+ * @param {number[]} 设置当前值，如果range，默认为[0,0],否则为[0]
  */
 /**
  * 滑动过程中的回调函数说明
@@ -66,6 +72,7 @@
  * @return {sliderTag} 返回riot-slider的实例对象
  */
 import addEventListener from "../common/rc-util-dom-addEventListener"
+import f from "../common/common"
 "use strict";
 let tag = this;
 let state = {
@@ -97,7 +104,8 @@ const getMarkWidth = function (len) {
   return parseNumber(100 / (len - 1) * 0.9)
 }
 //计算可停靠值对象
-const getEnablePoint = function (min, max, marks) {
+const getEnablePoint = function (marks) {
+  const {min, max} = state;
   let points = [];
   let markPoints;
   let length = max - min;
@@ -396,13 +404,12 @@ const removeEvents = function (type) {
     tag.onMouseUpListener.remove();
   }
 }
-//初始化参数，before-mount会在update之后触发
-const init = function () {
-  let {marks, value, min = 0, max = 100} = opts;
-  min = Math.max(0, min);
+
+const parseValue = function(value){
+  const {min, max}  = state;
   //筛选不合规范的值
-  let _value = [min, min];
-  if(value !== undefined && Object.prototype.toString.call(value) !== '[object Array]'){
+  let _value = [state.min, min];
+  if(f.isNumber(value)){
     console.warn('riot-slider实例类名为%s的opts.value不为数组，将强制转为数组',opts.class || 'riot-slider');
     _value = [Number(value) || min]
   }else if (value && value.length) {
@@ -422,10 +429,17 @@ const init = function () {
   } else if (_valen < 2) {
     _value.unshift(min)
   }
-  state.value = _value;
+  return _value;
+}
+
+//初始化参数，before-mount会在update之后触发
+const init = function () {
+  let {marks, value, min = 0, max = 100} = opts;
+  min = Math.max(0, min);
   state.min = min;
   state.max = max;
-  state.cachePoint = getEnablePoint(min, max, marks);
+  state.value = parseValue(value);
+  state.cachePoint = getEnablePoint(marks);
   //对rangeGapFixed进行提示; 如果gap为0且rangeGapFixed为true，则警告用户
   if(opts.rangeGapFix){
     state.rangeGap = state.value[1] - state.value[0];
@@ -485,6 +499,13 @@ tag.on('update', function () {
     width: parseNumber((state.value[1] - state.value[0]) / (state.max - state.min) * 100)
   } 
 });
+//设置值
+tag.setValue = function(value){
+  let _value = parseValue(value);
+  state.value = _value;
+  tag.update();
+}
+
 tag.on('mount', function () {
   sliderRootEle = tag.root.querySelector('.riot-slider');
 })
