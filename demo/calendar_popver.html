@@ -52,7 +52,7 @@ tag = riot.mount(document.querySelector('.riot-calendar-1-1'), 'riot-calendar', 
           </div>
         </div>
         <div class="demo-card">
-          <h4>基本的riot-calendar弹框</h4>
+          <h4>范围选择弹框</h4>
           <div class="pure-u-g popver">
             <div class="popver-calendar">
               <div class="riot-calendar-1-2"></div>
@@ -71,7 +71,9 @@ var tag;
 tag = riot.mount(document.querySelector('.riot-calendar-1-2'), 'riot-calendar', {
   switchViewByOtherMonth: true,
   isRange: true,
-  rangeLimit: [new Date()],
+  minDate: new Date(),
+  maxDate: new Date(2017,01,12),
+  selectDates: [new Date(), new Date(2016,10,15)],
   switchViewOverLimit: true
 })[0];
             </textarea>

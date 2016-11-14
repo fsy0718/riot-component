@@ -306,10 +306,6 @@
     transform: scale(0);
     opacity: 0; } }
 
-[data-is="riot-popver"] {
-  background-color: #fff;
-  border-radius: 0 0 7px 7px; }
-
 [data-is="riot-slider"] .riot-slider {
   position: relative; }
 

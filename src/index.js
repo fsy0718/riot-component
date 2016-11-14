@@ -5,6 +5,5 @@
  * @license MIT
  * @copyright fsy0718 {{year}}
  */
-import "./components/popver/popver.tag";
 import "./components/calendar/calendar.tag";
 import "./components/slider/slider.tag";

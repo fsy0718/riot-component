@@ -3,10 +3,6 @@
 
   riot = 'default' in riot ? riot['default'] : riot;
 
-  riot.tag2('riot-popver', '<yield></yield>', '', '', function (opts) {
-    var tag = this;
-  });
-
   /*https://github.com/madrobby/zepto/blob/master/src/zepto.js */
   var camelize = function camelize(str) {
     return str.replace(/-+(.)?/g, function (match, chr) {
@@ -574,7 +570,7 @@
         var y1 = state.viewItems[0].y;
         var m1 = state.viewItems[0].m;
         var y2 = state.viewItems[state.viewItems.length - 1].y;
-        var m2 = state.viewItems[state.viewItems.length - 1].y;
+        var m2 = state.viewItems[state.viewItems.length - 1].m;
         var firstDateStr = formatDate3(y1, m1, 1);
         var lastDateStr = formatDate3(y2, m2, getDatesInMonth(y2, m2));
         if (opts.isRange && firstDateStr <= rls || firstDateStr <= mis) {

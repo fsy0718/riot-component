@@ -576,7 +576,7 @@ tag.on('update', function () {
     let y1 = state.viewItems[0].y;
     let m1 = state.viewItems[0].m;
     let y2 = state.viewItems[state.viewItems.length - 1].y;
-    let m2 = state.viewItems[state.viewItems.length - 1].y;
+    let m2 = state.viewItems[state.viewItems.length - 1].m;
     let firstDateStr = formatDate3(y1, m1, 1);
     let lastDateStr = formatDate3(y2, m2, getDatesInMonth(y2, m2));
     if (opts.isRange && firstDateStr <= rls || firstDateStr <= mis) {

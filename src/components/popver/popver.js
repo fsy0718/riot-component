@@ -1,2 +1,0 @@
-const tag = this;
-

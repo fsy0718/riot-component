@@ -80,7 +80,7 @@ gulp.task('build:noCss', function(){
 gulp.task('build:uglify', function(){
   var uglify = require('gulp-uglify');
   var rename = require('gulp-rename');
-  return gulp.src([`${config.destpath}/riot-component.js`])
+  return gulp.src([`${config.destpath}/riot-component.js`, `${config.destpath}/riot-component-no-css.js`])
     .pipe(uglify())
     .pipe(rename({
       suffix: '-min'
