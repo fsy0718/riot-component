@@ -108,6 +108,10 @@
     height: rSize(26*2);
     overflow: hidden;
     margin: 0 20% rSize(16) 20%;
+    &--title{
+      visibility: hidden;
+      pointer-events: none;
+    }
   }
   .riot-calendar__body{
     padding: rSize(13) 0;
@@ -117,6 +121,10 @@
       margin-top: rSize(16);
     }
     overflow: hidden;
+    &--hidden{
+      visibility: hidden;
+      pointer-events: none;
+    }
   }
   .riot-calendar__body--cur,.riot-calendar__body--other,.title__cur,.title__other{
     will-change: transform, opacity;
@@ -149,6 +157,7 @@
     top: rSize(8);
     height: 100%;
   }
+
   .date-placeholder{
     display: block;
   }
