@@ -633,10 +633,8 @@ tag.on('updated', function () {
       tag.otherData = null;
       removeClass($cur, 'animation ' + c1);
       removeClass($other, 'animation ' + c2);
-      addClass($other, 'riot-calendar__body--hidden');
       removeClass($curT, 'animation ' + c1);
       removeClass($otherT, 'animation ' + c2);
-      addClass($otherT, 'title--hidden');
       clearTimeout(timer);
       delete state.viewDirection;
     }, duration * 1000)
