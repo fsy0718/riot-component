@@ -539,7 +539,7 @@ const init = function () {
   mis = formatDate3(opts.minDate);
   mas = formatDate3(opts.maxDate);
   if (opts.isRange) {
-    mis && rls && rls < mis ? rls = mis : '';
+    mis && rls && rls < mis ? rls = mis : ''; 
     mas && rle && rle > mas ? rle = mas : '';
   }
   getWeekTitles();
@@ -682,7 +682,13 @@ tag.checkDate = function (e) {
       return;
     }
   }
+  if(date._format < mis || mas && date._format > mas){
+    return;
+  }
   if (opts.isRange) {
+    if(date._format < rls || rle && date._format > rle){
+      return;
+    }
     if (rs && !re && rs === date._format) {
       //如果只有rs且点击就是rs，取消选中rs
       selectDates = [];
