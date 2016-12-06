@@ -246,12 +246,18 @@
   .range--start, .range--end {
     &:before {
       width: 50%;
-      height: 100%;
+      //UC10.2上before,after伪元素只能设置固定高度值，否则，不会有高度
+      //height: 100%;
+      height: 32px;
       position: absolute;
       top: 0;
-      left: 50%;
       background-color: $calendar-day-high-color;
-      content: "";
+      content: " ";
+    }
+  }
+  .range--start{
+    &:before{
+      right: 0;
     }
   }
 

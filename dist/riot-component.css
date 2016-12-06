@@ -197,12 +197,13 @@
     font-weight: bold; }
   [data-is="riot-calendar"] .range--start:before, [data-is="riot-calendar"] .range--end:before {
     width: 50%;
-    height: 100%;
+    height: 32px;
     position: absolute;
     top: 0;
-    left: 50%;
     background-color: #eee2e9;
-    content: ""; }
+    content: " "; }
+  [data-is="riot-calendar"] .range--start:before {
+    right: 0; }
   [data-is="riot-calendar"] .range--end:before {
     left: 0; }
 

@@ -11,22 +11,6 @@ const gulpIf = require('gulp-if');
 
 gulp.task('riot:copy:js:index', function(){
   return gulp.src(config.sourcepath + '/index.js')
-    .pipe(
-      replace(/\{\{([^\}]+)\}\}/g, function(a,b){
-        if(b === 'version'){
-          return config.package.version;
-        }
-        if(b === 'name'){
-          return config.package.name;
-        }
-        if(b === 'year'){
-          return new Date().getFullYear();
-        }
-        if( b === 'author'){
-          return config.package.author;
-        }
-      })
-    )
     .pipe(gulp.dest(config.cachepath));
 })
 gulp.task('riot:copy:js', function(){

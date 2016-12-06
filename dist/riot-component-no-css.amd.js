@@ -1,3 +1,10 @@
+/**
+ * @file riot-component.js |基于riot的组件
+ * @version 0.0.3beta2
+ * @author fsy0718 <fsy0718@gmail.com>
+ * @license MIT
+ * @copyright fsy0718 2016
+ */
 define(['riot'], function (riot) { 'use strict';
 
   riot = 'default' in riot ? riot['default'] : riot;

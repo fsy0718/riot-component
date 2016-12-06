@@ -48,20 +48,28 @@ gulp.task('build:riot', function () {
       external: ['riot'],
       plugins: rollupPluginList
     }).then(bundle => {
-        bundle.write({
-          format: 'iife',
-          moduleName: changeCase.camelCase(config.package.name),
-          globals: { riot: 'riot' },
-          dest: `${dest}.js`
-        })
-        bundle.write({ format: 'es', dest: `${dest}.es6.js` })
-        bundle.write({ format: 'amd', dest: `${dest}.amd.js` })
-        bundle.write({ format: 'cjs', dest: `${dest}.cjs.js` })
-        resolve();
-      }).catch(error => {
-        console.error(error);
-        reject();
+      let banner = `/**
+ * @file ${config.package.name}.js |基于riot的组件
+ * @version ${config.package.version}
+ * @author ${config.package.author}
+ * @license ${config.package.license}
+ * @copyright fsy0718 ${new Date().getFullYear()}
+ */`
+      bundle.write({
+        format: 'iife',
+        moduleName: changeCase.camelCase(config.package.name),
+        globals: { riot: 'riot' },
+        dest: `${dest}.js`,
+        banner: banner
       })
+      bundle.write({ format: 'es', banner: banner, dest: `${dest}.es6.js` })
+      bundle.write({ format: 'amd', banner: banner, dest: `${dest}.amd.js` })
+      bundle.write({ format: 'cjs', banner: banner, dest: `${dest}.cjs.js` })
+      resolve();
+    }).catch(error => {
+      console.error(error);
+      reject();
+    })
   })
   return promise;
 
@@ -81,7 +89,9 @@ gulp.task('build:uglify', function(){
   var uglify = require('gulp-uglify');
   var rename = require('gulp-rename');
   return gulp.src([`${config.destpath}/riot-component.js`, `${config.destpath}/riot-component-no-css.js`])
-    .pipe(uglify())
+    .pipe(uglify({
+      preserveComments: 'license'
+    }))
     .pipe(rename({
       suffix: '-min'
     }))
