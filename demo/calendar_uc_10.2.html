@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>riot-calendar</title>
+  <link rel="stylesheet" href="./pure-min.css">
+  <link rel="stylesheet" href="./reset.css">
+  <link rel="stylesheet" href="./common.css">
+  <link rel="stylesheet" href="./prism.css">
+  <style>
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="demo-title">riot-calenar弹框示例</div>
+    <div class="pure-g ctac">
+      <div class="pure-u-1-2">
+        <div class="demo-card">
+          <h4>基本的riot-calendar弹框</h4>
+          <div class="pure-u-g popver">
+            <div class="popver-calendar">
+              <div class="riot-calendar-1-1"></div>
+            </div>
+          </div>
+          <div class="demo-desc">最基本的用法</div>
+          <div class="view-source">
+            <a title="查看源码" class="view-source-target" href="javascript:;"></a>
+          </div>
+          <div class="code-source">
+            <textarea class="code">
+var calIpt = document.querySelector('.pop-ipt-1-1');
+var i = 0;
+var tag;
+
+tag = riot.mount(document.querySelector('.riot-calendar-1-1'), 'riot-calendar', {
+  onChange: function(date){
+    if(date.select){
+      //tag.unmount(true)
+    }
+  },
+  numberOfMonths: 1,
+  isRange: true,
+  selectDates: [new Date(2016,11,1), new Date(2016,11,12)],
+  switchViewOverLimit: true
+
+})[0];
+            </textarea>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <script src="./riot.min.js"></script>
+  <script src="../dist/riot-component.js"></script>
+  <script src="./prism.js"></script>
+  <script>
+    var codes = [].slice.call(document.querySelectorAll('textarea.code'),0);
+    codes.forEach(function(ipt){
+      var _code = ipt.value;
+      eval(_code);
+			var hightline = ipt.dataset.line;
+			var pre = document.createElement('pre');
+			if(hightline){
+				pre.dataset.line = hightline;
+			}
+			pre.className = 'line-numbers language-javascript';
+			pre.innerHTML = '<code class="language-javascript">' + _code + '</code>';
+			ipt.parentNode.appendChild(pre);
+    })
+    //
+
+
+  </script>
+  <script src="./common.js"></script>
+</body>
+
+</html>
