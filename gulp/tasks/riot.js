@@ -8,6 +8,7 @@ const rename = require('gulp-rename');
 const gulpSequence = require('gulp-sequence');
 const injectString = require('gulp-inject-string');
 const gulpIf = require('gulp-if');
+const ts = require('gulp-typescript');
 
 gulp.task('riot:copy:js:index', function(){
   return gulp.src(config.sourcepath + '/index.js')
@@ -17,6 +18,16 @@ gulp.task('riot:copy:js', function(){
   return gulp.src([config.sourcepath + '/components/**/*.js'])
     .pipe(gulp.dest(config.cachepath + '/components'));
 });
+//临时测试typescript
+const tsProject = ts.createProject(path.join(config.basepath, 'tsconfig.json'));
+
+gulp.task('riot:copy:ts', function(){
+  return gulp.src([config.sourcepath + '/components/**/*.ts'])
+    .pipe(tsProject())
+    .js
+    .pipe(gulp.dest(config.cachepath + '/components'));
+})
+
 gulp.task('riot:copy:tag', function(){
   return gulp.src([config.sourcepath + '/components/**/*.tag'])
     .pipe(
