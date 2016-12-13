@@ -31,7 +31,8 @@ module.exports = {
     server: {
       baseDir: "demo",
       routes: {
-        "/dist": "./dist"
+        "/dist": "./dist",
+        "/cachepath": "./cachepath"
       }
     },
     open: false

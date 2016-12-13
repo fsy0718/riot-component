@@ -1,17 +1,28 @@
 /// <reference path="../riot.d.ts" />
 
-import {eleClassListMethods, css} from "../common/utils"
+import RiotDate from "./riotdate";
+import {eleClassListMethods} from "../common/utils";
+import riotCalendarTmpl from "./calendar.tag";
 
-const addClass = eleClassListMethods.addClass;
-const removeClass = eleClassListMethods.removeClass;
 
+const {removeClass, addClass} = eleClassListMethods;
 
-class RiotCalendar extends riot.Tag {
-    constructor(el: Element, opts: Object){
-        super(el, opts);
-        this.on('update', function(){
-
-        })
+export default (function(Tag){
+    class RiotCalendar extends riot.Tag{
+        constructor(el: Element, opts={}){
+            super(el, opts);  
+        }
+        get name(){
+            return 'riot-calendar';
+        }
+        get tmpl(){
+            return riotCalendarTmpl;
+        }
     }
-    private state = {};
-}
+})(riot.Tag)
+
+
+
+
+
+

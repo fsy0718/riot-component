@@ -8,8 +8,8 @@ declare class Observe{
 
 declare namespace riot {
     class Tag extends Observe{
-        readonly name: string;
-        tmpl: string;
-        constructor(el: Element, opts: Object);
+        name(): string;
+        tmpl(): string;
+        constructor(el: Element, opts: Object)
     }
 }

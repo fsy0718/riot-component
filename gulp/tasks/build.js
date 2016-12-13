@@ -8,8 +8,10 @@ const rollup = require('rollup');
 const riot = require('rollup-plugin-riot');
 const babel = require('rollup-plugin-babel');
 const json = require('rollup-plugin-json');
+const typescript = require('rollup-plugin-typescript');
 const nodeResolve = require('rollup-plugin-node-resolve');
 const commonjs = require('rollup-plugin-commonjs');
+const string  = require('rollup-plugin-string');
 const gulpSequence = require('gulp-sequence');
 const Promise = require('bluebird');
 
@@ -103,3 +105,28 @@ gulp.task('build', function () {
   })
 });
 
+
+gulp.task('build:ts', function(){
+  rollup.rollup({
+      entry: `${config.sourcepath}/index.ts`,
+      plugins: [
+        typescript(),
+        string({
+          include: `${config.sourcepath}/components/**/*.tag`
+        })
+      ]
+    }).then(bundle => {
+      bundle.write({
+        format: 'iife',
+        dest: `${dest}.js`,
+        globals: { riot: 'riot' },
+        moduleName: changeCase.camelCase(config.package.name)
+      })
+      bundle.write({ format: 'es', dest: `${dest}.es6.js` })
+      bundle.write({ format: 'amd', dest: `${dest}.amd.js` })
+      bundle.write({ format: 'cjs', dest: `${dest}.cjs.js` })
+    }).catch(error => {
+      console.error(error);
+      reject();
+    });
+})

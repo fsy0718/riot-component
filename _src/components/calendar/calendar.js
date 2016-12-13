@@ -111,6 +111,7 @@
  * @param {beforeShowDateCall} [opts.beforeShowDate]  个性自定义每日显示样式
  * @param {number}        [opts.minRangeGap]        range时最小选择区间
  * @param {number}        [opts.maxRangeGap]          range时最大选择区间
+ * @param {boolean}       [opts.disabledOverRangeGap] 禁止超出rangeGap的日期,只有当rangeStart已存在时生效 默认为false
  * @param {rangeGapInvalidCall} [opts.onRangeGapInvalid] range选择不合minRangeGap与maxRangeGap时回调函数
  * @param {(number|number[])} [opts.numberOfMonths]   设置一次显示几个月  number 一行显示的月份数  number[] 显示的行数与列数，设置opts.numberOfMonths则默认opts.showOtherMonthDates为false
  * @returns {calendarTag}
@@ -331,7 +332,20 @@ const getViewDates = function (y, m, order) {
         r.disable = 2;
       } else if ((mis && mis > r._format) || (mas && mas < r._format)) {
         r.disable = 3;
-      }
+      } else if(opts.isRange && opts.disabledOverRangeGap && selectDates && selectDates.length === 1 ){
+        //目前全是0时0分0秒，所以直接相减
+        let selectRangeStart = selectDates[0];
+        let diff = (r.date - selectRangeStart) / 1000 / 60 / 60 / 24 ;
+        if(diff > 0){
+          //因为当前diff是从1开始的，故需要 >=
+          if(opts.minRangeGap && diff < opts.minRangeGap){
+            r.disable = 4;
+          }
+          if(opts.maxRangeGap && diff >= opts.maxRangeGap){
+            r.disable = 5
+          }
+        }
+      } 
       opts.disabledDate && opts.disabledDate(r);
       //有当前变化值才会有上次选中值,动画值
       if (curChangeDateStr) {

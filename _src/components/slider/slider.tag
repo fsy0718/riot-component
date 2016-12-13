@@ -1,4 +1,6 @@
-<div class="riot-slider {opts.disabled && 'riot-slider--disable'} {!included && 'riot-slider--independent'}"  onmousedown={opts.disabled ? noop : onMouseDown} ontouchstart={opts.disabled ? noop : onTouchStart}>
+
+<riot-slider>
+  <div class="riot-slider {opts.disabled && 'riot-slider--disable'} {!included && 'riot-slider--independent'}"  onmousedown={opts.disabled ? noop : onMouseDown} ontouchstart={opts.disabled ? noop : onTouchStart}>
     <div class="riot-slider__track"></div>
     <div class="riot-slider__track--select" if={included} style="left:{selectTrack.left + '%'};width:{selectTrack.width + '%'}"></div>
     <div class="riot-slider__handler riot-slider__handler--1" style="left:{(opts.range ?selectTrack.left : selectTrack.width) + '%'}" data-key={selectTrack.left}></div>
@@ -10,3 +12,8 @@
       </div>
     </div>
   </div>
+  <!--inject-style-->
+  <script>
+  <!-- inject: ./slider.js -->
+  </script>
+</riot-slider>

@@ -115,16 +115,9 @@ export function css(dom, property, value) {
 
 
 const elementClassListmethods = ['add', 'remove', 'toggle', 'contains'];
-const elementClassmethods  = ['addClass', 'removeClass', 'toggleClass', 'hasClass'];
-interface eleClassListMethodsInferface {
-  addClass(dom:HTMLElement, className: string)
-  removeClass(dom:HTMLElement, className: string)
-  toggleClass(dom:HTMLElement, className: string)
-  hasClass(dom:HTMLElement, className: string)
-}
 const _eleClassListMethods = {}
 
-elementClassmethods.forEach(function (method, index) {
+['addClass', 'removeClass', 'toggleClass', 'hasClass'].forEach(function (method, index) {
   _eleClassListMethods[method] = function (dom, className) {
     let call = function (_className) {
       _className = _className.split(' ');
@@ -135,4 +128,4 @@ elementClassmethods.forEach(function (method, index) {
     return each(dom, call, className);
   }
 });
-export  const  eleClassListMethods = _eleClassListMethods as eleClassListMethodsInferface;
+export  const  eleClassListMethods = _eleClassListMethods;
