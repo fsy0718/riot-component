@@ -4,12 +4,33 @@ import addEventListener from "../common/domEventListener";
 import { isNumber, isUndefined } from "../common/utils";
 import riotSlideTmpl from "./slider.tag";
 
+interface riotSliderOptsMarkStringInterface {
+  [index: string]: string
+}
+
+interface riotSliderOptsMarkObjectKeysInterface {
+  label: string,
+  tip ?: boolean,
+  dot ?: boolean
+}
+
+interface riotSliderOptsMarkObjectInterface {
+  [index: string]: riotSliderOptsMarkObjectKeysInterface
+}
+
 interface riotSliderOptsInterface {
   control?: boolean,
   vertical?: boolean,
   allowCross?: boolean,
   rangeValueShouldEqual?: boolean,
-  included?: boolean
+  included?: boolean,
+  range ?: boolean,
+  step ?: number,
+  dots ?: boolean,
+  marks ?: riotSliderOptsMarkStringInterface | riotSliderOptsMarkObjectInterface,
+  value ?: [number],
+  min ?:number,
+  max ?: number
 }
 
 interface riotSliderPointInterface {
@@ -20,6 +41,15 @@ interface riotSliderPointInterface {
   tip?: boolean,
   mark?: boolean,
   dot?: boolean
+}
+
+interface ELementBoundingClientRect {
+  top: number,
+  left: number,
+  right: number,
+  bottom: number,
+  width: number,
+  height: number
 }
 
 export default (function (Tag) {
@@ -75,6 +105,8 @@ export default (function (Tag) {
       let _markPoints = [];
       let markCount = Object.keys(marks).length;
       w = getMarkWidth(markCount);
+      let optShowMarkDotsNoUndefined = !isUndefined(opts.showMarkDots);
+      let optShowMarkTipsNoUndefined = !isUndefined(opts.showMarkTips);
       for (let key in marks) {
         let _key = parseFloat(key);
         let mark = marks[key];
@@ -88,11 +120,11 @@ export default (function (Tag) {
             precent: parseNumber((_key - min) / length * 100)
           }
           if (markIsString) {
-            _point.dot = !isUndefined(opts.showMarkDots) ? opts.showMarkDots : true
-            _point.tip = !isUndefined(opts.showMarkTips) ? opts.showMarkTips : true
+            _point.dot = optShowMarkDotsNoUndefined ? opts.showMarkDots : true
+            _point.tip = optShowMarkTipsNoUndefined ? opts.showMarkTips : true
           } else {
-            _point.dot = mark.dot !== undefined ? mark.dot : !isUndefined(opts.showMarkDots) ? opts.showMarkDots : true
-            _point.tip = mark.tip !== undefined ? mark.tip : !isUndefined(opts.showMarkTips) ? opts.showMarkTips : true
+            _point.dot = mark.dot !== undefined ? mark.dot : optShowMarkDotsNoUndefined ? opts.showMarkDots : true
+            _point.tip = mark.tip !== undefined ? mark.tip : optShowMarkTipsNoUndefined ? opts.showMarkTips : true
           }
           points.push(_point);
           _markPoints.push(_point);
@@ -120,12 +152,100 @@ export default (function (Tag) {
     }
   }
 
+  const getMousePosition = function(e: MouseEvent, isVertical=false){
+    return isVertical ? e.clientY : e.pageX;
+  }
+
+  const getTouchPosition = function(e: TouchEvent, isVertical= false){
+    return isVertical ? e.touches[0].clientY : e.touches[0].pageX;
+  }
+  //通过长度获取值
+  const getPrecentByPosition = function (pos:number, rect: ELementBoundingClientRect, isVertical=false):number {
+    let v;
+    if (isVertical) {
+      v = (pos - rect.top) / rect.height
+    } else {
+      v = (pos - rect.left) / rect.width;
+    }
+    return v > 1 ? 1 : v < 0 ? 0 : v;
+  }
+  const getClosetPointByPosition = function (position:number, rect:ELementBoundingClientRect, config: riotSliderOptsInterface, marks, points) {
+    const {range, dots, vertical, max, min, step} = config;
+    //precent需要先乘100并保留四位有效数字，求_value时再除以100,否则会造成3 => 2.999999999999999999999999的情况
+    let precent = getPrecentByPosition(position, rect, vertical);
+    let _value: number | Object = precent * (max - min) + min;
+    if(range && !step){
+      _value = getClosetValueByDichotomy(marks,_value);
+    }else if(dots){
+      _value = getClosetValueByDichotomy(points, _value);
+    }else{
+      _value = {
+        key: parseInt(''+_value), 
+      }
+    }
+    return {
+      //precent小数点后可能不止四位，不用对外提供，不进行优化
+      precent: precent * 100,
+      point: _value
+    }
+  }
+  //二分法查换值
+const getClosetValueByDichotomy = function (source, val) {
+  let len = source.length;
+  if (val <= source[0].key) {
+    return source[0];
+  }
+  if (val >= source[len - 1].key) {
+    return source[len - 1];
+  }
+  let _source = source.slice(0);
+  let _len;
+  let i = 0;
+  while ((_len = _source.length) > 0) {
+    let _l;
+    ++i;
+    if (_len === 1) {
+      return _source[0]
+    } else {
+      _l = Math.floor(_len / 2);
+    }
+    let d1 = val - _source[_l - 1].key;
+    let d2 = _source[_l].key - val;
+    if (d1 < 0) {
+      //说明在右边
+      _source = _source.slice(0, _l);
+    } else if (d2 < 0) {
+      //说明在左边
+      _source = _source.slice(_l);
+    } else {
+      return d1 > d2 ? _source[_l] : _source[_l - 1];
+    }
+    if (i > len) {
+      console.warn('由于算法原因，已进入死循环');
+      return;
+    }
+  }
+}
+  const initConfig = function (opts: riotSliderOptsInterface) {
+    let {marks, value, min = 0, max = 100} = opts;
+    min = Math.max(0, min);
+    return {
+      control: opts.control || false,
+      isVertical: opts.vertical || false,
+      allowCross: isUndefined(opts.allowCross) ? true : opts.allowCross,
+      rangeValueShouldEqual: isUndefined(opts.rangeValueShouldEqual) ? true : opts.rangeValueShouldEqual,
+      included: isUndefined(opts.included) ? true : opts.included,
+      min: min,
+      max: max
+    }
+  }
   class RiotSlider extends Tag {
+    config: Object
     constructor(dom, opts = {}) {
       super(dom, opts);
-      let sliderRootEle;
+      let $eventRoot;
       this.on('mount', function () {
-        sliderRootEle = this.root.querySelector('.riot-slider');
+        $eventRoot = this.root.querySelector('.riot-slider');
       })
     }
     get name() {
@@ -135,17 +255,8 @@ export default (function (Tag) {
       return riotSlideTmpl;
     }
     private state = {};
-    private initState(opts: riotSliderOptsInterface) {
-      this.state = {
-        control: opts.control || false,
-        isVertical: opts.vertical || false,
-        allowCross: isUndefined(opts.allowCross) ? true : opts.allowCross,
-        rangeValueShouldEqual: isUndefined(opts.rangeValueShouldEqual) ? true : opts.rangeValueShouldEqual,
-        included: isUndefined(opts.included) ? true : opts.included
-      }
-    }
     onCreate(opts: riotSliderOptsInterface) {
-      this.initState(opts);
+      this.config = initConfig(opts);
     }
   }
   return RiotSlider;
