@@ -66,6 +66,7 @@ interface ELementBoundingClientRect {
   height: number
 }
 
+
 export default (function (Tag) {
   const getHandleRect = function (handle: HTMLElement) {
     return handle.getBoundingClientRect();
@@ -265,43 +266,109 @@ export default (function (Tag) {
     }
   }
 
-const setRangeValue = function (val, state, config): boolean {
-  const {rangeValueShouldEqual, rangeGapFix, allowCross} = config;
-  if(!rangeValueShouldEqual && val === state.rangeStableValue){
-    return false;
-  }
-  //如果固定range的差值
-  if(rangeGapFix){
-    //滑动方向 1表示向右 -1向左
-    let direction = val - state.value[state.rangeChangeHandle];
-    if(direction > 0){
-      direction = 1
-    }else if(direction < 0){
-      direction = -1;
-    }else{
-      //如果为0 直接不更新
+  const setRangeValue = function (val, state, config): boolean {
+    const {rangeValueShouldEqual, rangeGapFix, allowCross} = config;
+    let {values, rangeGap, rangeStableValue, rangeChangeHandle, cachePoint} = state;
+    if(!rangeValueShouldEqual && val === rangeStableValue){
       return false;
     }
-    let newVal = state.value[state.rangeChangeHandle ? 0 : 1] + direction * state.rangeGap;
-    let newValInPoint = state.cachePoint.points.some(function(point){
-      return point.key === newVal
-    })
-    if(newValInPoint){
-      state.value = state.rangeChangeHandle === 0 ? [val, newVal] : [newVal, val];
-      return true
+    //如果固定range的差值
+    if(rangeGapFix){
+      //滑动方向 1表示向右 -1向左
+      let direction = val - values[rangeChangeHandle];
+      if(direction > 0){
+        direction = 1
+      }else if(direction < 0){
+        direction = -1;
+      }else{
+        //如果为0 直接不更新
+        return false;
+      }
+      let newVal = values[rangeChangeHandle ? 0 : 1] + direction * rangeGap;
+      let newValInPoint = cachePoint.points.some(function(point){
+        return point.key === newVal
+      })
+      if(newValInPoint){
+        values = rangeChangeHandle === 0 ? [val, newVal] : [newVal, val];
+        return true
+      }
+      return false;
     }
-    return false;
+    values = [val, rangeStableValue].sort(function (a, b) {
+      return a - b;
+    })
+    let diff = val - rangeStableValue
+    if (!allowCross && (rangeChangeHandle === 0 && val > rangeStableValue || rangeChangeHandle === 1 && val < rangeStableValue)) {
+      return false;
+    }
+    return true;
   }
-  state.value = [val, state.rangeStableValue].sort(function (a, b) {
-    return a - b;
-  })
-  let diff = val - state.rangeStableValue
-  if (!allowCross && (state.rangeChangeHandle === 0 && val > state.rangeStableValue || state.rangeChangeHandle === 1 && val < state.rangeStableValue)) {
-    return false;
-  }
-  return true;
-}
 
+  //点击时确认是哪个handle移动的
+  const getHandleIndex = function (precent, selectTrack) {
+
+    let index;
+    let d1 = precent - selectTrack.left;
+    let d2 = selectTrack.left + selectTrack.width - precent;
+    if (d1 <= 0) {
+      index = 0
+    } else if (d2 <= 0) {
+      index = 1;
+    } else {
+      index = d1 > d2 ? 1 : 0;
+    }
+    return index;
+  }
+
+  const getValue = function(config:riotSliderOptsInterface, state): number[]{
+    return config.range ? state.value.concat() : state.value.slice(1,2);
+  }
+
+  //更新state.value值，返回是否更新成功
+  const updateStateValue = function(point, config: riotSliderOptsInterface, state){
+    state.changePointKey = point.key;
+    let shouldUpdate ;
+    if (config.range) {
+      shouldUpdate = setRangeValue(point.key, state, config);
+    } else {
+      state.value = [config.min, point.key];
+      shouldUpdate = true;
+    }
+    return shouldUpdate;
+  }
+
+  const onMouseMove = function (e) {
+    let position = getMousePosition(e);
+    onMove(position)
+  }
+  const onTouchMove = function(e){
+    if(isNotTouchEvent(e)){
+      end('touch');
+      e.preventUpdate = true;
+      return;
+    }
+    let position = getTouchPosition(e);
+    onMove(position)
+  }
+  const onMove = function(position){
+    //TODO 不断的去比较值，后期进行优化
+    let closetPoint = getClosetPointByPosition(position);
+    let point = closetPoint.point;
+    if (state.changePointKey !== point.key ) {
+      let shouldUpdate = updateStateValue(point);
+      if(shouldUpdate){
+        tag.update();
+        opts.onChange && opts.onChange(getValue());
+      }
+    }
+  }
+  const end = function (type) {
+    //TODO 需要值
+    state.rangeChangeHandle = undefined;
+    state.rangeStableValue = null;
+    opts.onAfterChange && opts.onAfterChange(getValue());
+    removeEvents(type);
+  }
   const initConfig = function (opts: riotSliderOptsInterface): riotSliderOptsInterface {
     let {marks, step,  min = 0, max = 100, value} = opts;
     min = Math.max(0, min);
@@ -335,6 +402,7 @@ const setRangeValue = function (val, state, config): boolean {
 
   class RiotSlider extends Tag {
     config: riotSliderOptsInterface
+    selectTrack: {left:number, width: number}
     constructor(dom: Element, opts: riotSliderOptsInterface = {}) {
       super(dom, opts);
       console.log(opts);
