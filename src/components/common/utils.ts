@@ -59,26 +59,26 @@ export function zeroFill(number: number, targetLength=2, forceSign=false) {
         Math.pow(10, Math.max(0, zerosToFill)).toString().substr(1) + absNumber;
 };
 //'String', 'Number', 'Object', 'Date', 'Array', 'Function', 'Undefined'
-export function isString(str){
-  _toString.call(str) === '[object String]'
+export function isString(str): boolean{
+  return _toString.call(str) === '[object String]'
 }
-export function isNumber(str){
-  _toString.call(str) === '[object Number]'
+export function isNumber(str): boolean{
+  return _toString.call(str) === '[object Number]'
 }
-export function isObject(str){
-  _toString.call(str) === '[object Object]'
+export function isObject(str): boolean{
+  return _toString.call(str) === '[object Object]'
 }
-export function isDate(str){
-  _toString.call(str) === '[object Date]'
+export function isDate(str): boolean{
+  return _toString.call(str) === '[object Date]'
 }
-export function isArray(str){
-  _toString.call(str) === '[object Array]'
+export function isArray(str): boolean{
+  return _toString.call(str) === '[object Array]'
 }
-export function isFunction(str){
-  _toString.call(str) === '[object Function]'
+export function isFunction(str): boolean{
+  return _toString.call(str) === '[object Function]'
 }
-export function isUndefined(str){
-  _toString.call(str) === '[object Undefined]'
+export function isUndefined(str): boolean{
+  return _toString.call(str) === '[object Undefined]'
 }
 export function css(dom, property, value) {
   if (arguments.length < 3) {

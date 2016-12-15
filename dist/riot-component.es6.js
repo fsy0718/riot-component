@@ -6,31 +6,6 @@ function __extends(d, b) {
 
 var version = 'v${version}';
 
-var camelize = function (str) {
-    return str.replace(/-+(.)?/g, function (match, chr) {
-        return chr ? chr.toUpperCase() : '';
-    });
-};
-var dasherize = function (str) {
-    return str.replace(/::/g, '/')
-        .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
-        .replace(/([a-z\d])([A-Z])/g, '$1_$2')
-        .replace(/_/g, '-')
-        .toLowerCase();
-};
-var prefixProps = {
-    animation: true
-};
-var maybePrefix = function (key, value) {
-    var css = '';
-    var key = dasherize(key);
-    var _key = key.split('-');
-    if (prefixProps[_key[0]]) {
-        css += '-webkit-' + key + ':' + value + ';';
-    }
-    css += key + ':' + value + ';';
-    return css;
-};
 var _slice = [].slice;
 var _toString = Object.prototype.toString;
 var each = function (dom, callback) {
@@ -48,25 +23,9 @@ var each = function (dom, callback) {
         callback.apply(dom[0], args);
     }
 };
-
-
-
-
-
-
-//'String', 'Number', 'Object', 'Date', 'Array', 'Function', 'Undefined'
-
-
-
-
-function isArray(str) {
-    _toString.call(str) === '[object Array]';
-}
-
 function isUndefined(str) {
-    _toString.call(str) === '[object Undefined]';
+    return _toString.call(str) === '[object Undefined]';
 }
-
 var elementClassListmethods = ['add', 'remove', 'toggle', 'contains'];
 var elementClassmethods = ['addClass', 'removeClass', 'toggleClass', 'hasClass'];
 var _eleClassListMethods = {};
@@ -82,9 +41,8 @@ elementClassmethods.forEach(function (method, index) {
     };
 });
 
-var riotCalendarTmpl = "<div class=\"riot-calendar__box {(mutipleItems > 1 && 'riot-calendar--multiple riot-calendar--multiple-i' + mutipleItems)}\">\n  <a class=\"prev {prevMonthDisable && 'disable'}\" href=\"javascript:;\" onclick={prevMonth}><i></i></a>\n  <a class=\"next {nextMonthDisable && 'disable'}\" href=\"javascript:;\" onclick={nextMonth}><i></i></a>\n  <div class=\"riot-calendar__items\" each={items, index in viewDatas}>\n    <div class=\"riot-calendar__head\">\n      <div class=\"control title\">\n        <div if={otherViewDatas} class=\"title__other\">{otherViewDatas[index].title}</div>\n        <div class=\"title__cur\">{items.title}</div>\n      </div>\n      <div class=\"pure-g weeks\">\n        <div class=\"pure-u-1-8\" each={week in weekTitles}>{week}</div>\n      </div>\n    </div>\n    <div class=\"riot-calendar__body\">\n      <div if={otherViewDatas} class=\"riot-calendar__body--other\">\n        <div class=\"pure-g\" each={weekdates in otherViewDatas[index].weekdates}>\n          <div class=\"pure-u-1-8 {parseDateBoxClass(date)}\" each={date in weekdates}>\n            <div class=\"{date.disable === 0 && 'enable' || 'disable'} {date.select === 1 && 'choice' || ''}\">\n              <riot-date date={date}></riot-date>\n            </div>\n          </div>\n        </div>\n      </div>\n    <div class=\"riot-calendar__body--cur\">\n      <div class=\"pure-g\" each={weekdates in items.weekdates}>\n        <div class=\"pure-u-1-8 {parseDateBoxClass(date)}\" each={date in weekdates}>\n          <span class=\"date-placeholder\" if={!showOtherMonthDates && date.current}></span>\n          <div if={showOtherMonthDates || (showOtherMonthDates===false && date.current===0 )} class=\"{date.disable === 0 && 'enable' || 'disable'} {date._change && 'change'} {date.select === 1 && 'choice' || ''}\" onclick={checkDate}>\n            <riot-date date={date}></riot-date>\n          </div>\n        </div>\n      </div>\n    </div>\n  </div>\n</div>\n<div class=\"riot-calendar__foot\"></div>";
+var riotCalendarTmpl = "<div class=\"riot-calendar__box {(mutipleItems > 1 && 'riot-calendar--multiple riot-calendar--multiple-i' + mutipleItems)}\">\r\n  <a class=\"prev {prevMonthDisable && 'disable'}\" href=\"javascript:;\" onclick={prevMonth}><i></i></a>\r\n  <a class=\"next {nextMonthDisable && 'disable'}\" href=\"javascript:;\" onclick={nextMonth}><i></i></a>\r\n  <div class=\"riot-calendar__items\" each={items, index in viewDatas}>\r\n    <div class=\"riot-calendar__head\">\r\n      <div class=\"control title\">\r\n        <div if={otherViewDatas} class=\"title__other\">{otherViewDatas[index].title}</div>\r\n        <div class=\"title__cur\">{items.title}</div>\r\n      </div>\r\n      <div class=\"pure-g weeks\">\r\n        <div class=\"pure-u-1-8\" each={week in weekTitles}>{week}</div>\r\n      </div>\r\n    </div>\r\n    <div class=\"riot-calendar__body\">\r\n      <div if={otherViewDatas} class=\"riot-calendar__body--other\">\r\n        <div class=\"pure-g\" each={weekdates in otherViewDatas[index].weekdates}>\r\n          <div class=\"pure-u-1-8 {parseDateBoxClass(date)}\" each={date in weekdates}>\r\n            <div class=\"{date.disable === 0 && 'enable' || 'disable'} {date.select === 1 && 'choice' || ''}\">\r\n              <riot-date date={date}></riot-date>\r\n            </div>\r\n          </div>\r\n        </div>\r\n      </div>\r\n    <div class=\"riot-calendar__body--cur\">\r\n      <div class=\"pure-g\" each={weekdates in items.weekdates}>\r\n        <div class=\"pure-u-1-8 {parseDateBoxClass(date)}\" each={date in weekdates}>\r\n          <span class=\"date-placeholder\" if={!showOtherMonthDates && date.current}></span>\r\n          <div if={showOtherMonthDates || (showOtherMonthDates===false && date.current===0 )} class=\"{date.disable === 0 && 'enable' || 'disable'} {date._change && 'change'} {date.select === 1 && 'choice' || ''}\" onclick={checkDate}>\r\n            <riot-date date={date}></riot-date>\r\n          </div>\r\n        </div>\r\n      </div>\r\n    </div>\r\n  </div>\r\n</div>\r\n<div class=\"riot-calendar__foot\"></div>";
 
-/// <reference path="../riot.d.ts" />
 var calendar = (function (Tag) {
     var RiotCalendar = (function (_super) {
         __extends(RiotCalendar, _super);
@@ -110,10 +68,9 @@ var calendar = (function (Tag) {
     }(riot.Tag));
 })(riot.Tag);
 
-var riotSlideTmpl = "<div class=\"riot-slider {opts.disabled && 'riot-slider--disable'} {!included && 'riot-slider--independent'}\"  onmousedown={opts.disabled ? noop : onMouseDown} ontouchstart={opts.disabled ? noop : onTouchStart}>\n    <div class=\"riot-slider__track\"></div>\n    <div class=\"riot-slider__track--select\" if={included} style=\"left:{selectTrack.left + '%'};width:{selectTrack.width + '%'}\"></div>\n    <div class=\"riot-slider__handler riot-slider__handler--1\" style=\"left:{(opts.range ?selectTrack.left : selectTrack.width) + '%'}\" data-key={selectTrack.left}></div>\n    <div class=\"riot-slider__handler riot-slider__handler--2\" if={opts.range} style=\"left: {(selectTrack.left + selectTrack.width) + '%'}\" data-key={selectTrack.left + selectTrack.width}></div>\n    <div class=\"riot-slider__marks\" if={opts.marks || opts.showAllDots}>\n      <div each={mark,index in marks} class=\"riot-slider__marks--items {parseMarkItemClass(mark)}\">\n        <span class=\"riot-slider__marks--items-dot\" data-key={index} style=\"left:{mark.precent + '%'}\" if={mark.dot}></span>\n        <span class=\"riot-slider__marks--items-tip\" data-key={index} style=\"width:{mark.width + '%'};margin-left:{(-0.5 * mark.width) + '%'};left:{mark.precent + '%'}\" if={mark.tip}>{mark.label}</span>\n      </div>\n    </div>\n  </div>";
+var riotSlideTmpl = "<div class=\"riot-slider {opts.disabled && 'riot-slider--disable'} {!included && 'riot-slider--independent'}\"  onmousedown={opts.disabled ? noop : onMouseDown} ontouchstart={opts.disabled ? noop : onTouchStart}>\r\n    <div class=\"riot-slider__track\"></div>\r\n    <div class=\"riot-slider__track--select\" if={included} style=\"left:{selectTrack.left + '%'};width:{selectTrack.width + '%'}\"></div>\r\n    <div class=\"riot-slider__handler riot-slider__handler--1\" style=\"left:{(opts.range ?selectTrack.left : selectTrack.width) + '%'}\" data-key={selectTrack.left}></div>\r\n    <div class=\"riot-slider__handler riot-slider__handler--2\" if={opts.range} style=\"left: {(selectTrack.left + selectTrack.width) + '%'}\" data-key={selectTrack.left + selectTrack.width}></div>\r\n    <div class=\"riot-slider__marks\" if={opts.marks || opts.showAllDots}>\r\n      <div each={mark,index in marks} class=\"riot-slider__marks--items {parseMarkItemClass(mark)}\">\r\n        <span class=\"riot-slider__marks--items-dot\" data-key={index} style=\"left:{mark.precent + '%'}\" if={mark.dot}></span>\r\n        <span class=\"riot-slider__marks--items-tip\" data-key={index} style=\"width:{mark.width + '%'};margin-left:{(-0.5 * mark.width) + '%'};left:{mark.precent + '%'}\" if={mark.tip}>{mark.label}</span>\r\n      </div>\r\n    </div>\r\n  </div>";
 
-/// <reference path="../riot.d.ts" />
-var slider = (function (Tag) {
+var RiotSlider = (function (Tag) {
     var getHandleRect = function (handle) {
         return handle.getBoundingClientRect();
     };
@@ -134,15 +91,37 @@ var slider = (function (Tag) {
         //算法来自https://github.com/react-component/slider/blob/master/src/Marks.jsx
         return parseNumber(100 / (len - 1) * 0.9);
     };
-    var getEnablePoint = function (marks, state, opts) {
-        var min = state.min, max = state.max;
+    var parseValue = function (value, min, max, opts) {
+        var _value = [min, min];
+        if (value && value.length) {
+            var _v_1 = [];
+            value.forEach(function (v) {
+                if (v >= min && v <= max) {
+                    _v_1.push(+v);
+                }
+                else {
+                    console.warn('riot-slider实例类名为%s的opts.value由于不在opts.min与opts.max之间被移动', opts.class || 'riot-slider', v);
+                }
+            });
+            _value = _v_1.sort();
+        }
+        var _valen = _value.length;
+        if (_valen > 2) {
+            _value = _value.slice(0, 2);
+        }
+        else if (_valen < 2) {
+            _value.unshift(min);
+        }
+        return _value;
+    };
+    var getEnablePoint = function (marks, config) {
+        var min = config.min, max = config.max, step = config.step, showAllTips = config.showAllTips, showAllDots = config.showAllDots, showMarkTips = config.showMarkTips, showMarkDots = config.showMarkDots;
         var points = [];
         var markPoints;
         var length = max - min;
         var w;
-        var step = opts.range ? opts.step : opts.step || 1;
         if (step > 0) {
-            opts.showAllTips ? w = parseNumber(getMarkWidth(Math.ceil((max - min) / step))) : '';
+            showAllTips ? w = parseNumber(getMarkWidth(Math.ceil((max - min) / step))) : '';
             var i = min;
             while (i <= max) {
                 if (!(marks && marks[i])) {
@@ -151,11 +130,11 @@ var slider = (function (Tag) {
                         label: '' + i,
                         precent: parseNumber((i - min) / length * 100)
                     };
-                    if (opts.showAllTips) {
+                    if (showAllTips) {
                         _point.width = w;
                         _point.tip = true;
                     }
-                    if (opts.showAllDots) {
+                    if (showAllDots) {
                         _point.dot = true;
                     }
                     points.push(_point);
@@ -167,8 +146,6 @@ var slider = (function (Tag) {
             var _markPoints = [];
             var markCount = Object.keys(marks).length;
             w = getMarkWidth(markCount);
-            var optShowMarkDotsNoUndefined = !isUndefined(opts.showMarkDots);
-            var optShowMarkTipsNoUndefined = !isUndefined(opts.showMarkTips);
             for (var key in marks) {
                 var _key = parseFloat(key);
                 var mark = marks[key];
@@ -182,18 +159,15 @@ var slider = (function (Tag) {
                         precent: parseNumber((_key - min) / length * 100)
                     };
                     if (markIsString) {
-                        _point.dot = optShowMarkDotsNoUndefined ? opts.showMarkDots : true;
-                        _point.tip = optShowMarkTipsNoUndefined ? opts.showMarkTips : true;
+                        _point.dot = showMarkDots;
+                        _point.tip = showMarkTips;
                     }
                     else {
-                        _point.dot = mark.dot !== undefined ? mark.dot : optShowMarkDotsNoUndefined ? opts.showMarkDots : true;
-                        _point.tip = mark.tip !== undefined ? mark.tip : optShowMarkTipsNoUndefined ? opts.showMarkTips : true;
+                        _point.dot = mark.dot !== undefined ? mark.dot : showMarkDots;
+                        _point.tip = mark.tip !== undefined ? mark.tip : showMarkTips;
                     }
                     points.push(_point);
                     _markPoints.push(_point);
-                }
-                else {
-                    console.warn('riot-slider实例类名为%s中有key为%s的mark由于不在opts.min和opts.max之间被移除', opts.class, key);
                 }
             }
             //筛选出错误的mark
@@ -212,22 +186,22 @@ var slider = (function (Tag) {
         });
         return {
             points: points,
-            marks: opts.showAllDots ? points : markPoints
+            marks: showAllDots ? points : markPoints
         };
     };
-    var getMousePosition = function (e, isVertical) {
-        if (isVertical === void 0) { isVertical = false; }
-        return isVertical ? e.clientY : e.pageX;
+    var getMousePosition = function (e, vertical) {
+        if (vertical === void 0) { vertical = false; }
+        return vertical ? e.clientY : e.pageX;
     };
-    var getTouchPosition = function (e, isVertical) {
-        if (isVertical === void 0) { isVertical = false; }
-        return isVertical ? e.touches[0].clientY : e.touches[0].pageX;
+    var getTouchPosition = function (e, vertical) {
+        if (vertical === void 0) { vertical = false; }
+        return vertical ? e.touches[0].clientY : e.touches[0].pageX;
     };
     //通过长度获取值
-    var getPrecentByPosition = function (pos, rect, isVertical) {
-        if (isVertical === void 0) { isVertical = false; }
+    var getPrecentByPosition = function (pos, rect, vertical) {
+        if (vertical === void 0) { vertical = false; }
         var v;
-        if (isVertical) {
+        if (vertical) {
             v = (pos - rect.top) / rect.height;
         }
         else {
@@ -298,16 +272,31 @@ var slider = (function (Tag) {
         }
     };
     var initConfig = function (opts) {
-        var marks = opts.marks, value = opts.value, _a = opts.min, min = _a === void 0 ? 0 : _a, _b = opts.max, max = _b === void 0 ? 100 : _b;
+        var marks = opts.marks, step = opts.step, _a = opts.min, min = _a === void 0 ? 0 : _a, _b = opts.max, max = _b === void 0 ? 100 : _b, value = opts.value;
         min = Math.max(0, min);
+        if (!(marks || step) || (step && step <= 0) || !step) {
+            step = 1;
+        }
+        var _value = parseValue(value, min, max, opts);
         return {
             control: opts.control || false,
-            isVertical: opts.vertical || false,
-            allowCross: isUndefined(opts.allowCross) ? true : opts.allowCross,
-            rangeValueShouldEqual: isUndefined(opts.rangeValueShouldEqual) ? true : opts.rangeValueShouldEqual,
-            included: isUndefined(opts.included) ? true : opts.included,
+            vertical: opts.vertical || false,
+            allowCross: isUndefined(opts.allowCross) && true || opts.allowCross,
+            rangeValueShouldEqual: isUndefined(opts.rangeValueShouldEqual) && true || opts.rangeValueShouldEqual,
+            included: isUndefined(opts.included) && true || opts.included,
             min: min,
-            max: max
+            max: max,
+            showMarkTip: isUndefined(opts.showMarkTip) && true || opts.showMarkTip,
+            showMarkDot: isUndefined(opts.showMarkDot) && true || opts.showMarkDot,
+            range: opts.range || false,
+            step: step,
+            marks: marks,
+            value: _value,
+            dots: opts.dots || false,
+            showAllTips: opts.showAllTips || false,
+            showAllDots: opts.showAllDots || false,
+            rangeGapFixed: opts.rangeGapFixed || false,
+            onChange: opts.onChange
         };
     };
     var RiotSlider = (function (_super) {
@@ -315,7 +304,7 @@ var slider = (function (Tag) {
         function RiotSlider(dom, opts) {
             if (opts === void 0) { opts = {}; }
             _super.call(this, dom, opts);
-            this.state = {};
+            console.log(opts);
             var $eventRoot;
             this.on('mount', function () {
                 $eventRoot = this.root.querySelector('.riot-slider');
@@ -337,10 +326,22 @@ var slider = (function (Tag) {
         });
         RiotSlider.prototype.onCreate = function (opts) {
             this.config = initConfig(opts);
+            console.log(this.config);
         };
         return RiotSlider;
     }(Tag));
     return RiotSlider;
 })(riot.Tag);
 
-export { version, calendar as RiotCalendar, slider as RiotSlider };
+var dom = document.querySelector('.demo');
+var riotSlider = new RiotSlider(dom, {
+    marks: {
+        '1': '50%',
+        '20': {
+            label: '60'
+        }
+    },
+    step: 3
+});
+
+export { version, calendar as RiotCalendar };
