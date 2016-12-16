@@ -112,7 +112,7 @@ gulp.task('build:ts', function(){
       plugins: [
         typescript(),
         string({
-          include: `${config.sourcepath}/components/**/*.tag`
+          include: [`${config.sourcepath}/components/**/*.tag`,`${config.sourcepath}/components/**/*.css`]
         })
       ]
     }).then(bundle => {

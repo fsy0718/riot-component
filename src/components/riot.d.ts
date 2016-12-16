@@ -11,5 +11,7 @@ declare namespace riot {
         readonly name: string;
         tmpl: string;
         constructor(el: Element, opts: Object);
+        css: string;
+        attrs: string;
     }
 }

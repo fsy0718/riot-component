@@ -46,8 +46,10 @@
     "build": "gulp build",
     "build:noCss": "gulp build:noCss --withCss false",
     "watch": "gulp watch",
+    "watch:ts": "gulp watch:ts",
     "server": "gulp server",
     "start": "gulp server:watch",
+    "start:ts": "gulp server:watch:ts",
     "start:build": "gulp server:watch:build",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "changelog:first": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"

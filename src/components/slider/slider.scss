@@ -1,0 +1,109 @@
+@charset "utf-8";
+@import "../common/var";
+@import "../common/lib";
+:scope/*slider*/{
+  .riot-slider{
+    width: 100%;
+    @extend %Lposr;
+    height: rSize(10);
+    padding: rSize(10) 0;
+    //轨道
+    &__track{
+      height: 100%;
+      border-radius: rSize(5);
+      background-color: $slider-track-color;
+      z-index: 2;
+      //被选中的轨道
+      &--select{
+        @extend %Lposa;
+        z-index: 3;
+        background-color: $slider-track-select-color;
+        top: rSize(10);
+        bottom: rSize(10);
+        border-radius: rSize(5);
+      }
+    }
+    //滑块
+    &__handler{
+      @extend %Lposa;
+      width: rSize(24);
+      height: rSize(24);
+      border-radius: 50%;
+      background-color: $slider-mark-color;
+      box-shadow: 0 0 rSize(5) 1px $slider-mark-shadow-color;
+      top: rSize(24 - 20) / 2;
+      z-index: 10;
+      margin-left: -0.5 * rSize(24);
+      @extend %Lcurp;
+    }
+    //mark
+    &__marks{
+      background-color: transparent;
+      @extend %Lposa;
+      z-index: 4;
+      top: rSize(10);
+      bottom: rSize(10);
+      width: 100%; 
+      &--items{
+        &-dot{
+          width: rSize(18);
+          height: rSize(18);
+          border-radius: 50%;
+          background: #fff;
+          border: solid 1px $slider-track-color;
+          top: -1 * rSize(18 - 10);
+          @extend %Lposa;
+          @extend %Lcurp;
+          margin-left: -0.5 * rSize(18);
+        }
+        &-tip{
+          font-size: rSize(24);
+          line-height: 1;
+          @extend %Lposa;
+          top: rSize(20);
+          color: $slider-mark-text-color;
+          @extend %Lcurp;
+          @extend %Ltac;
+        }
+      }
+      &--items-select{
+        .riot-slider__marks--items{
+          &-dot{
+            border-color: $slider-track-select-color;
+          }
+          &-tip{
+            color: $slider-mark-text-select-color;
+          }
+        }
+
+      }
+      
+    }
+    //并列关系
+    &--independent{
+      .riot-slider__handler{
+        background-color: $slider-track-select-color;
+      }
+    }
+    //禁止
+    &--disable{
+      .riot-slider__track--select{
+        background-color: darken($slider-track-color,10);
+      }
+      .riot-slider__handler{
+        cursor: not-allowed;
+        background-color: $slider-track-color;
+      }
+      .riot-slider__marks--items-select{
+        .riot-slider__marks--items{
+          &-dot{
+            border: solid 1px $slider-track-color;
+          }
+          &-tip{
+            color: $slider-mark-text-color;
+          }
+        }
+      }
+    }
+  }
+}

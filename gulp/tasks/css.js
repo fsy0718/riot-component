@@ -41,3 +41,24 @@ gulp.task('css:noCss',['scss:copy'], function(){
     .pipe(concat('riot-component.css'))
     .pipe(gulp.dest(config.destpath))
 });
+gulp.task('scss:copy:ts', function(cb){
+  return gulp.src([config.sourcepath + '/components/**/*.scss'])
+    .pipe(
+      gulpIf(
+        true,
+        replace(/\:scope(?:\/\*([^\*]+)\*\/)/, function(a,b){
+          return '[data-is="riot-' + b + '"]'
+          }
+        )
+      )
+    )
+    .pipe(gulp.dest(config.cachepath + '/components'));
+})
+gulp.task('css:ts', ['scss:copy:ts'], function(){
+  return sass(config.cachepath + '/components/**/*.scss')
+    .on('error', sass.logError)
+    .pipe(
+      autoprefixer(config.autoprefixer)
+    )
+    .pipe(gulp.dest(config.sourcepath + '/components'))
+})

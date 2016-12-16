@@ -70,30 +70,45 @@ define(['exports'], function (exports) { 'use strict';
         }(riot.Tag));
     })(riot.Tag);
 
-    var riotSlideTmpl = "<div class=\"riot-slider {opts.disabled && 'riot-slider--disable'} {!included && 'riot-slider--independent'}\"  onmousedown={opts.disabled ? noop : onMouseDown} ontouchstart={opts.disabled ? noop : onTouchStart}>\r\n    <div class=\"riot-slider__track\"></div>\r\n    <div class=\"riot-slider__track--select\" if={included} style=\"left:{selectTrack.left + '%'};width:{selectTrack.width + '%'}\"></div>\r\n    <div class=\"riot-slider__handler riot-slider__handler--1\" style=\"left:{(opts.range ?selectTrack.left : selectTrack.width) + '%'}\" data-key={selectTrack.left}></div>\r\n    <div class=\"riot-slider__handler riot-slider__handler--2\" if={opts.range} style=\"left: {(selectTrack.left + selectTrack.width) + '%'}\" data-key={selectTrack.left + selectTrack.width}></div>\r\n    <div class=\"riot-slider__marks\" if={opts.marks || opts.showAllDots}>\r\n      <div each={mark,index in marks} class=\"riot-slider__marks--items {parseMarkItemClass(mark)}\">\r\n        <span class=\"riot-slider__marks--items-dot\" data-key={index} style=\"left:{mark.precent + '%'}\" if={mark.dot}></span>\r\n        <span class=\"riot-slider__marks--items-tip\" data-key={index} style=\"width:{mark.width + '%'};margin-left:{(-0.5 * mark.width) + '%'};left:{mark.precent + '%'}\" if={mark.tip}>{mark.label}</span>\r\n      </div>\r\n    </div>\r\n  </div>";
+    var riotSlideTmpl = "  <div class=\"riot-slider {config.disabled && 'riot-slider--disable'} {!config.included && 'riot-slider--independent'}\"  onmousedown=\"{config.disabled ? noop : onMouseDown}\" ontouchstart=\"{config.disabled ? noop : onTouchStart}\">\r\n    <div class=\"riot-slider__track\"></div>\r\n    <div class=\"riot-slider__track--select\" if={config.included} style=\"left:{state.track.left + '%'};width:{state.track.width + '%'}\"></div>\r\n    <div class=\"riot-slider__handler riot-slider__handler--1\" style=\"left:{(config.range ?state.track.left : state.track.width) + '%'}\" data-key={state.track.left}></div>\r\n    <div class=\"riot-slider__handler riot-slider__handler--2\" if={config.range} style=\"left: {(state.track.left + state.track.width) + '%'}\" data-key={state.track.left + state.track.width}></div>\r\n    <div class=\"riot-slider__marks\" if={config.marks || config.showAllDots}>\r\n      <div each={mark,index in marks} class=\"riot-slider__marks--items {parseMarkItemClass(mark)}\">\r\n        <span class=\"riot-slider__marks--items-dot\" data-key={index} style=\"left:{mark.precent + '%'}\" if={mark.dot}></span>\r\n        <span class=\"riot-slider__marks--items-tip\" data-key={index} style=\"width:{mark.width + '%'};margin-left:{(-0.5 * mark.width) + '%'};left:{mark.precent + '%'}\" if={mark.tip}>{mark.label}</span>\r\n      </div>\r\n    </div>\r\n  </div>";
 
-    var RiotSlider = (function (Tag) {
-        var getHandleRect = function (handle) {
-            return handle.getBoundingClientRect();
-        };
-        var isNotTouchEvent = function (e) {
-            return e.touches.length > 1 || (e.type.toLowerCase() === 'touchend' && e.touches.length > 0);
-        };
-        //保留四位有效数字
-        var floatReg = /\./;
-        var parseNumber = function (num, dot) {
-            if (dot === void 0) { dot = 4; }
-            var result = num;
-            if (floatReg.test(num)) {
-                result = num.toFixed(dot);
+    var riotSlideCss = "[data-is=\"riot-slider\"] .riot-slider {\r\n  position: relative; }\r\n\r\n[data-is=\"riot-slider\"] .riot-slider__track--select, [data-is=\"riot-slider\"] .riot-slider__handler, [data-is=\"riot-slider\"] .riot-slider__marks, [data-is=\"riot-slider\"] .riot-slider__marks--items-dot, [data-is=\"riot-slider\"] .riot-slider__marks--items-tip {\r\n  position: absolute; }\r\n\r\n[data-is=\"riot-slider\"] .riot-slider__marks--items-tip {\r\n  text-align: center; }\r\n\r\n[data-is=\"riot-slider\"] .riot-slider__handler, [data-is=\"riot-slider\"] .riot-slider__marks--items-dot, [data-is=\"riot-slider\"] .riot-slider__marks--items-tip {\r\n  cursor: pointer; }\r\n\r\n[data-is=\"riot-slider\"] .riot-slider {\r\n  width: 100%;\r\n  height: 0.3125rem;\r\n  padding: 0.3125rem 0; }\r\n  [data-is=\"riot-slider\"] .riot-slider__track {\r\n    height: 100%;\r\n    border-radius: 0.15625rem;\r\n    background-color: #eeeaea;\r\n    z-index: 2; }\r\n    [data-is=\"riot-slider\"] .riot-slider__track--select {\r\n      z-index: 3;\r\n      background-color: #7f1f59;\r\n      top: 0.3125rem;\r\n      bottom: 0.3125rem;\r\n      border-radius: 0.15625rem; }\r\n  [data-is=\"riot-slider\"] .riot-slider__handler {\r\n    width: 0.75rem;\r\n    height: 0.75rem;\r\n    border-radius: 50%;\r\n    background-color: #fff;\r\n    box-shadow: 0 0 0.15625rem 1px rgba(195, 195, 195, 0.25);\r\n    top: 0.0625rem;\r\n    z-index: 10;\r\n    margin-left: -0.375rem; }\r\n  [data-is=\"riot-slider\"] .riot-slider__marks {\r\n    background-color: transparent;\r\n    z-index: 4;\r\n    top: 0.3125rem;\r\n    bottom: 0.3125rem;\r\n    width: 100%; }\r\n    [data-is=\"riot-slider\"] .riot-slider__marks--items-dot {\r\n      width: 0.5625rem;\r\n      height: 0.5625rem;\r\n      border-radius: 50%;\r\n      background: #fff;\r\n      border: solid 1px #eeeaea;\r\n      top: -0.25rem;\r\n      margin-left: -0.28125rem; }\r\n    [data-is=\"riot-slider\"] .riot-slider__marks--items-tip {\r\n      font-size: 0.75rem;\r\n      line-height: 1;\r\n      top: 0.625rem;\r\n      color: #bfbfbf; }\r\n    [data-is=\"riot-slider\"] .riot-slider__marks--items-select .riot-slider__marks--items-dot {\r\n      border-color: #7f1f59; }\r\n    [data-is=\"riot-slider\"] .riot-slider__marks--items-select .riot-slider__marks--items-tip {\r\n      color: #651c4d; }\r\n  [data-is=\"riot-slider\"] .riot-slider--independent .riot-slider__handler {\r\n    background-color: #7f1f59; }\r\n  [data-is=\"riot-slider\"] .riot-slider--disable .riot-slider__track--select {\r\n    background-color: #d7cece; }\r\n  [data-is=\"riot-slider\"] .riot-slider--disable .riot-slider__handler {\r\n    cursor: not-allowed;\r\n    background-color: #eeeaea; }\r\n  [data-is=\"riot-slider\"] .riot-slider--disable .riot-slider__marks--items-select .riot-slider__marks--items-dot {\r\n    border: solid 1px #eeeaea; }\r\n  [data-is=\"riot-slider\"] .riot-slider--disable .riot-slider__marks--items-select .riot-slider__marks--items-tip {\r\n    color: #bfbfbf; }\r\n";
+
+    var slider = (function (Tag) {
+        //初始化配置
+        var initConfig = function (opts) {
+            var step = opts.step, _a = opts.min, min = _a === void 0 ? 0 : _a, _b = opts.max, max = _b === void 0 ? 100 : _b, value = opts.value;
+            min = Math.max(0, min);
+            if (!(opts.marks || step) || (step && step <= 0) || !step) {
+                step = 1;
             }
-            return +result;
+            var _value = parseValue(value, min, max);
+            return {
+                control: opts.control || false,
+                vertical: opts.vertical || false,
+                disabled: opts.disabled || false,
+                allowCross: isUndefined(opts.allowCross) && true || opts.allowCross,
+                rangeValueShouldEqual: isUndefined(opts.rangeValueShouldEqual) && true || opts.rangeValueShouldEqual,
+                included: isUndefined(opts.included) && true || opts.included,
+                min: min,
+                max: max,
+                showMarkTips: isUndefined(opts.showMarkTips) && true || opts.showMarkTips,
+                showMarkDots: isUndefined(opts.showMarkDots) && true || opts.showMarkDots,
+                range: opts.range || false,
+                step: step,
+                marks: opts.marks,
+                value: _value,
+                dots: opts.dots || false,
+                showAllTips: opts.showAllTips || false,
+                showAllDots: opts.showAllDots || false,
+                rangeGapFixed: opts.rangeGapFixed || false,
+                onChange: opts.onChange,
+                onAfterChange: opts.onAfterChange,
+                onBeforeChange: opts.onBeforeChange
+            };
         };
-        var getMarkWidth = function (len) {
-            //算法来自https://github.com/react-component/slider/blob/master/src/Marks.jsx
-            return parseNumber(100 / (len - 1) * 0.9);
-        };
-        var parseValue = function (value, min, max, opts) {
+        //检测值
+        var parseValue = function (value, min, max) {
             var _value = [min, min];
             if (value && value.length) {
                 var _v_1 = [];
@@ -102,7 +117,7 @@ define(['exports'], function (exports) { 'use strict';
                         _v_1.push(+v);
                     }
                     else {
-                        console.warn('riot-slider实例类名为%s的opts.value由于不在opts.min与opts.max之间被移动', opts.class || 'riot-slider', v);
+                        console.warn('riot-slider参数value中的%s由于不在参数min与参数max之间被移除', v);
                     }
                 });
                 _value = _v_1.sort();
@@ -116,8 +131,18 @@ define(['exports'], function (exports) { 'use strict';
             }
             return _value;
         };
-        var getEnablePoint = function (marks, config) {
-            var min = config.min, max = config.max, step = config.step, showAllTips = config.showAllTips, showAllDots = config.showAllDots, showMarkTips = config.showMarkTips, showMarkDots = config.showMarkDots;
+        //初始化state
+        var initState = function (tag) {
+            var pointAndMarks = getEnablePoint(tag.config);
+            return {
+                points: pointAndMarks.points,
+                marks: pointAndMarks.marks,
+                track: getTrack(tag.config)
+            };
+        };
+        //计算可用的point和mark
+        var getEnablePoint = function (config) {
+            var marks = config.marks, min = config.min, max = config.max, step = config.step, showAllTips = config.showAllTips, showAllDots = config.showAllDots, showMarkTips = config.showMarkTips, showMarkDots = config.showMarkDots;
             var points = [];
             var markPoints;
             var length = max - min;
@@ -156,7 +181,7 @@ define(['exports'], function (exports) { 'use strict';
                         var _point = {
                             key: _key,
                             mark: true,
-                            label: markIsString ? mark : (mark.label || ''),
+                            label: (markIsString ? mark : (mark.label || '')),
                             width: markIsString ? w : parseNumber(mark.width || w),
                             precent: parseNumber((_key - min) / length * 100)
                         };
@@ -187,130 +212,35 @@ define(['exports'], function (exports) { 'use strict';
                 return +a.key - +b.key;
             });
             return {
-                points: points,
-                marks: showAllDots ? points : markPoints
+                points: (points),
+                marks: (showAllDots ? points : markPoints)
             };
         };
-        var getMousePosition = function (e, vertical) {
-            if (vertical === void 0) { vertical = false; }
-            return vertical ? e.clientY : e.pageX;
+        //保留四位有效数字
+        var floatReg = /\./;
+        var parseNumber = function (num, dot) {
+            if (dot === void 0) { dot = 4; }
+            var result = num;
+            if (floatReg.test(num)) {
+                result = num.toFixed(dot);
+            }
+            return +result;
         };
-        var getTouchPosition = function (e, vertical) {
-            if (vertical === void 0) { vertical = false; }
-            return vertical ? e.touches[0].clientY : e.touches[0].pageX;
+        var getMarkWidth = function (len) {
+            //算法来自https://github.com/react-component/slider/blob/master/src/Marks.jsx
+            return parseNumber(100 / (len - 1) * 0.9);
         };
-        //通过长度获取值
-        var getPrecentByPosition = function (pos, rect, vertical) {
-            if (vertical === void 0) { vertical = false; }
-            var v;
-            if (vertical) {
-                v = (pos - rect.top) / rect.height;
-            }
-            else {
-                v = (pos - rect.left) / rect.width;
-            }
-            return v > 1 ? 1 : v < 0 ? 0 : v;
-        };
-        var getClosetPointByPosition = function (position, rect, config, marks, points) {
-            var range = config.range, dots = config.dots, vertical = config.vertical, max = config.max, min = config.min, step = config.step;
-            //precent需要先乘100并保留四位有效数字，求_value时再除以100,否则会造成3 => 2.999999999999999999999999的情况
-            var precent = getPrecentByPosition(position, rect, vertical);
-            var _value = precent * (max - min) + min;
-            if (range && !step) {
-                _value = getClosetValueByDichotomy(marks, _value);
-            }
-            else if (dots) {
-                _value = getClosetValueByDichotomy(points, _value);
-            }
-            else {
-                _value = {
-                    key: parseInt('' + _value),
-                };
-            }
+        var getTrack = function (config) {
+            var value = config.value, min = config.min, max = config.max;
             return {
-                //precent小数点后可能不止四位，不用对外提供，不进行优化
-                precent: precent * 100,
-                point: _value
-            };
-        };
-        //二分法查换值
-        var getClosetValueByDichotomy = function (source, val) {
-            var len = source.length;
-            if (val <= source[0].key) {
-                return source[0];
-            }
-            if (val >= source[len - 1].key) {
-                return source[len - 1];
-            }
-            var _source = source.slice(0);
-            var _len;
-            var i = 0;
-            while ((_len = _source.length) > 0) {
-                var _l = void 0;
-                ++i;
-                if (_len === 1) {
-                    return _source[0];
-                }
-                else {
-                    _l = Math.floor(_len / 2);
-                }
-                var d1 = val - _source[_l - 1].key;
-                var d2 = _source[_l].key - val;
-                if (d1 < 0) {
-                    //说明在右边
-                    _source = _source.slice(0, _l);
-                }
-                else if (d2 < 0) {
-                    //说明在左边
-                    _source = _source.slice(_l);
-                }
-                else {
-                    return d1 > d2 ? _source[_l] : _source[_l - 1];
-                }
-                if (i > len) {
-                    console.warn('由于算法原因，已进入死循环');
-                    return;
-                }
-            }
-        };
-        var initConfig = function (opts) {
-            var marks = opts.marks, step = opts.step, _a = opts.min, min = _a === void 0 ? 0 : _a, _b = opts.max, max = _b === void 0 ? 100 : _b, value = opts.value;
-            min = Math.max(0, min);
-            if (!(marks || step) || (step && step <= 0) || !step) {
-                step = 1;
-            }
-            var _value = parseValue(value, min, max, opts);
-            return {
-                control: opts.control || false,
-                vertical: opts.vertical || false,
-                allowCross: isUndefined(opts.allowCross) && true || opts.allowCross,
-                rangeValueShouldEqual: isUndefined(opts.rangeValueShouldEqual) && true || opts.rangeValueShouldEqual,
-                included: isUndefined(opts.included) && true || opts.included,
-                min: min,
-                max: max,
-                showMarkTip: isUndefined(opts.showMarkTip) && true || opts.showMarkTip,
-                showMarkDot: isUndefined(opts.showMarkDot) && true || opts.showMarkDot,
-                range: opts.range || false,
-                step: step,
-                marks: marks,
-                value: _value,
-                dots: opts.dots || false,
-                showAllTips: opts.showAllTips || false,
-                showAllDots: opts.showAllDots || false,
-                rangeGapFixed: opts.rangeGapFixed || false,
-                onChange: opts.onChange
+                left: parseNumber((value[0] - min) / (max - min) * 100),
+                width: parseNumber((value[1] - value[0]) / (max - min) * 100)
             };
         };
         var RiotSlider = (function (_super) {
             __extends(RiotSlider, _super);
             function RiotSlider(dom, opts) {
-                if (opts === void 0) { opts = {}; }
                 _super.call(this, dom, opts);
-                console.log(opts);
-                var $eventRoot;
-                this.on('mount', function () {
-                    $eventRoot = this.root.querySelector('.riot-slider');
-                });
             }
             Object.defineProperty(RiotSlider.prototype, "name", {
                 get: function () {
@@ -326,28 +256,42 @@ define(['exports'], function (exports) { 'use strict';
                 enumerable: true,
                 configurable: true
             });
+            Object.defineProperty(RiotSlider.prototype, "css", {
+                get: function () {
+                    return riotSlideCss;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(RiotSlider.prototype, "attrs", {
+                get: function () {
+                    return 'data-is="riot-slider"';
+                },
+                enumerable: true,
+                configurable: true
+            });
+            RiotSlider.prototype.parseMarkItemClass = function (mark) {
+                if (mark) {
+                    //mark元素与handler重叠会有问题，浏览器对4.5px处理方式不一样
+                    if (this.config.included && mark.precent > this.state.track.left && mark.precent < (this.state.track.left + this.state.track.width)) {
+                        return 'riot-slider__marks--items-select';
+                    }
+                }
+            };
             RiotSlider.prototype.onCreate = function (opts) {
                 this.config = initConfig(opts);
-                console.log(this.config);
+                this.state = initState(this);
+                console.log(this);
             };
             return RiotSlider;
         }(Tag));
+        ;
         return RiotSlider;
     })(riot.Tag);
 
-    var dom = document.querySelector('.demo');
-    var riotSlider = new RiotSlider(dom, {
-        marks: {
-            '1': '50%',
-            '20': {
-                label: '60'
-            }
-        },
-        step: 3
-    });
-
     exports.version = version;
     exports.RiotCalendar = calendar;
+    exports.RiotSlider = slider;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

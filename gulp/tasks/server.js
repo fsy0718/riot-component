@@ -11,6 +11,8 @@ gulp.task('server', function(){
 
 
 gulp.task('server:watch',['server', 'watch']);
+gulp.task('server:watch:ts', ['server', 'watch:ts']);
 gulp.task('server:watch:build', function(){
   gulpSequence('build', 'server', 'watch')();
 })
+
