@@ -1,6 +1,6 @@
 {
   "name": "riot-component",
-  "version": "0.0.3beta2",
+  "version": "1.0.0",
   "description": "some components base on riot.js",
   "main": "./dist/riot-component.cjs.js",
   "devDependencies": {
@@ -36,7 +36,9 @@
     "rollup-plugin-strip": "^1.1.1",
     "rollup-pluginutils": "^1.5.0",
     "typescript": "^2.0.10",
-    "uglify-js": "^2.6.3"
+    "uglify-js": "^2.6.3",
+    "gulp-riot-only-compiler-template": "^0.0.2",
+    "gulp-cssnano": "^2.1.2"
   },
   "scripts": {
     "test": "npm run eslint && npm run karma",
@@ -44,12 +46,9 @@
     "karma": "karma start test/karma.conf.js",
     "doc": "gulp doc",
     "build": "gulp build",
-    "build:noCss": "gulp build:noCss --withCss false",
     "watch": "gulp watch",
-    "watch:ts": "gulp watch:ts",
     "server": "gulp server",
     "start": "gulp server:watch",
-    "start:ts": "gulp server:watch:ts",
     "start:build": "gulp server:watch:build",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "changelog:first": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
