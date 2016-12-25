@@ -40,7 +40,7 @@
 						<textarea class="code">
 var s11 = document.querySelector('riot-slider-1-1');
 var i11 = document.querySelector('.ipt-1-1');
-riot.mount(s11,'riot-slider',{
+new riotComponent.RiotSlider(s11,{
   step: 5,
   onChange: function(v){
 		i11.value = v.join('-');
@@ -65,7 +65,7 @@ riot.mount(s11,'riot-slider',{
 						<textarea class="code" data-line="4">
 var s13 = document.querySelector('.riot-slider-1-3');
 var i13 = document.querySelector('.ipt-1-3')
-riot.mount(s13,'riot-slider',{
+new riotComponent.RiotSlider(s13,{
 	disabled: true,
 	min: 10,
 	max: 100,
@@ -104,7 +104,7 @@ riot.mount(s13,'riot-slider',{
 var s16 = document.querySelector('.riot-slider-1-6');
 var i16 = document.querySelector('.ipt-1-6')
 var sel16 = document.querySelector('.sel-1-6');
-var slide16 = riot.mount(s16,'riot-slider',{
+var slide16 = new riotComponent.RiotSlider(s16,{
 	control: true,
 	min: 10,
 	max: 100,
@@ -117,7 +117,7 @@ var slide16 = riot.mount(s16,'riot-slider',{
 	value: [30]
 });
 sel16.onchange = function(){
-  slide16[0].setControl(this.options.selectedIndex ? false : true);
+  slide16.setControl(this.options.selectedIndex ? false : true);
 }
         		</textarea>
 					</div>
@@ -137,7 +137,7 @@ sel16.onchange = function(){
 						<textarea class="code" data-line="5-7">
 var s12 = document.querySelector('.riot-slider-1-2');
 var i12 = document.querySelector('.ipt-1-2')
-riot.mount(s12,'riot-slider',{
+new riotComponent.RiotSlider(s12,{
 	min: 10,
 	max: 100,
 	step: 10,
@@ -165,7 +165,7 @@ riot.mount(s12,'riot-slider',{
 						<textarea class="code" data-line="4">
 var s14 = document.querySelector('.riot-slider-1-4');
 var i14 = document.querySelector('.ipt-1-4')
-riot.mount(s14,'riot-slider',{
+new riotComponent.RiotSlider(s14,{
 	included:false,
 	min: 10,
 	max: 100,
@@ -203,7 +203,7 @@ var s15 = document.querySelector('.riot-slider-1-5');
 var i151 = document.querySelector('.ipt-1-5-1');
 var i152 = document.querySelector('.ipt-1-5-2');
 var i153 = document.querySelector('.ipt-1-5-3');
-riot.mount(s15,'riot-slider',{
+new riotComponent.RiotSlider(s15,{
 	min: 10,
 	max: 100,
 	step: 10,
@@ -241,7 +241,7 @@ riot.mount(s15,'riot-slider',{
 						<textarea class="code" data-line="4">
 var s21 = document.querySelector('.riot-slider-2-1');
 var i21 = document.querySelector('.ipt-2-1')
-riot.mount(s21,'riot-slider',{
+new riotComponent.RiotSlider(s21,{
 	range: true,
 	marks: {
     0 : '￥0',
@@ -283,7 +283,7 @@ riot.mount(s21,'riot-slider',{
 						<textarea class="code" data-line="4">
 var s22 = document.querySelector('.riot-slider-2-2');
 var i22 = document.querySelector('.ipt-2-2');
-riot.mount(s22,'riot-slider',{
+new riotComponent.RiotSlider(s22,{
 	dots: true,
 	range: true,
 	step: 5,
@@ -327,7 +327,7 @@ riot.mount(s22,'riot-slider',{
 						<textarea class="code" data-line="4,13-17">
 var s24 = document.querySelector('.riot-slider-2-4');
 var i24 = document.querySelector('.ipt-2-4')
-riot.mount(s24,'riot-slider',{
+new riotComponent.RiotSlider(s24,{
 	range: true,
 	marks: {
     0 : '',
@@ -375,7 +375,7 @@ riot.mount(s24,'riot-slider',{
 						<textarea class="code" data-line="4">
 var s23 = document.querySelector('.riot-slider-2-3');
 var i23 = document.querySelector('.ipt-2-3');
-riot.mount(s23,'riot-slider',{
+new riotComponent.RiotSlider(s23,{
 	allowCross: false,
 	range: true,
 	value:[20,60],
@@ -415,7 +415,7 @@ riot.mount(s23,'riot-slider',{
 						<textarea class="code" data-line="4">
 var s25 = document.querySelector('.riot-slider-2-5');
 var i25 = document.querySelector('.ipt-2-5');
-riot.mount(s25,'riot-slider',{
+new riotComponent.RiotSlider(s25,{
 	rangeValueShouldEqual: false,
 	range: true,
 	value:[20,60],
@@ -427,6 +427,7 @@ riot.mount(s25,'riot-slider',{
   dots: true,
   onChange: function(v){
 		var str;
+		console.log(v);
 		if(v[0] === v[1]){
 			str = '￥' + v[0] * 7.5;
 		}else{
@@ -447,7 +448,7 @@ riot.mount(s25,'riot-slider',{
 							<input class="ipt-2-6" type="text">
 						</p>
 					</div>
-					<div class="demo-desc"><code>range</code>为真,设置<code>rangeGapFix=true</code>固定range差值不变</div>
+					<div class="demo-desc"><code>range</code>为真,设置<code>rangeGapFixed=true</code>固定range差值不变</div>
 					<div class="view-source">
 						<a title="查看源码" class="view-source-target" href="javascript:;"></a>
 					</div>
@@ -455,9 +456,9 @@ riot.mount(s25,'riot-slider',{
 						<textarea class="code" data-line="4">
 var s26 = document.querySelector('.riot-slider-2-6');
 var i26 = document.querySelector('.ipt-2-6');
-riot.mount(s26,'riot-slider',{
+var rs26 = new riotComponent.RiotSlider(s26,{
 	range: true,
-  rangeGapFix: true,
+  rangeGapFixed: true,
 	marks: {
 		0: '￥0',
 		20: '￥150',
@@ -477,13 +478,14 @@ riot.mount(s26,'riot-slider',{
 		i26.value = str;
   }
 });
+console.log(rs26);
         		</textarea>
 					</div>
 				</div>				
 			</div>
 		</div>
 	</div>
-	<script src="./riot.min.js"></script>
+	<script src="./riot.js"></script>
 	<script src="../dist/riot-component.js"></script>
 	<script src="./prism.js"></script>
 	<script>

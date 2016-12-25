@@ -80,6 +80,14 @@ export function isFunction(str): boolean{
 export function isUndefined(str): boolean{
   return _toString.call(str) === '[object Undefined]'
 }
+
+export function noop(){}
+
+export function pauseEvent(e:Event){
+  e.preventDefault();
+  e.stopPropagation();
+  return this;
+}
 export function css(dom, property, value) {
   if (arguments.length < 3) {
     if (typeof property == 'string') {

@@ -13,5 +13,7 @@ declare namespace riot {
         constructor(el: Element, opts: Object);
         css: string;
         attrs: string;
+        root: Element;
+        update: ()=> any;
     }
 }

@@ -11,9 +11,11 @@
   <script>
     var RiotCalendar = riotComponent.RiotCalendar;
     var RiotSlider = riotComponent.RiotSlider;
-    new RiotSlider(
+    var riotSlider = new RiotSlider(
       document.querySelector('.demo'),{
-        value: [0,20]
+        showAllDots: true,
+        step: 20,
+        included: true
       }
     )
   </script>
