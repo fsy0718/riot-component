@@ -1,6 +1,7 @@
 import { zeroFill, isString, isFunction } from "../common/utils";
 import { getWeeksInYear } from "./utils";
 import RiotDateBase from "./date";
+import {RiotDateBaseInterface} from "./date";
 
 
 const formattingTokens = /(\[[^\[]*\])|(\\)?([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)/g;
@@ -89,6 +90,13 @@ function _formatRiotDate(date, format?){
   }
   return formatRiotDate(date, format);
 }
+
+export interface RiotDateInterface extends RiotDateBaseInterface {
+  week(): number,
+  format(date: RiotDateInterface, format ?: string): string,
+  format(date: RiotDateInterface, format: Function): string
+}
+
 
 class RiotDate extends RiotDateBase {
   //TODO week计算有错误

@@ -1,10 +1,13 @@
-/// <reference path="../riot.d.ts" />
+/// <reference path="../../../typings/index.d.ts" />
+
 
 import addEventListener from "../common/domEventListener";
 import {addEventListenerReturnInterface, IE8DocumentInterface} from "../common/domEventListener";
 import { isNumber, isUndefined, pauseEvent } from "../common/utils";
+import objectAssign from "../common/objectAssign";
 import riotSlideTmpl from "./slider.tag";
 import riotSlideCss from "./slider.css";
+
 
 interface riotSliderOptsMarkObjectKeysInterface {
   label: string,
@@ -86,34 +89,25 @@ export interface riotSliderOptsInterface {
 
 
 export default (function (Tag) {
+  const defaultConfig = {
+    allowCross: true,
+    rangeValueShouldEqual: true,
+    included: true,
+    showMarkTips: true,
+    showMarkDots: true,
+    min: 0,
+    max: 100
+  }
   //初始化配置
   const initConfig = function (opts: riotSliderOptsInterface): riotSliderOptsInterface {
-    let { step, min = 0, max = 100} = opts;
+    let config = objectAssign({}, defaultConfig, opts);
+    let { step, min, max} = config;
     min = Math.max(0, min);
-    step = opts.range ? opts.marks ? opts.step : opts.step || 1 : opts.step || 1
-    return {
-      control: opts.control || false,
-      vertical: opts.vertical || false,
-      disabled: opts.disabled || false,
-      allowCross: isUndefined(opts.allowCross) && true || opts.allowCross,
-      rangeValueShouldEqual: isUndefined(opts.rangeValueShouldEqual) && true || opts.rangeValueShouldEqual,
-      included: isUndefined(opts.included) && true || opts.included,
-      min: min,
-      max: max,
-      showMarkTips: isUndefined(opts.showMarkTips) && true || opts.showMarkTips,
-      showMarkDots: isUndefined(opts.showMarkDots) && true || opts.showMarkDots,
-      range: opts.range || false,
-      step: step,
-      marks: opts.marks,
-      value: opts.value,
-      dots: opts.dots || false,
-      showAllTips: opts.showAllTips || false,
-      showAllDots: opts.showAllDots || false,
-      rangeGapFixed: opts.rangeGapFixed || false,
-      onChange: opts.onChange,
-      onAfterChange: opts.onAfterChange,
-      onBeforeChange: opts.onBeforeChange
-    }
+    step = config.range ? config.marks ? config.step : config.step || 1 : config.step || 1
+    config.min = min;
+    config.max = max;
+    config.step = step;
+    return config;
   };
 
   //初始化props
@@ -578,7 +572,8 @@ export default (function (Tag) {
       })
       this.on('update', function () {
         this.state.track = getTrack(this.state.value, this.config.min, this.config.max);
-      })
+      });
+      console.log(this)
     }
 
     setValue(value: number[]) {

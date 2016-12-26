@@ -16,11 +16,13 @@
     "gulp": "^3.9.1",
     "gulp-autoprefixer": "^3.1.1",
     "gulp-concat": "^2.6.0",
+    "gulp-cssnano": "^2.1.2",
     "gulp-if": "2.0.1",
     "gulp-inject-file": "^0.0.18",
     "gulp-inject-string": "^1.1.0",
     "gulp-jsdoc3": "^1.0.1",
     "gulp-replace": "^0.5.4",
+    "gulp-riot-only-compiler-template": "^0.0.2",
     "gulp-ruby-sass": "^2.1.0",
     "gulp-sequence": "^0.4.5",
     "gulp-typescript": "^3.1.3",
@@ -35,10 +37,8 @@
     "rollup-plugin-string": "^2.0.2",
     "rollup-plugin-strip": "^1.1.1",
     "rollup-pluginutils": "^1.5.0",
-    "typescript": "^2.0.10",
-    "uglify-js": "^2.6.3",
-    "gulp-riot-only-compiler-template": "^0.0.2",
-    "gulp-cssnano": "^2.1.2"
+    "typescript": "^2.1.4",
+    "uglify-js": "^2.6.3"
   },
   "scripts": {
     "test": "npm run eslint && npm run karma",

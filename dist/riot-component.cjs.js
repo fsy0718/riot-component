@@ -17,33 +17,7 @@ function __extends(d, b) {
 
 var version = 'v${version}';
 
-var camelize = function (str) {
-    return str.replace(/-+(.)?/g, function (match, chr) {
-        return chr ? chr.toUpperCase() : '';
-    });
-};
-var dasherize = function (str) {
-    return str.replace(/::/g, '/')
-        .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
-        .replace(/([a-z\d])([A-Z])/g, '$1_$2')
-        .replace(/_/g, '-')
-        .toLowerCase();
-};
-var prefixProps = {
-    animation: true
-};
-var maybePrefix = function (key, value) {
-    var css = '';
-    var key = dasherize(key);
-    var _key = key.split('-');
-    if (prefixProps[_key[0]]) {
-        css += '-webkit-' + key + ':' + value + ';';
-    }
-    css += key + ':' + value + ';';
-    return css;
-};
 var _slice = [].slice;
-var _toString = Object.prototype.toString;
 var each = function (dom, callback) {
     var args = [];
     for (var _i = 2; _i < arguments.length; _i++) {
@@ -59,31 +33,11 @@ var each = function (dom, callback) {
         callback.apply(dom[0], args);
     }
 };
-
-
-
-
-
-
-//'String', 'Number', 'Object', 'Date', 'Array', 'Function', 'Undefined'
-
-
-
-
-function isArray(str) {
-    return _toString.call(str) === '[object Array]';
-}
-
-function isUndefined(str) {
-    return _toString.call(str) === '[object Undefined]';
-}
-
 function pauseEvent(e) {
     e.preventDefault();
     e.stopPropagation();
     return this;
 }
-
 var elementClassListmethods = ['add', 'remove', 'toggle', 'contains'];
 var elementClassmethods = ['addClass', 'removeClass', 'toggleClass', 'hasClass'];
 var _eleClassListMethods = {};
@@ -99,15 +53,114 @@ elementClassmethods.forEach(function (method, index) {
     };
 });
 
+/* eslint-disable no-unused-vars */
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+function toObject(val) {
+    if (val === null || val === undefined) {
+        throw new TypeError('Object.assign cannot be called with null or undefined');
+    }
+    return Object(val);
+}
+function shouldUseNative() {
+    try {
+        if (!Object.assign) {
+            return false;
+        }
+        // Detect buggy property enumeration order in older V8 versions.
+        // https://bugs.chromium.org/p/v8/issues/detail?id=4118
+        var test1 = new String('abc'); // eslint-disable-line
+        test1[5] = 'de';
+        if (Object.getOwnPropertyNames(test1)[0] === '5') {
+            return false;
+        }
+        // https://bugs.chromium.org/p/v8/issues/detail?id=3056
+        var test2 = {};
+        for (var i = 0; i < 10; i++) {
+            test2['_' + String.fromCharCode(i)] = i;
+        }
+        var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+            return test2[n];
+        });
+        if (order2.join('') !== '0123456789') {
+            return false;
+        }
+        // https://bugs.chromium.org/p/v8/issues/detail?id=3056
+        var test3 = {};
+        'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+            test3[letter] = letter;
+        });
+        if (Object.keys(Object.assign({}, test3)).join('') !==
+            'abcdefghijklmnopqrst') {
+            return false;
+        }
+        return true;
+    }
+    catch (e) {
+        // We don't expect any of the above to throw, but better to be safe.
+        return false;
+    }
+}
+var objectAssign;
+if (shouldUseNative()) {
+    objectAssign = Object.assign;
+}
+else {
+    objectAssign = function (target, source) {
+        var from;
+        var to = toObject(target);
+        var symbols;
+        for (var s = 1; s < arguments.length; s++) {
+            from = Object(arguments[s]);
+            for (var key in from) {
+                if (hasOwnProperty.call(from, key)) {
+                    to[key] = from[key];
+                }
+            }
+            if (Object.getOwnPropertySymbols) {
+                symbols = Object.getOwnPropertySymbols(from);
+                for (var i = 0; i < symbols.length; i++) {
+                    if (propIsEnumerable.call(from, symbols[i])) {
+                        to[symbols[i]] = from[symbols[i]];
+                    }
+                }
+            }
+        }
+        return to;
+    };
+}
+var objectAssign$1 = objectAssign;
+
 var riotCalendarTmpl = "<div class=\"riot-calendar__box {(mutipleItems > 1 && 'riot-calendar--multiple riot-calendar--multiple-i' + mutipleItems)}\"> <a class=\"prev {prevMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{prevMonth}\"><i></i></a> <a class=\"next {nextMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{nextMonth}\"><i></i></a> <div class=\"riot-calendar__items\" each=\"{items, index in viewDatas}\"> <div class=\"riot-calendar__head\"> <div class=\"control title\"> <div if=\"{otherViewDatas}\" class=\"title__other\">{otherViewDatas[index].title}</div> <div class=\"title__cur\">{items.title}</div> </div> <div class=\"pure-g weeks\"> <div class=\"pure-u-1-8\" each=\"{week in weekTitles}\">{week}</div> </div> </div> <div class=\"riot-calendar__body\"> <div if=\"{otherViewDatas}\" class=\"riot-calendar__body--other\"> <div class=\"pure-g\" each=\"{weekdates in otherViewDatas[index].weekdates}\"> <div class=\"pure-u-1-8 {parseDateBoxClass(date)}\" each=\"{date in weekdates}\"> <div class=\"{date.disable === 0 && 'enable' || 'disable'} {date.select === 1 && 'choice' || ''}\"> <riot-date date=\"{date}\"></riot-date> </div> </div> </div> </div> <div class=\"riot-calendar__body--cur\"> <div class=\"pure-g\" each=\"{weekdates in items.weekdates}\"> <div class=\"pure-u-1-8 {parseDateBoxClass(date)}\" each=\"{date in weekdates}\"> <span class=\"date-placeholder\" if=\"{!showOtherMonthDates && date.current}\"></span> <div if=\"{showOtherMonthDates || (showOtherMonthDates===false && date.current===0 )}\" class=\"{date.disable === 0 && 'enable' || 'disable'} {date._change && 'change'} {date.select === 1 && 'choice' || ''}\" onclick=\"{checkDate}\"> <riot-date date=\"{date}\"></riot-date> </div> </div> </div> </div> </div> </div> <div class=\"riot-calendar__foot\"></div>";
 
-/// <reference path="../riot.d.ts" />
 var calendar = (function (Tag) {
+    var defaultOpts = {
+        showOtherMonthDates: true,
+        switchWithAnimation: true,
+        animationTimingFunction: 'cubic-bezier(0.445, 0.05, 0.55, 0.95)',
+        animationDuration: 0.45,
+        numberOfMonths: 1,
+        firstDay: 0
+    };
+    var leapYearCache = {};
+    var weekTitles = ['日', '一', '二', '三', '四', '五', '六'];
+    var initConfig = function (opts) {
+        return objectAssign$1({}, defaultOpts, opts);
+    };
+    var initState = function (ctx) {
+        return {};
+    };
+    var initProps = function (ctx) {
+        var config = ctx.config;
+        var firstDay = config.firstDay, rangeLimit = config.rangeLimit, minDate = config.minDate, maxDate = config.maxDate;
+        return {
+            weekTitles: weekTitles.slice(firstDay, 7).concat(weekTitles.slice(0, firstDay))
+        };
+    };
     var RiotCalendar = (function (_super) {
         __extends(RiotCalendar, _super);
-        function RiotCalendar(el, opts) {
-            if (opts === void 0) { opts = {}; }
-            _super.call(this, el, opts);
+        function RiotCalendar() {
+            return _super.apply(this, arguments) || this;
         }
         Object.defineProperty(RiotCalendar.prototype, "name", {
             get: function () {
@@ -123,10 +176,16 @@ var calendar = (function (Tag) {
             enumerable: true,
             configurable: true
         });
+        RiotCalendar.prototype.onCreate = function (opts) {
+            this.config = initConfig(opts);
+            this.props = initProps(this);
+            this.state = initState(this);
+        };
         return RiotCalendar;
     }(riot.Tag));
 })(riot.Tag);
 
+;
 function addEventListener(target, eventType, callback) {
     if (target.addEventListener) {
         target.addEventListener(eventType, callback, false);
@@ -145,42 +204,32 @@ function addEventListener(target, eventType, callback) {
         };
     }
 }
+;
 
 var riotSlideTmpl = "<div class=\"riot-slider {config.disabled && 'riot-slider--disable'} {!config.included && 'riot-slider--independent'}\" onmousedown=\"{config.disabled ? noop : onMousedown}\" ontouchstart=\"{config.disabled ? noop : onTouchstart}\"> <div class=\"riot-slider__track\"></div> <div class=\"riot-slider__track--select\" if=\"{config.included}\" riot-style=\"left:{state.track.left + '%'};width:{state.track.width + '%'}\"></div> <div class=\"riot-slider__handler riot-slider__handler--1\" riot-style=\"left:{(config.range ? state.track.left : state.track.width) + '%'}\" data-key=\"{state.track.left}\"></div> <div class=\"riot-slider__handler riot-slider__handler--2\" if=\"{config.range}\" riot-style=\"left: {(state.track.left + state.track.width) + '%'}\" data-key=\"{state.track.left + state.track.width}\"></div> <div class=\"riot-slider__marks\" if=\"{config.marks || config.showAllDots}\"> <div each=\"{mark,index in props.marks}\" class=\"riot-slider__marks--items {parent.parseMarkItemClass(mark)}\"> <span class=\"riot-slider__marks--items-dot\" data-key=\"{index}\" riot-style=\"left:{mark.precent + '%'}\" if=\"{mark.dot}\"></span> <span class=\"riot-slider__marks--items-tip\" data-key=\"{index}\" riot-style=\"width:{mark.width + '%'};margin-left:{(-0.5 * mark.width) + '%'};left:{mark.precent + '%'}\" if=\"{mark.tip}\">{mark.label}</span> </div> </div> </div>";
 
 var riotSlideCss = "[data-is=riot-slider] .riot-slider{position:relative}[data-is=riot-slider] .riot-slider__handler,[data-is=riot-slider] .riot-slider__marks,[data-is=riot-slider] .riot-slider__marks--items-dot,[data-is=riot-slider] .riot-slider__marks--items-tip,[data-is=riot-slider] .riot-slider__track--select{position:absolute}[data-is=riot-slider] .riot-slider__marks--items-tip{text-align:center}[data-is=riot-slider] .riot-slider__handler,[data-is=riot-slider] .riot-slider__marks--items-dot,[data-is=riot-slider] .riot-slider__marks--items-tip{cursor:pointer}[data-is=riot-slider] .riot-slider{width:100%;height:.3125rem;padding:.3125rem 0}[data-is=riot-slider] .riot-slider__track{height:100%;border-radius:.15625rem;background-color:#eeeaea;z-index:1}[data-is=riot-slider] .riot-slider__track--select{z-index:2;background-color:#7f1f59;top:.3125rem;bottom:.3125rem;border-radius:.15625rem}[data-is=riot-slider] .riot-slider__handler{width:.75rem;height:.75rem;border-radius:50%;background-color:#fff;box-shadow:0 0 .15625rem 1px hsla(0,0%,76%,.25);top:.0625rem;z-index:4;margin-left:-.375rem}[data-is=riot-slider] .riot-slider__marks{background-color:transparent;z-index:3;top:.3125rem;bottom:.3125rem;width:100%}[data-is=riot-slider] .riot-slider__marks--items-dot{width:.5625rem;height:.5625rem;border-radius:50%;background:#fff;border:1px solid #eeeaea;top:-.25rem;margin-left:-.28125rem}[data-is=riot-slider] .riot-slider__marks--items-tip{font-size:.75rem;line-height:1;top:.625rem;color:#bfbfbf}[data-is=riot-slider] .riot-slider__marks--items-select .riot-slider__marks--items-dot{border-color:#7f1f59}[data-is=riot-slider] .riot-slider__marks--items-select .riot-slider__marks--items-tip{color:#651c4d}[data-is=riot-slider] .riot-slider--independent .riot-slider__handler{background-color:#7f1f59}[data-is=riot-slider] .riot-slider--disable .riot-slider__track--select{background-color:#d7cece}[data-is=riot-slider] .riot-slider--disable .riot-slider__handler{cursor:not-allowed;background-color:#eeeaea}[data-is=riot-slider] .riot-slider--disable .riot-slider__marks--items-select .riot-slider__marks--items-dot{border:1px solid #eeeaea}[data-is=riot-slider] .riot-slider--disable .riot-slider__marks--items-select .riot-slider__marks--items-tip{color:#bfbfbf}";
 
-/// <reference path="../riot.d.ts" />
-
 var slider = (function (Tag) {
+    var defaultConfig = {
+        allowCross: true,
+        rangeValueShouldEqual: true,
+        included: true,
+        showMarkTips: true,
+        showMarkDots: true,
+        min: 0,
+        max: 100
+    };
     //初始化配置
     var initConfig = function (opts) {
-        var step = opts.step, _a = opts.min, min = _a === void 0 ? 0 : _a, _b = opts.max, max = _b === void 0 ? 100 : _b;
+        var config = objectAssign$1({}, defaultConfig, opts);
+        var step = config.step, min = config.min, max = config.max;
         min = Math.max(0, min);
-        step = opts.range ? opts.marks ? opts.step : opts.step || 1 : opts.step || 1;
-        return {
-            control: opts.control || false,
-            vertical: opts.vertical || false,
-            disabled: opts.disabled || false,
-            allowCross: isUndefined(opts.allowCross) && true || opts.allowCross,
-            rangeValueShouldEqual: isUndefined(opts.rangeValueShouldEqual) && true || opts.rangeValueShouldEqual,
-            included: isUndefined(opts.included) && true || opts.included,
-            min: min,
-            max: max,
-            showMarkTips: isUndefined(opts.showMarkTips) && true || opts.showMarkTips,
-            showMarkDots: isUndefined(opts.showMarkDots) && true || opts.showMarkDots,
-            range: opts.range || false,
-            step: step,
-            marks: opts.marks,
-            value: opts.value,
-            dots: opts.dots || false,
-            showAllTips: opts.showAllTips || false,
-            showAllDots: opts.showAllDots || false,
-            rangeGapFixed: opts.rangeGapFixed || false,
-            onChange: opts.onChange,
-            onAfterChange: opts.onAfterChange,
-            onBeforeChange: opts.onBeforeChange
-        };
+        step = config.range ? config.marks ? config.step : config.step || 1 : config.step || 1;
+        config.min = min;
+        config.max = max;
+        config.step = step;
+        return config;
     };
     //初始化props
     var initProps = function (ctx) {
@@ -566,7 +615,7 @@ var slider = (function (Tag) {
     var RiotSlider = (function (_super) {
         __extends(RiotSlider, _super);
         function RiotSlider() {
-            _super.apply(this, arguments);
+            return _super.apply(this, arguments) || this;
         }
         Object.defineProperty(RiotSlider.prototype, "name", {
             get: function () {
@@ -598,7 +647,7 @@ var slider = (function (Tag) {
         });
         RiotSlider.prototype.noop = function () {
         };
-        
+        ;
         RiotSlider.prototype.onTouchstart = function (e) {
             var self = this;
             if (isNotTouchEvent(e) || self.config.control) {
@@ -643,6 +692,7 @@ var slider = (function (Tag) {
             this.on('update', function () {
                 this.state.track = getTrack(this.state.value, this.config.min, this.config.max);
             });
+            console.log(this);
         };
         RiotSlider.prototype.setValue = function (value) {
             var _value = parseValue(value, this.config.min, this.config.max);
@@ -655,7 +705,7 @@ var slider = (function (Tag) {
         };
         return RiotSlider;
     }(riot.Tag));
-    
+    ;
     return RiotSlider;
 })(riot.Tag);
 

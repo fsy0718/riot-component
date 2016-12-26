@@ -18,12 +18,36 @@ const _makeGetSet = function(unit: string, keepTime?: boolean){
 }
 const _getsetYear = _makeGetSet('FullYear');
 const _getsetMonth = _makeGetSet('Month');
-const _getsetDate = _makeGetSet('Date')
-const _getsetDay = _makeGetSet('Day')
-const _getsetHour = _makeGetSet('Hours')
-const _getsetMinute = _makeGetSet('Minutes')
-const _getsetSecond = _makeGetSet('Seconds')
-const _getsetMillisecond = _makeGetSet('Milliseconds')
+const _getsetDate = _makeGetSet('Date');
+const _getsetDay = _makeGetSet('Day');
+const _getsetHour = _makeGetSet('Hours');
+const _getsetMinute = _makeGetSet('Minutes');
+const _getsetSecond = _makeGetSet('Seconds');
+const _getsetMillisecond = _makeGetSet('Milliseconds');
+
+
+export interface RiotDateBaseInterface {
+    _d: Date,
+    isRiotDate: boolean,
+    year(): number,
+    year(value:number): RiotDateBaseInterface,
+    month(): number,
+    month(value:number): RiotDateBaseInterface,
+    date(): number,
+    date(value:number): RiotDateBaseInterface,
+    day(): number,
+    hour(): number,
+    hour(value:number): RiotDateBaseInterface,
+    minute(): number,
+    minute(value:number): RiotDateBaseInterface,
+    second(): number,
+    second(value:number): RiotDateBaseInterface,
+    millisecond(): number,
+    millisecond(value:number): RiotDateBaseInterface,
+    clone(): RiotDateBaseInterface
+}
+
+
 /**
  * 基础date对象
  */

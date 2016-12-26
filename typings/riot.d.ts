@@ -6,6 +6,9 @@ declare class Observe{
 }
 
 
+
+
+
 declare namespace riot {
     class Tag extends Observe{
         readonly name: string;

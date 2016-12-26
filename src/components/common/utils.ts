@@ -16,7 +16,7 @@ const prefixProps = {
   animation: true
 }
 
-const maybePrefix = function (key: string, value: string): string {
+const maybePrefix = function (key: string, value: string|number): string {
   var css = '';
   var key = dasherize(key);
   var _key = key.split('-');
@@ -45,6 +45,8 @@ const each = function (dom: [Element], callback, ...args) {
 interface CssMethods {
   
 }
+
+
 export  function $(selector: string, context = document): Element {
   return context.querySelector(selector)
 };
@@ -88,14 +90,27 @@ export function pauseEvent(e:Event){
   e.stopPropagation();
   return this;
 }
-export function css(dom, property, value) {
+
+
+export function cacheRiotComponentToTAGIMPL(tag){
+  let __cache_div__ = document.createElement('div');
+  var __cacheRiotInstance__ = new tag(__cache_div__);
+  __cacheRiotInstance__.unmout();
+  __cache_div__ = null;
+}
+
+function cssFunc(dom: HTMLElement, property: string): string;
+function cssFunc(dom: HTMLElement, property: string[]): string;
+function cssFunc(dom: HTMLElement, property: string, value: string|number): HTMLElement;
+function cssFunc(dom: HTMLElement, property: Object): HTMLElement
+function cssFunc(dom: HTMLElement, property: string|string[]|Object, value?: string|number) {
   if (arguments.length < 3) {
     if (typeof property == 'string') {
       return dom.style[camelize(property)] || getComputedStyle(dom, '').getPropertyValue(property)
     } else if (isArray(property)) {
       var props = {}
       var computedStyle = getComputedStyle(dom, '');
-      property.forEach(function (prop) {
+      (property as string[]).forEach(function (prop) {
         props[prop] = dom.style[camelize(prop)] || computedStyle.getPropertyValue(prop);
       })
       return props
@@ -120,6 +135,9 @@ export function css(dom, property, value) {
   }
   return dom.style.cssText += ';' + css;
 }
+
+export const css = cssFunc;
+
 
 
 const elementClassListmethods = ['add', 'remove', 'toggle', 'contains'];
