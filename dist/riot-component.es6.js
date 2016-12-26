@@ -13,7 +13,33 @@ function __extends(d, b) {
 
 var version = 'v${version}';
 
+var camelize = function (str) {
+    return str.replace(/-+(.)?/g, function (match, chr) {
+        return chr ? chr.toUpperCase() : '';
+    });
+};
+var dasherize = function (str) {
+    return str.replace(/::/g, '/')
+        .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+        .replace(/([a-z\d])([A-Z])/g, '$1_$2')
+        .replace(/_/g, '-')
+        .toLowerCase();
+};
+var prefixProps = {
+    animation: true
+};
+var maybePrefix = function (key, value) {
+    var css = '';
+    var key = dasherize(key);
+    var _key = key.split('-');
+    if (prefixProps[_key[0]]) {
+        css += '-webkit-' + key + ':' + value + ';';
+    }
+    css += key + ':' + value + ';';
+    return css;
+};
 var _slice = [].slice;
+var _toString = Object.prototype.toString;
 var each = function (dom, callback) {
     var args = [];
     for (var _i = 2; _i < arguments.length; _i++) {
@@ -29,11 +55,40 @@ var each = function (dom, callback) {
         callback.apply(dom[0], args);
     }
 };
+
+
+
+
+function zeroFill(number, targetLength, forceSign) {
+    if (targetLength === void 0) { targetLength = 2; }
+    if (forceSign === void 0) { forceSign = false; }
+    var absNumber = '' + Math.abs(number), zerosToFill = targetLength - absNumber.length, sign = number >= 0;
+    return (sign ? (forceSign ? '+' : '') : '-') +
+        Math.pow(10, Math.max(0, zerosToFill)).toString().substr(1) + absNumber;
+}
+
+//'String', 'Number', 'Object', 'Date', 'Array', 'Function', 'Undefined'
+
+
+
+function isDate(str) {
+    return _toString.call(str) === '[object Date]';
+}
+function isArray(str) {
+    return _toString.call(str) === '[object Array]';
+}
+function isFunction(str) {
+    return _toString.call(str) === '[object Function]';
+}
+
+
 function pauseEvent(e) {
     e.preventDefault();
     e.stopPropagation();
     return this;
 }
+
+
 var elementClassListmethods = ['add', 'remove', 'toggle', 'contains'];
 var elementClassmethods = ['addClass', 'removeClass', 'toggleClass', 'hasClass'];
 var _eleClassListMethods = {};
@@ -48,6 +103,229 @@ elementClassmethods.forEach(function (method, index) {
         return each(dom, call, className);
     };
 });
+
+var datesOfMonth = [31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+function getFirstDateInMonth(y, m) {
+    return new Date(y, m - 1, 1);
+}
+
+//是否为闰年
+function isLeapYear(y) {
+    return !(y % 4) && !!(y % 100) || !(y % 400);
+}
+
+function getDatesInPrevMonth(y, m, firstDay) {
+    if (firstDay === void 0) { firstDay = 0; }
+    var firstDayInMonth = getFirstDateInMonth(y, m).getDay();
+    var dates = 0;
+    if (~firstDayInMonth) {
+        if (firstDayInMonth > firstDay) {
+            dates = firstDayInMonth - firstDay;
+        }
+        else if (firstDayInMonth === firstDay) {
+            dates = 0;
+        }
+        else {
+            dates = 6 - firstDay + 1 + firstDayInMonth;
+        }
+    }
+    return dates;
+}
+
+
+
+function getDatesInMonth(y, m) {
+    --m;
+    return m === 1 ? isLeapYear(y) ? 29 : 28 : datesOfMonth[m];
+}
+
+function getWeeksInMonth(y, m, firstDay) {
+    var datesInMonth = getDatesInMonth(y, m) - 7 + getDatesInPrevMonth(y, m, firstDay);
+    return Math.ceil(datesInMonth / 7) + 1 || 0;
+}
+
+function getDatesInYear(y, m, d) {
+    var _d = 0;
+    var i = 1;
+    while (i < m) {
+        _d = _d + (i === 2 ? isLeapYear(y) ? 29 : 28 : datesOfMonth[m - 1]);
+        i++;
+    }
+    _d += d;
+    return _d;
+}
+
+function getWeeksInYear(y, m, d) {
+    var _d = getDatesInYear(y, m, d);
+    return Math.round(_d / 7);
+}
+
+function cloneDate(date) {
+    return new Date(date.getTime());
+}
+
+var _get = function (d, unit) {
+    return d._d['get' + unit]();
+};
+var _set = function (d, unit, value) {
+    return d._d['set' + unit](value);
+};
+var _makeGetSet = function (unit, keepTime) {
+    return function (value) {
+        if (value != null) {
+            _set(this, unit, value);
+            return this;
+        }
+        else {
+            return _get(this, unit);
+        }
+    };
+};
+var _getsetYear = _makeGetSet('FullYear');
+var _getsetMonth = _makeGetSet('Month');
+var _getsetDate = _makeGetSet('Date');
+var _getsetDay = _makeGetSet('Day');
+var _getsetHour = _makeGetSet('Hours');
+var _getsetMinute = _makeGetSet('Minutes');
+var _getsetSecond = _makeGetSet('Seconds');
+var _getsetMillisecond = _makeGetSet('Milliseconds');
+/**
+ * 基础date对象
+ */
+var RiotDateBase = (function () {
+    function RiotDateBase(y, m, d) {
+        this.isRiotDate = true;
+        if (isDate(y)) {
+            this._d = y;
+        }
+        else if (arguments.length >= 3) {
+            this._d = new Date(y, m - 1, d);
+        }
+        else {
+            this._d = new Date();
+        }
+    }
+    RiotDateBase.prototype.year = function (value) {
+        return _getsetYear.call(this, value);
+    };
+    RiotDateBase.prototype.month = function (value) {
+        return _getsetMonth.call(this, value);
+    };
+    RiotDateBase.prototype.date = function (value) {
+        return _getsetDate.call(this, value);
+    };
+    RiotDateBase.prototype.day = function () {
+        return _getsetDay.call(this, null);
+    };
+    RiotDateBase.prototype.hour = function (value) {
+        return _getsetHour.call(this, value);
+    };
+    RiotDateBase.prototype.minute = function (value) {
+        return _getsetMinute.call(this, value);
+    };
+    RiotDateBase.prototype.second = function (value) {
+        return _getsetSecond.call(this, value);
+    };
+    RiotDateBase.prototype.millisecond = function (value) {
+        return _getsetMillisecond.call(this, value);
+    };
+    RiotDateBase.prototype.clone = function () {
+        var _d = this._d;
+        return new RiotDateBase(_d);
+    };
+    return RiotDateBase;
+}());
+
+var formattingTokens = /(\[[^\[]*\])|(\\)?([Hh]mm(ss)?|Mo|MM?M?M?|Do|DDDo|DD?D?D?|ddd?d?|do?|w[o|w]?|W[o|W]?|Qo?|YYYYYY|YYYYY|YYYY|YY|gg(ggg?)?|GG(GGG?)?|e|E|a|A|hh?|HH?|kk?|mm?|ss?|S{1,9}|x|X|zz?|ZZ?|.)/g;
+var formatFunctions = {};
+var formatTokenFunctions = {};
+var addFormatToken = function (token, padded, ordinal, callback) {
+    var func = callback;
+    if (typeof callback === 'string') {
+        func = function () {
+            return this[callback]();
+        };
+    }
+    if (token) {
+        formatTokenFunctions[token] = func;
+    }
+    if (padded) {
+        formatTokenFunctions[padded[0]] = function () {
+            return zeroFill(func.apply(this, arguments), padded[1], padded[2]);
+        };
+    }
+    //TODO 不考虑ordinal
+    /*if (ordinal) {
+      formatTokenFunctions[ordinal] = function () {
+        return this.localeData().ordinal(func.apply(this, arguments), token);
+      };
+    }*/
+};
+var makeFormatFunction = function (format) {
+    var array = format.match(formattingTokens), i, length;
+    for (i = 0, length = array.length; i < length; i++) {
+        if (formatTokenFunctions[array[i]]) {
+            array[i] = formatTokenFunctions[array[i]];
+        }
+        else {
+            array[i] = removeFormattingTokens(array[i]);
+        }
+    }
+    return function (mom) {
+        var output = '', i;
+        for (i = 0; i < length; i++) {
+            output += array[i] instanceof Function ? array[i].call(mom, format) : array[i];
+        }
+        return output;
+    };
+};
+// format date using native date object
+var formatRiotDate = function (m, format) {
+    formatFunctions[format] = formatFunctions[format] || makeFormatFunction(format);
+    return formatFunctions[format](m);
+};
+var removeFormattingTokens = function (input) {
+    if (input.match(/\[[\s\S]/)) {
+        return input.replace(/^\[|\]$/g, '');
+    }
+    return input.replace(/\\/g, '');
+};
+addFormatToken('M', ['MM', 2], 'Mo', function () {
+    return this._d.getMonth() + 1;
+});
+addFormatToken(0, ['YY', 2], 0, 'year');
+addFormatToken(0, ['YYYY', 4], 0, 'year');
+addFormatToken('w', ['ww', 2], 'wo', 'week');
+addFormatToken('D', ['DD', 2], 'DD', 'date');
+addFormatToken('DDD', ['DDDD', 3], 'DDDo', 'date');
+addFormatToken('e', 0, 0, 'day');
+addFormatToken('H', ['HH', 2], 0, 'hour');
+addFormatToken('m', ['mm', 2], 0, 'minute');
+addFormatToken('s', ['ss', 2], 0, 'second');
+addFormatToken(0, ['SSS', 3], 0, 'millisecond');
+function _formatRiotDate(date, format) {
+    if (!format) {
+        format = 'YYYY-MM-DD';
+    }
+    if (isFunction(format)) {
+        return format(date);
+    }
+    return formatRiotDate(date, format);
+}
+var RiotDate = (function (_super) {
+    __extends(RiotDate, _super);
+    function RiotDate() {
+        _super.apply(this, arguments);
+    }
+    //TODO week计算有错误
+    RiotDate.prototype.week = function () {
+        return getWeeksInYear(this.year(), this.month() + 1, this.date());
+    };
+    RiotDate.prototype.format = function (arg) {
+        return _formatRiotDate(this, arg);
+    };
+    return RiotDate;
+}(RiotDateBase));
 
 /* eslint-disable no-unused-vars */
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -129,6 +407,7 @@ var objectAssign$1 = objectAssign;
 
 var riotCalendarTmpl = "<div class=\"riot-calendar__box {(mutipleItems > 1 && 'riot-calendar--multiple riot-calendar--multiple-i' + mutipleItems)}\"> <a class=\"prev {prevMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{prevMonth}\"><i></i></a> <a class=\"next {nextMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{nextMonth}\"><i></i></a> <div class=\"riot-calendar__items\" each=\"{items, index in viewDatas}\"> <div class=\"riot-calendar__head\"> <div class=\"control title\"> <div if=\"{otherViewDatas}\" class=\"title__other\">{otherViewDatas[index].title}</div> <div class=\"title__cur\">{items.title}</div> </div> <div class=\"pure-g weeks\"> <div class=\"pure-u-1-8\" each=\"{week in weekTitles}\">{week}</div> </div> </div> <div class=\"riot-calendar__body\"> <div if=\"{otherViewDatas}\" class=\"riot-calendar__body--other\"> <div class=\"pure-g\" each=\"{weekdates in otherViewDatas[index].weekdates}\"> <div class=\"pure-u-1-8 {parseDateBoxClass(date)}\" each=\"{date in weekdates}\"> <div class=\"{date.disable === 0 && 'enable' || 'disable'} {date.select === 1 && 'choice' || ''}\"> <riot-date date=\"{date}\"></riot-date> </div> </div> </div> </div> <div class=\"riot-calendar__body--cur\"> <div class=\"pure-g\" each=\"{weekdates in items.weekdates}\"> <div class=\"pure-u-1-8 {parseDateBoxClass(date)}\" each=\"{date in weekdates}\"> <span class=\"date-placeholder\" if=\"{!showOtherMonthDates && date.current}\"></span> <div if=\"{showOtherMonthDates || (showOtherMonthDates===false && date.current===0 )}\" class=\"{date.disable === 0 && 'enable' || 'disable'} {date._change && 'change'} {date.select === 1 && 'choice' || ''}\" onclick=\"{checkDate}\"> <riot-date date=\"{date}\"></riot-date> </div> </div> </div> </div> </div> </div> <div class=\"riot-calendar__foot\"></div>";
 
+/// <reference path="../../../typings/index.d.ts" />
 var calendar = (function (Tag) {
     var defaultOpts = {
         showOtherMonthDates: true,
@@ -138,25 +417,86 @@ var calendar = (function (Tag) {
         numberOfMonths: 1,
         firstDay: 0
     };
-    var leapYearCache = {};
+    function format(date) {
+        if (isDate(date)) {
+            return '' + date.getFullYear() + zeroFill(date.getMonth() + 1) + zeroFill(date.getDate());
+        }
+        return '';
+    }
+    var yearCache = {};
     var weekTitles = ['日', '一', '二', '三', '四', '五', '六'];
+    var initSelectDates = function (ctx) {
+        var _a = ctx.config, isRange = _a.isRange, isMultiple = _a.isMultiple, _b = _a.selectDates, selectDates = _b === void 0 ? [] : _b;
+        var _c = ctx.props, rls = _c.rls, rle = _c.rle, mis = _c.mis, mas = _c.mas;
+        var selectDatesClone = [];
+        selectDates.forEach(function (d) {
+            var s = format(d);
+            if (isRange && ((rls && rls > s) || (rle && rle < s))) {
+                console.warn('riot-calendr组件value中%s由于不符合rangeLimit条件而被移除', d);
+            }
+            else if ((mis && mis > s) || (mas && mas < s)) {
+                console.warn('riot-calendr组件value中%s由于不符合minDate与maxDate条件而被移除', d);
+            }
+            selectDatesClone.push(new RiotDate(d));
+        });
+        selectDatesClone.sort(function (a, b) {
+            return +a._d - +b._d;
+        });
+        if (isRange) {
+            selectDatesClone = selectDatesClone.slice(0, 2);
+        }
+        else if (!isMultiple) {
+            selectDatesClone = selectDatesClone.slice(0, 1);
+        }
+        return selectDatesClone;
+    };
     var initConfig = function (opts) {
         return objectAssign$1({}, defaultOpts, opts);
     };
     var initState = function (ctx) {
-        return {};
+        var state = {
+            selectDates: initSelectDates(ctx)
+        };
+        return state;
     };
     var initProps = function (ctx) {
         var config = ctx.config;
-        var firstDay = config.firstDay, rangeLimit = config.rangeLimit, minDate = config.minDate, maxDate = config.maxDate;
+        var firstDay = config.firstDay, _a = config.rangeLimit, rangeLimit = _a === void 0 ? [] : _a, minDate = config.minDate, maxDate = config.maxDate, isRange = config.isRange, isMultiple = config.isMultiple, defaultDate = config.defaultDate;
+        var rls = format(rangeLimit[0]);
+        var rle = format(rangeLimit[1]);
+        var mis = format(minDate);
+        var mas = format(maxDate);
+        if (isRange) {
+            //判断rangeLimit与misDate|masDate的大小
+            mis && rls && rls < mis ? rls = mis : '';
+            mas && rle && rle > mas ? rle = mas : '';
+        }
         return {
-            weekTitles: weekTitles.slice(firstDay, 7).concat(weekTitles.slice(0, firstDay))
+            weekTitles: weekTitles.slice(firstDay, 7).concat(weekTitles.slice(0, firstDay)),
+            rls: rls,
+            rle: rle,
+            mis: mis,
+            mas: mas
         };
+    };
+    var updateProps = function (ctx) {
+        var selectDates = ctx.state.selectDates;
+        var _a = ctx.config, isMultiple = _a.isMultiple, isRange = _a.isRange;
+        var rs = '';
+        var re = '';
+        if (selectDates[0] && isMultiple) {
+            rs = selectDates[0].format('YYYYMMDD');
+        }
+        if (selectDates[1] && isRange) {
+            re = selectDates[1].format('YYYYMMDD');
+        }
+        ctx.props.rs = rs;
+        ctx.props.re = re;
     };
     var RiotCalendar = (function (_super) {
         __extends(RiotCalendar, _super);
         function RiotCalendar() {
-            return _super.apply(this, arguments) || this;
+            _super.apply(this, arguments);
         }
         Object.defineProperty(RiotCalendar.prototype, "name", {
             get: function () {
@@ -176,12 +516,22 @@ var calendar = (function (Tag) {
             this.config = initConfig(opts);
             this.props = initProps(this);
             this.state = initState(this);
+            updateProps(this);
+            console.log(this);
+        };
+        RiotCalendar.prototype.getSelectDates = function (sort) {
+            if (sort && this.config.isMultiple) {
+                this.state.selectDates.sort(function (a, b) {
+                    return +a._d - +b._d;
+                });
+            }
+            return this.state.selectDates;
         };
         return RiotCalendar;
     }(riot.Tag));
+    return RiotCalendar;
 })(riot.Tag);
 
-;
 function addEventListener(target, eventType, callback) {
     if (target.addEventListener) {
         target.addEventListener(eventType, callback, false);
@@ -200,11 +550,12 @@ function addEventListener(target, eventType, callback) {
         };
     }
 }
-;
 
 var riotSlideTmpl = "<div class=\"riot-slider {config.disabled && 'riot-slider--disable'} {!config.included && 'riot-slider--independent'}\" onmousedown=\"{config.disabled ? noop : onMousedown}\" ontouchstart=\"{config.disabled ? noop : onTouchstart}\"> <div class=\"riot-slider__track\"></div> <div class=\"riot-slider__track--select\" if=\"{config.included}\" riot-style=\"left:{state.track.left + '%'};width:{state.track.width + '%'}\"></div> <div class=\"riot-slider__handler riot-slider__handler--1\" riot-style=\"left:{(config.range ? state.track.left : state.track.width) + '%'}\" data-key=\"{state.track.left}\"></div> <div class=\"riot-slider__handler riot-slider__handler--2\" if=\"{config.range}\" riot-style=\"left: {(state.track.left + state.track.width) + '%'}\" data-key=\"{state.track.left + state.track.width}\"></div> <div class=\"riot-slider__marks\" if=\"{config.marks || config.showAllDots}\"> <div each=\"{mark,index in props.marks}\" class=\"riot-slider__marks--items {parent.parseMarkItemClass(mark)}\"> <span class=\"riot-slider__marks--items-dot\" data-key=\"{index}\" riot-style=\"left:{mark.precent + '%'}\" if=\"{mark.dot}\"></span> <span class=\"riot-slider__marks--items-tip\" data-key=\"{index}\" riot-style=\"width:{mark.width + '%'};margin-left:{(-0.5 * mark.width) + '%'};left:{mark.precent + '%'}\" if=\"{mark.tip}\">{mark.label}</span> </div> </div> </div>";
 
 var riotSlideCss = "[data-is=riot-slider] .riot-slider{position:relative}[data-is=riot-slider] .riot-slider__handler,[data-is=riot-slider] .riot-slider__marks,[data-is=riot-slider] .riot-slider__marks--items-dot,[data-is=riot-slider] .riot-slider__marks--items-tip,[data-is=riot-slider] .riot-slider__track--select{position:absolute}[data-is=riot-slider] .riot-slider__marks--items-tip{text-align:center}[data-is=riot-slider] .riot-slider__handler,[data-is=riot-slider] .riot-slider__marks--items-dot,[data-is=riot-slider] .riot-slider__marks--items-tip{cursor:pointer}[data-is=riot-slider] .riot-slider{width:100%;height:.3125rem;padding:.3125rem 0}[data-is=riot-slider] .riot-slider__track{height:100%;border-radius:.15625rem;background-color:#eeeaea;z-index:1}[data-is=riot-slider] .riot-slider__track--select{z-index:2;background-color:#7f1f59;top:.3125rem;bottom:.3125rem;border-radius:.15625rem}[data-is=riot-slider] .riot-slider__handler{width:.75rem;height:.75rem;border-radius:50%;background-color:#fff;box-shadow:0 0 .15625rem 1px hsla(0,0%,76%,.25);top:.0625rem;z-index:4;margin-left:-.375rem}[data-is=riot-slider] .riot-slider__marks{background-color:transparent;z-index:3;top:.3125rem;bottom:.3125rem;width:100%}[data-is=riot-slider] .riot-slider__marks--items-dot{width:.5625rem;height:.5625rem;border-radius:50%;background:#fff;border:1px solid #eeeaea;top:-.25rem;margin-left:-.28125rem}[data-is=riot-slider] .riot-slider__marks--items-tip{font-size:.75rem;line-height:1;top:.625rem;color:#bfbfbf}[data-is=riot-slider] .riot-slider__marks--items-select .riot-slider__marks--items-dot{border-color:#7f1f59}[data-is=riot-slider] .riot-slider__marks--items-select .riot-slider__marks--items-tip{color:#651c4d}[data-is=riot-slider] .riot-slider--independent .riot-slider__handler{background-color:#7f1f59}[data-is=riot-slider] .riot-slider--disable .riot-slider__track--select{background-color:#d7cece}[data-is=riot-slider] .riot-slider--disable .riot-slider__handler{cursor:not-allowed;background-color:#eeeaea}[data-is=riot-slider] .riot-slider--disable .riot-slider__marks--items-select .riot-slider__marks--items-dot{border:1px solid #eeeaea}[data-is=riot-slider] .riot-slider--disable .riot-slider__marks--items-select .riot-slider__marks--items-tip{color:#bfbfbf}";
+
+/// <reference path="../../../typings/index.d.ts" />
 
 var slider = (function (Tag) {
     var defaultConfig = {
@@ -611,7 +962,7 @@ var slider = (function (Tag) {
     var RiotSlider = (function (_super) {
         __extends(RiotSlider, _super);
         function RiotSlider() {
-            return _super.apply(this, arguments) || this;
+            _super.apply(this, arguments);
         }
         Object.defineProperty(RiotSlider.prototype, "name", {
             get: function () {
@@ -643,7 +994,7 @@ var slider = (function (Tag) {
         });
         RiotSlider.prototype.noop = function () {
         };
-        ;
+        
         RiotSlider.prototype.onTouchstart = function (e) {
             var self = this;
             if (isNotTouchEvent(e) || self.config.control) {
@@ -701,7 +1052,7 @@ var slider = (function (Tag) {
         };
         return RiotSlider;
     }(riot.Tag));
-    ;
+    
     return RiotSlider;
 })(riot.Tag);
 

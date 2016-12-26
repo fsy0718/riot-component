@@ -54,7 +54,7 @@ export interface RiotDateBaseInterface {
 export default class RiotDateBase {
     _d : Date;
     isRiotDate: boolean;
-    constructor(y:Date|number, m ?: number, d?: number){
+    constructor(y?:Date|number, m ?: number, d?: number){
         this.isRiotDate = true;
         if(isDate(y)){
             this._d = <Date>y;
