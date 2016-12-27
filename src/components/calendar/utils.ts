@@ -26,7 +26,7 @@ export function getDatesInPrevMonth (y: number, m: number, firstDay = 0): number
   return dates;
 };
 
-export function getDatesInNextMonth (y: number, m: number, firstDay?: number, weekMode?: string): number {
+export function getDatesInNextMonth (y: number, m: number, firstDay?: number, weekMode?: boolean): number {
   return weekMode ? 6 : getWeeksInMonth(y, m, firstDay) * 7 - getDatesInPrevMonth(y, m, firstDay) - getDatesInMonth(y, m);
 };
 

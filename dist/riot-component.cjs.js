@@ -17,31 +17,6 @@ function __extends(d, b) {
 
 var version = 'v${version}';
 
-var camelize = function (str) {
-    return str.replace(/-+(.)?/g, function (match, chr) {
-        return chr ? chr.toUpperCase() : '';
-    });
-};
-var dasherize = function (str) {
-    return str.replace(/::/g, '/')
-        .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
-        .replace(/([a-z\d])([A-Z])/g, '$1_$2')
-        .replace(/_/g, '-')
-        .toLowerCase();
-};
-var prefixProps = {
-    animation: true
-};
-var maybePrefix = function (key, value) {
-    var css = '';
-    var key = dasherize(key);
-    var _key = key.split('-');
-    if (prefixProps[_key[0]]) {
-        css += '-webkit-' + key + ':' + value + ';';
-    }
-    css += key + ':' + value + ';';
-    return css;
-};
 var _slice = [].slice;
 var _toString = Object.prototype.toString;
 var each = function (dom, callback) {
@@ -59,10 +34,6 @@ var each = function (dom, callback) {
         callback.apply(dom[0], args);
     }
 };
-
-
-
-
 function zeroFill(number, targetLength, forceSign) {
     if (targetLength === void 0) { targetLength = 2; }
     if (forceSign === void 0) { forceSign = false; }
@@ -70,11 +41,10 @@ function zeroFill(number, targetLength, forceSign) {
     return (sign ? (forceSign ? '+' : '') : '-') +
         Math.pow(10, Math.max(0, zerosToFill)).toString().substr(1) + absNumber;
 }
-
-//'String', 'Number', 'Object', 'Date', 'Array', 'Function', 'Undefined'
-
-
-
+;
+function isNumber(str) {
+    return _toString.call(str) === '[object Number]';
+}
 function isDate(str) {
     return _toString.call(str) === '[object Date]';
 }
@@ -84,15 +54,11 @@ function isArray(str) {
 function isFunction(str) {
     return _toString.call(str) === '[object Function]';
 }
-
-
 function pauseEvent(e) {
     e.preventDefault();
     e.stopPropagation();
     return this;
 }
-
-
 var elementClassListmethods = ['add', 'remove', 'toggle', 'contains'];
 var elementClassmethods = ['addClass', 'removeClass', 'toggleClass', 'hasClass'];
 var _eleClassListMethods = {};
@@ -112,12 +78,12 @@ var datesOfMonth = [31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 function getFirstDateInMonth(y, m) {
     return new Date(y, m - 1, 1);
 }
-
+;
 //是否为闰年
 function isLeapYear(y) {
     return !(y % 4) && !!(y % 100) || !(y % 400);
 }
-
+;
 function getDatesInPrevMonth(y, m, firstDay) {
     if (firstDay === void 0) { firstDay = 0; }
     var firstDayInMonth = getFirstDateInMonth(y, m).getDay();
@@ -135,19 +101,21 @@ function getDatesInPrevMonth(y, m, firstDay) {
     }
     return dates;
 }
-
-
-
+;
+function getDatesInNextMonth(y, m, firstDay, weekMode) {
+    return weekMode ? 6 : getWeeksInMonth(y, m, firstDay) * 7 - getDatesInPrevMonth(y, m, firstDay) - getDatesInMonth(y, m);
+}
+;
 function getDatesInMonth(y, m) {
     --m;
     return m === 1 ? isLeapYear(y) ? 29 : 28 : datesOfMonth[m];
 }
-
+;
 function getWeeksInMonth(y, m, firstDay) {
     var datesInMonth = getDatesInMonth(y, m) - 7 + getDatesInPrevMonth(y, m, firstDay);
     return Math.ceil(datesInMonth / 7) + 1 || 0;
 }
-
+;
 function getDatesInYear(y, m, d) {
     var _d = 0;
     var i = 1;
@@ -158,15 +126,12 @@ function getDatesInYear(y, m, d) {
     _d += d;
     return _d;
 }
-
+;
 function getWeeksInYear(y, m, d) {
     var _d = getDatesInYear(y, m, d);
     return Math.round(_d / 7);
 }
-
-function cloneDate(date) {
-    return new Date(date.getTime());
-}
+;
 
 var _get = function (d, unit) {
     return d._d['get' + unit]();
@@ -319,7 +284,7 @@ function _formatRiotDate(date, format) {
 var RiotDate = (function (_super) {
     __extends(RiotDate, _super);
     function RiotDate() {
-        _super.apply(this, arguments);
+        return _super.apply(this, arguments) || this;
     }
     //TODO week计算有错误
     RiotDate.prototype.week = function () {
@@ -409,9 +374,10 @@ else {
 }
 var objectAssign$1 = objectAssign;
 
-var riotCalendarTmpl = "<div class=\"riot-calendar__box {(mutipleItems > 1 && 'riot-calendar--multiple riot-calendar--multiple-i' + mutipleItems)}\"> <a class=\"prev {prevMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{prevMonth}\"><i></i></a> <a class=\"next {nextMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{nextMonth}\"><i></i></a> <div class=\"riot-calendar__items\" each=\"{items, index in viewDatas}\"> <div class=\"riot-calendar__head\"> <div class=\"control title\"> <div if=\"{otherViewDatas}\" class=\"title__other\">{otherViewDatas[index].title}</div> <div class=\"title__cur\">{items.title}</div> </div> <div class=\"pure-g weeks\"> <div class=\"pure-u-1-8\" each=\"{week in weekTitles}\">{week}</div> </div> </div> <div class=\"riot-calendar__body\"> <div if=\"{otherViewDatas}\" class=\"riot-calendar__body--other\"> <div class=\"pure-g\" each=\"{weekdates in otherViewDatas[index].weekdates}\"> <div class=\"pure-u-1-8 {parseDateBoxClass(date)}\" each=\"{date in weekdates}\"> <div class=\"{date.disable === 0 && 'enable' || 'disable'} {date.select === 1 && 'choice' || ''}\"> <riot-date date=\"{date}\"></riot-date> </div> </div> </div> </div> <div class=\"riot-calendar__body--cur\"> <div class=\"pure-g\" each=\"{weekdates in items.weekdates}\"> <div class=\"pure-u-1-8 {parseDateBoxClass(date)}\" each=\"{date in weekdates}\"> <span class=\"date-placeholder\" if=\"{!showOtherMonthDates && date.current}\"></span> <div if=\"{showOtherMonthDates || (showOtherMonthDates===false && date.current===0 )}\" class=\"{date.disable === 0 && 'enable' || 'disable'} {date._change && 'change'} {date.select === 1 && 'choice' || ''}\" onclick=\"{checkDate}\"> <riot-date date=\"{date}\"></riot-date> </div> </div> </div> </div> </div> </div> <div class=\"riot-calendar__foot\"></div>";
+var riotCalendarTmpl = "<div class=\"riot-calendar__box\"> <div class=\"riot-calendar__main {(props.mutipleItems > 1 && 'riot-calendar--multiple riot-calendar--multiple-i' + props.mutipleItems)}\"> <a class=\"prev {state.prevMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{prevMonth}\"><i></i></a> <a class=\"next {state.nextMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{nextMonth}\"><i></i></a> <div class=\"riot-calendar__items\" each=\"{items, index in state.viewDatas}\"> <div class=\"riot-calendar__head\"> <div class=\"control title\"> <div if=\"{otherViewDatas}\" class=\"title__other\">{otherViewDatas[index].title}</div> <div class=\"title__cur\">{items.title}</div> </div> <div class=\"riot-component__row weeks\"> <div class=\"riot-component__col\" each=\"{week in props.weekTitles}\">{week}</div> </div> </div> <div class=\"riot-calendar__body\"> <div class=\"riot-calendar__body--cur\"> <div class=\"riot-component__row\"> <div class=\"riot-component__col\" each=\"{date in items.dates}\"> <span class=\"date-placeholder\" if=\"{!config.showOtherMonthDates && date.current}\"></span> <div if=\"{config.showOtherMonthDates || (config.showOtherMonthDates === false && date.current === 0)}\" class=\"{date.disable === 0 && 'enable' || 'disable'} {date.change && 'change'} {date.select === 1 && 'choice' || ''}\" onclick=\"{checkDate}\"> <riot-date date=\"{date}\">{date.date()}</riot-date> </div> </div> </div> </div> </div> </div> </div> <div class=\"riot-calendar__foot\"></div> </div>";
 
-/// <reference path="../../../typings/index.d.ts" />
+var riotCalendarCss = ".riot-component__row{letter-spacing:-.31em;text-rendering:optimizeSpeed;display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-flow:row wrap;flex-flow:row wrap;-ms-flex-line-pack:start;align-content:flex-start;font-family:FreeSans,Arimo,Droid Sans,Helvetica,Arial,sans-serif}.riot-component__row .riot-component__col{display:inline-block;zoom:1;letter-spacing:normal;word-spacing:normal;vertical-align:top;text-rendering:auto}[data-is=riot-calendar]{display:block}[data-is=riot-calendar] riot-date{display:block;height:100%}[data-is=riot-calendar] .riot-calendar__main{position:relative}[data-is=riot-calendar] .riot-calendar__main .next,[data-is=riot-calendar] .riot-calendar__main .prev{width:20%;position:absolute;top:0;height:1.625rem;line-height:2;z-index:2}[data-is=riot-calendar] .riot-calendar__main .next i,[data-is=riot-calendar] .riot-calendar__main .prev i{position:absolute;width:.5rem;height:.5rem;top:50%;left:50%;margin-top:-.40625rem;margin-left:-.25rem;border-top:none;border-right:none;border-left:2px solid #7f1f59;border-bottom:2px solid #7f1f59}[data-is=riot-calendar] .riot-calendar__main .next.disable i,[data-is=riot-calendar] .riot-calendar__main .prev.disable i{border-left-color:#b8b8b8;border-bottom-color:#b8b8b8}[data-is=riot-calendar] .riot-calendar__main .prev{left:0}[data-is=riot-calendar] .riot-calendar__main .prev i{-webkit-transform:rotate(45deg);transform:rotate(45deg)}[data-is=riot-calendar] .riot-calendar__main .next{right:0}[data-is=riot-calendar] .riot-calendar__main .next i{-webkit-transform:rotate(-135deg);transform:rotate(-135deg)}[data-is=riot-calendar] .riot-calendar--multiple:after,[data-is=riot-calendar] .riot-calendar--multiple:before{content:\"\";display:table}[data-is=riot-calendar] .riot-calendar--multiple:after{clear:both}[data-is=riot-calendar] .riot-calendar--multiple .riot-calendar__items{float:left;box-sizing:border-box}[data-is=riot-calendar] .riot-calendar--multiple .next,[data-is=riot-calendar] .riot-calendar--multiple .prev{width:15%}[data-is=riot-calendar] .riot-calendar--multiple-i2 .riot-calendar__items{width:49%;padding:0 1%}[data-is=riot-calendar] .riot-calendar--multiple-i3 .riot-calendar__items{width:32.33333%;padding:0 1%}[data-is=riot-calendar] .riot-calendar--multiple-i4 .riot-calendar__items{width:24%;padding:0 1%}[data-is=riot-calendar] .riot-calendar--multiple-i5 .riot-calendar__items{width:19%;padding:0 1%}[data-is=riot-calendar] .riot-calendar--multiple-i6 .riot-calendar__items{width:15.66667%;padding:0 1%}[data-is=riot-calendar] .riot-component__col{width:14.285%;text-align:center;position:relative}[data-is=riot-calendar] .weeks{font-size:.8125rem;color:#333;line-height:2.1875rem;position:relative}[data-is=riot-calendar] .weeks:after{position:absolute;content:\"\";width:90.625%;height:1px;background-color:#efebea;opacity:.97;left:4.6875%;bottom:0;z-index:2}[data-is=riot-calendar] .title{text-align:center;color:#333;font-size:.8125rem;line-height:2;position:relative;height:1.625rem;overflow:hidden;margin:0 20% .5rem}[data-is=riot-calendar] .title--cur{z-index:2}[data-is=riot-calendar] .title--other{z-index:1;pointer-events:none}[data-is=riot-calendar] .riot-calendar__body{padding:.40625rem 0;position:relative;min-height:15rem;overflow:hidden}[data-is=riot-calendar] .riot-calendar__body .pure-g{margin-top:.5rem}[data-is=riot-calendar] .riot-calendar__body--cur{z-index:2}[data-is=riot-calendar] .riot-calendar__body--other{z-index:1;pointer-events:none}[data-is=riot-calendar] .riot-calendar__body--cur,[data-is=riot-calendar] .riot-calendar__body--other,[data-is=riot-calendar] .title__cur,[data-is=riot-calendar] .title__other{will-change:transform,opacity;position:absolute;width:100%;left:0;background:#fff;-webkit-animation-play-state:paused;animation-play-state:paused;-webkit-animation-duration:.45s;animation-duration:.45s;-webkit-animation-fill-mode:forwards;animation-fill-mode:forwards;-webkit-animation-timing-function:cubic-bezier(.23,1,.32,1);animation-timing-function:cubic-bezier(.23,1,.32,1)}[data-is=riot-calendar] .riot-calendar__body--cur.calendar-fadeInLeft,[data-is=riot-calendar] .riot-calendar__body--other.calendar-fadeInLeft,[data-is=riot-calendar] .title__cur.calendar-fadeInLeft,[data-is=riot-calendar] .title__other.calendar-fadeInLeft{-webkit-animation-name:a;animation-name:a}[data-is=riot-calendar] .riot-calendar__body--cur.calendar-fadeInRight,[data-is=riot-calendar] .riot-calendar__body--other.calendar-fadeInRight,[data-is=riot-calendar] .title__cur.calendar-fadeInRight,[data-is=riot-calendar] .title__other.calendar-fadeInRight{-webkit-animation-name:c;animation-name:c}[data-is=riot-calendar] .riot-calendar__body--cur.calendar-fadeOutLeft,[data-is=riot-calendar] .riot-calendar__body--other.calendar-fadeOutLeft,[data-is=riot-calendar] .title__cur.calendar-fadeOutLeft,[data-is=riot-calendar] .title__other.calendar-fadeOutLeft{-webkit-animation-name:b;animation-name:b}[data-is=riot-calendar] .riot-calendar__body--cur.calendar-fadeOutRight,[data-is=riot-calendar] .riot-calendar__body--other.calendar-fadeOutRight,[data-is=riot-calendar] .title__cur.calendar-fadeOutRight,[data-is=riot-calendar] .title__other.calendar-fadeOutRight{-webkit-animation-name:d;animation-name:d}[data-is=riot-calendar] .riot-calendar__body--cur.animation,[data-is=riot-calendar] .riot-calendar__body--other.animation,[data-is=riot-calendar] .title__cur.animation,[data-is=riot-calendar] .title__other.animation{-webkit-animation-play-state:running;animation-play-state:running}[data-is=riot-calendar] .riot-calendar__body--cur,[data-is=riot-calendar] .riot-calendar__body--other{top:.25rem;height:100%}[data-is=riot-calendar] .date-placeholder{display:block}[data-is=riot-calendar] .date,[data-is=riot-calendar] .date-placeholder{height:2rem;line-height:2rem;text-align:center;cursor:default}[data-is=riot-calendar] .date-placeholder i,[data-is=riot-calendar] .date i{font-style:normal}[data-is=riot-calendar] .disable{color:#c5c5c5}[data-is=riot-calendar] .enable{color:#393836}[data-is=riot-calendar] .change .date,[data-is=riot-calendar] .choice .date{width:32px;height:32px;position:absolute;z-index:2;left:50%;margin-left:-16px;-ms-box-sizing:border-box;box-sizing:border-box;line-height:2rem;display:inline-block}[data-is=riot-calendar] .change .date .riot-date--bg,[data-is=riot-calendar] .choice .date .riot-date--bg{width:100%;height:100%;border-radius:50%;content:\"\";background-color:#7f1f59;position:absolute;top:0;left:0;z-index:-1;-webkit-animation-duration:.45s;animation-duration:.45s;-webkit-animation-fill-mode:forwards;animation-fill-mode:forwards;-webkit-animation-timing-function:cubic-bezier(.23,1,.32,1);animation-timing-function:cubic-bezier(.23,1,.32,1);will-change:transform,opacity}[data-is=riot-calendar] .change .date.riot-calendar-in .riot-date--bg,[data-is=riot-calendar] .choice .date.riot-calendar-in .riot-date--bg{-webkit-animation-name:e;animation-name:e}[data-is=riot-calendar] .change .date.riot-calendar-out .riot-date--bg,[data-is=riot-calendar] .choice .date.riot-calendar-out .riot-date--bg{-webkit-animation-name:f;animation-name:f}[data-is=riot-calendar] .choice.enable{color:#fff}[data-is=riot-calendar] .range--area{background-color:#eee2e9}[data-is=riot-calendar] .range--area .enable .date{color:#fff}[data-is=riot-calendar] .checkoutrange{font-weight:700}[data-is=riot-calendar] .range--end:before,[data-is=riot-calendar] .range--start:before{width:50%;height:32px;position:absolute;top:0;background-color:#eee2e9;content:\" \"}[data-is=riot-calendar] .range--start:before{right:0}[data-is=riot-calendar] .range--end:before{left:0}@-webkit-keyframes a{0%{-webkit-transform:translateX(-100%);transform:translateX(-100%);opacity:0}to{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@keyframes a{0%{-webkit-transform:translateX(-100%);transform:translateX(-100%);opacity:0}to{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@-webkit-keyframes b{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}to{-webkit-transform:translateX(100%);transform:translateX(100%);opacity:0}}@keyframes b{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}to{-webkit-transform:translateX(100%);transform:translateX(100%);opacity:0}}@-webkit-keyframes c{0%{-webkit-transform:translateX(100%);transform:translateX(100%);opacity:0}to{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@keyframes c{0%{-webkit-transform:translateX(100%);transform:translateX(100%);opacity:0}to{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@-webkit-keyframes d{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}to{-webkit-transform:translateX(-100%);transform:translateX(-100%);opacity:1}}@keyframes d{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}to{-webkit-transform:translateX(-100%);transform:translateX(-100%);opacity:1}}@-webkit-keyframes e{0%{-webkit-transform:scale(0);transform:scale(0);opacity:0}to{-webkit-transform:scale(1);transform:scale(1);opacith:1}}@keyframes e{0%{-webkit-transform:scale(0);transform:scale(0);opacity:0}to{-webkit-transform:scale(1);transform:scale(1);opacith:1}}@-webkit-keyframes f{0%{-webkit-transform:scale(1);transform:scale(1);opacity:1}to{-webkit-transform:scale(0);transform:scale(0);opacity:0}}@keyframes f{0%{-webkit-transform:scale(1);transform:scale(1);opacity:1}to{-webkit-transform:scale(0);transform:scale(0);opacity:0}}";
+
 var calendar = (function (Tag) {
     var defaultOpts = {
         showOtherMonthDates: true,
@@ -427,11 +393,11 @@ var calendar = (function (Tag) {
         }
         return '';
     }
-    var yearCache = {};
+    var viewDatesCache = {};
     var weekTitles = ['日', '一', '二', '三', '四', '五', '六'];
     var initSelectDates = function (ctx) {
         var _a = ctx.config, isRange = _a.isRange, isMultiple = _a.isMultiple, _b = _a.selectDates, selectDates = _b === void 0 ? [] : _b;
-        var _c = ctx.props, rls = _c.rls, rle = _c.rle, mis = _c.mis, mas = _c.mas;
+        var _e = ctx.props, rls = _e.rls, rle = _e.rle, mis = _e.mis, mas = _e.mas;
         var selectDatesClone = [];
         selectDates.forEach(function (d) {
             var s = format(d);
@@ -454,18 +420,270 @@ var calendar = (function (Tag) {
         }
         return selectDatesClone;
     };
+    var getViewItems = function (y, m, ctx) {
+        var viewItems = [{ y: y, m: m }];
+        var n = ctx.props.numberOfMonths;
+        if (n > 1) {
+            var i = 1;
+            while (i < n) {
+                ++m;
+                if (m > 12) {
+                    m = 1;
+                    y += 1;
+                }
+                viewItems.push({
+                    y: y,
+                    m: m
+                });
+                i++;
+            }
+        }
+        return viewItems;
+    };
+    var parseRiotDateProps = function (date, ctx, rangeStartInOtherMonth, rangeEndInOtherMonth) {
+        date.disable = 0;
+        var _a = ctx.config, isRange = _a.isRange, dateTimeFormat = _a.dateTimeFormat, disabledOverRangeGap = _a.disabledOverRangeGap, minRangeGap = _a.minRangeGap, maxRangeGap = _a.maxRangeGap, disabledDate = _a.disabledDate, isMultiple = _a.isMultiple;
+        var _b = ctx.props, rs = _b.rs, re = _b.re, rls = _b.rls, rle = _b.rle, mis = _b.mis, mas = _b.mas;
+        var _e = ctx.state, selectDates = _e.selectDates, selectDatesFormat = _e.selectDatesFormat, curChangeDateFormat = _e.curChangeDateFormat, lastSelectDatesFormat = _e.lastSelectDatesFormat;
+        if (dateTimeFormat) {
+            date.dateformat = date.format(dateTimeFormat);
+        }
+        var _format = date.format('YYYYMMDD');
+        if (isRange) {
+            if (rs) {
+                if (rs === _format) {
+                    date.range = -1;
+                    date.select = 1;
+                    if (date.current !== 0) {
+                        rangeStartInOtherMonth = true;
+                    }
+                }
+                else if (re) {
+                    if (_format === re) {
+                        date.range = 1;
+                        date.select = 1;
+                        if (date.current !== 0) {
+                            rangeEndInOtherMonth = true;
+                        }
+                    }
+                    else if (_format > rs && _format < re) {
+                        date.range = 0;
+                    }
+                }
+            }
+        }
+        else if (selectDatesFormat.indexOf(_format) > -1) {
+            date.select = 1;
+        }
+        if (date.current) {
+            date.disable = 1;
+        }
+        else if (isRange && (rls && rls > _format) || (rle && rle < _format)) {
+            date.disable = 2;
+        }
+        else if ((mis && mis > _format) || (mas && mas < _format)) {
+            date.disable = 3;
+        }
+        else if (isRange && disabledOverRangeGap && selectDates && selectDates.length === 1) {
+            var diff = +_format - +selectDates[0].format('YYYYMMDD');
+            if (diff > 0) {
+                if (minRangeGap && diff < minRangeGap) {
+                    date.disable = 4;
+                }
+                if (maxRangeGap && diff >= maxRangeGap) {
+                    date.disable = 5;
+                }
+            }
+        }
+        disabledDate && disabledDate(date);
+        if (curChangeDateFormat) {
+            if (curChangeDateFormat === _format) {
+                date.animation = date.select === 1 ? 1 : -1;
+                date.change = 1;
+            }
+            else if (lastSelectDatesFormat.indexOf(_format) > -1) {
+                if (isRange) {
+                    if (selectDatesFormat.length === 1) {
+                        if (lastSelectDatesFormat.length === 1 || (lastSelectDatesFormat.length === 2 && (selectDatesFormat[0] !== lastSelectDatesFormat[0] || selectDatesFormat[0] !== lastSelectDatesFormat[1]))) {
+                            date.animation = -1;
+                            date.change = 1;
+                        }
+                    }
+                }
+                else if (isMultiple) {
+                    date.animation = -1;
+                    date.change = 1;
+                }
+            }
+        }
+    };
+    var _getViewDatas = function (y, m, ctx) {
+        var _a = ctx.config, weekMode = _a.weekMode, firstDay = _a.firstDay;
+        var reiom = false;
+        var rsiom = false;
+        var cache = [];
+        var viewDatas;
+        var viewDates = [];
+        var weekNum = weekMode ? 6 : getWeeksInMonth(y, m, firstDay);
+        var datesInPrevMonth = getDatesInPrevMonth(y, m, firstDay);
+        var datesInNextMonth = getDatesInNextMonth(y, m, firstDay, weekMode);
+        var d = getDatesInMonth(y, m);
+        var i = 0;
+        var y1 = y;
+        var y3 = y;
+        var m1 = m;
+        var m3 = m;
+        var d1 = d;
+        var d3 = d;
+        if (datesInPrevMonth) {
+            if (m1 === 1) {
+                --y1;
+                m1 = 13;
+            }
+            --m1;
+            d1 = getDatesInMonth(y1, m1);
+        }
+        if (datesInNextMonth) {
+            if (m3 === 12) {
+                ++y3;
+                m3 = 0;
+            }
+            ++m3;
+        }
+        var c2 = 0;
+        var c3 = 0;
+        while (i < weekNum) {
+            var j = 0;
+            while (j < 7) {
+                var _y = void 0, _m = void 0, _d = void 0, _c = 0;
+                if (datesInPrevMonth) {
+                    _y = y1;
+                    _m = m1;
+                    _d = d1 - datesInPrevMonth + 1;
+                    _c = -1;
+                    --datesInPrevMonth;
+                }
+                else if (c2 < d) {
+                    _y = y;
+                    _m = m;
+                    _d = ++c2;
+                }
+                else if (c3 < datesInNextMonth) {
+                    _y = y3;
+                    _m = m3;
+                    _d = ++c3;
+                    _c = 1;
+                }
+                //添加到缓存
+                cache.push(_c + '/' + _y + '/' + _m + '/' + _d);
+                var riotdate = new RiotDate(_y, _m, _d);
+                riotdate.current = _c;
+                parseRiotDateProps(riotdate, ctx, rsiom, reiom);
+                viewDates.push(riotdate);
+                j++;
+            }
+            i++;
+        }
+        viewDatesCache[ctx.props.idx][y + '-' + m] = cache;
+        return {
+            dates: viewDates,
+            rangeEndInOtherMonth: reiom,
+            rangeStartInOtherMonth: rsiom
+        };
+    };
+    var _parseViewDatasFromCache = function (data, ctx) {
+        var viewDatas;
+        var reiom = false;
+        var rsiom = false;
+        var viewDates = data.map(function (d) {
+            var _d = d.split('/');
+            var riotdate = new RiotDate(+_d[1], +_d[2], +_d[3]);
+            riotdate.current = +_d[0];
+            parseRiotDateProps(riotdate, ctx, rsiom, reiom);
+            return riotdate;
+        });
+        return {
+            dates: viewDates,
+            rangeEndInOtherMonth: reiom,
+            rangeStartInOtherMonth: rsiom
+        };
+    };
+    var getSingleViewDatas = function (y, m, ctx) {
+        var idx = ctx.props.idx;
+        var key = y + '-' + m;
+        var viewDatas;
+        if (!viewDatesCache[idx]) {
+            viewDatesCache[idx] = {};
+        }
+        if (!viewDatesCache[idx][key]) {
+            viewDatas = _getViewDatas(y, m, ctx);
+        }
+        else {
+            viewDatas = _parseViewDatasFromCache(viewDatesCache[idx][key], ctx);
+        }
+        viewDatas.title = y + '年' + m + '月';
+        viewDatas.year = y;
+        viewDatas.month = m;
+        return viewDatas;
+    };
+    var getViewDatas = function (viewItems, ctx) {
+        var viewDatas = viewItems.map(function (item, index) {
+            return getSingleViewDatas(item.y, item.m, ctx);
+        });
+        return viewDatas;
+    };
+    var changeView = function (direction, ctx) {
+        var isPrev = direction === -1;
+        var item = ctx.state.viewDatas[isPrev ? 0 : ctx.state.viewDatas.length - 1];
+        var m = item.month + direction;
+        var y = item.year;
+    };
+    var checkViewSwitchStatus = function (ctx) {
+        var _a = ctx.config, switchViewOverLimit = _a.switchViewOverLimit, isRange = _a.isRange;
+        var preMonthDisable = false, nextMonthDisable = false;
+        if (switchViewOverLimit) {
+            var _b = ctx.props, rls = _b.rls, mis = _b.mis, rle = _b.rle, mas = _b.mas;
+            var viewDatas = ctx.state.viewDatas;
+            var y1 = viewDatas[0].year;
+            var m1 = viewDatas[0].month;
+            var l = viewDatas.length - 1;
+            var y2 = viewDatas[l].year;
+            var m2 = viewDatas[l].month;
+            var firstDateFormat = y1 + zeroFill(m1) + '01';
+            var lastDateFormat = y2 + zeroFill(m2) + zeroFill(getDatesInMonth(y2, m2));
+            if (isRange && firstDateFormat <= rls || firstDateFormat <= mis) {
+                preMonthDisable = true;
+            }
+            else {
+                preMonthDisable = false;
+            }
+            if ((isRange && rle && lastDateFormat >= rle) || (mas && lastDateFormat >= mas)) {
+                nextMonthDisable = true;
+            }
+            else {
+                nextMonthDisable = false;
+            }
+        }
+        return { nextMonthDisable: nextMonthDisable, preMonthDisable: preMonthDisable };
+    };
     var initConfig = function (opts) {
         return objectAssign$1({}, defaultOpts, opts);
     };
     var initState = function (ctx) {
+        var selectDates = initSelectDates(ctx);
+        var selectDatesFormat = [];
+        selectDates.forEach(function (d) {
+            selectDatesFormat.push(d.format('YYYYMMDD'));
+        });
         var state = {
-            selectDates: initSelectDates(ctx)
+            selectDates: selectDates,
+            selectDatesFormat: selectDatesFormat
         };
         return state;
     };
     var initProps = function (ctx) {
         var config = ctx.config;
-        var firstDay = config.firstDay, _a = config.rangeLimit, rangeLimit = _a === void 0 ? [] : _a, minDate = config.minDate, maxDate = config.maxDate, isRange = config.isRange, isMultiple = config.isMultiple, defaultDate = config.defaultDate;
+        var firstDay = config.firstDay, _a = config.rangeLimit, rangeLimit = _a === void 0 ? [] : _a, minDate = config.minDate, maxDate = config.maxDate, isRange = config.isRange, isMultiple = config.isMultiple, defaultDate = config.defaultDate, weekMode = config.weekMode, numberOfMonths = config.numberOfMonths;
         var rls = format(rangeLimit[0]);
         var rle = format(rangeLimit[1]);
         var mis = format(minDate);
@@ -475,20 +693,34 @@ var calendar = (function (Tag) {
             mis && rls && rls < mis ? rls = mis : '';
             mas && rle && rle > mas ? rle = mas : '';
         }
-        return {
+        var props = {
             weekTitles: weekTitles.slice(firstDay, 7).concat(weekTitles.slice(0, firstDay)),
             rls: rls,
             rle: rle,
             mis: mis,
-            mas: mas
+            mas: mas,
+            idx: '' + firstDay + '/' + (weekMode ? 1 : 0)
         };
+        if (numberOfMonths) {
+            var col = void 0, row = 1;
+            if (isNumber(numberOfMonths)) {
+                col = parseInt('' + numberOfMonths);
+            }
+            else if (isArray(numberOfMonths)) {
+                row = parseInt(numberOfMonths[0]) || 0;
+                col = parseInt(numberOfMonths[1]) || 0;
+            }
+            props.numberOfMonths = row * col;
+            props.mutipleItems = col;
+        }
+        return props;
     };
     var updateProps = function (ctx) {
         var selectDates = ctx.state.selectDates;
-        var _a = ctx.config, isMultiple = _a.isMultiple, isRange = _a.isRange;
+        var _a = ctx.config, isMultiple = _a.isMultiple, isRange = _a.isRange, defaultDate = _a.defaultDate;
         var rs = '';
         var re = '';
-        if (selectDates[0] && isMultiple) {
+        if (selectDates[0] && !isMultiple) {
             rs = selectDates[0].format('YYYYMMDD');
         }
         if (selectDates[1] && isRange) {
@@ -496,11 +728,12 @@ var calendar = (function (Tag) {
         }
         ctx.props.rs = rs;
         ctx.props.re = re;
+        ctx.props.defaultDate = isDate(defaultDate) ? new RiotDate(defaultDate) : selectDates && selectDates[0] || new RiotDate();
     };
     var RiotCalendar = (function (_super) {
         __extends(RiotCalendar, _super);
         function RiotCalendar() {
-            _super.apply(this, arguments);
+            return _super.apply(this, arguments) || this;
         }
         Object.defineProperty(RiotCalendar.prototype, "name", {
             get: function () {
@@ -516,12 +749,41 @@ var calendar = (function (Tag) {
             enumerable: true,
             configurable: true
         });
+        Object.defineProperty(RiotCalendar.prototype, "css", {
+            get: function () {
+                return riotCalendarCss;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(RiotCalendar.prototype, "attrs", {
+            get: function () {
+                return 'data-is="riot-calendar"';
+            },
+            enumerable: true,
+            configurable: true
+        });
         RiotCalendar.prototype.onCreate = function (opts) {
-            this.config = initConfig(opts);
-            this.props = initProps(this);
-            this.state = initState(this);
-            updateProps(this);
-            console.log(this);
+            var self = this;
+            self.config = initConfig(opts);
+            self.props = initProps(self);
+            self.state = initState(self);
+            updateProps(self);
+            var date = self.props.defaultDate;
+            var m = date.month() + 1;
+            var y = date.year();
+            var viewItems = getViewItems(y, m, self);
+            self.state.viewDatas = getViewDatas(viewItems, self);
+            objectAssign$1(self.state, checkViewSwitchStatus(self));
+            console.log(viewDatesCache);
+        };
+        RiotCalendar.prototype.prevMonth = function (e) {
+            var self = this;
+            if (self.state.preMonthDisable) {
+                e ? e.preventUpdate = true : '';
+                return;
+            }
+            changeView(-1, self);
         };
         RiotCalendar.prototype.getSelectDates = function (sort) {
             if (sort && this.config.isMultiple) {
@@ -536,6 +798,7 @@ var calendar = (function (Tag) {
     return RiotCalendar;
 })(riot.Tag);
 
+;
 function addEventListener(target, eventType, callback) {
     if (target.addEventListener) {
         target.addEventListener(eventType, callback, false);
@@ -554,12 +817,11 @@ function addEventListener(target, eventType, callback) {
         };
     }
 }
+;
 
 var riotSlideTmpl = "<div class=\"riot-slider {config.disabled && 'riot-slider--disable'} {!config.included && 'riot-slider--independent'}\" onmousedown=\"{config.disabled ? noop : onMousedown}\" ontouchstart=\"{config.disabled ? noop : onTouchstart}\"> <div class=\"riot-slider__track\"></div> <div class=\"riot-slider__track--select\" if=\"{config.included}\" riot-style=\"left:{state.track.left + '%'};width:{state.track.width + '%'}\"></div> <div class=\"riot-slider__handler riot-slider__handler--1\" riot-style=\"left:{(config.range ? state.track.left : state.track.width) + '%'}\" data-key=\"{state.track.left}\"></div> <div class=\"riot-slider__handler riot-slider__handler--2\" if=\"{config.range}\" riot-style=\"left: {(state.track.left + state.track.width) + '%'}\" data-key=\"{state.track.left + state.track.width}\"></div> <div class=\"riot-slider__marks\" if=\"{config.marks || config.showAllDots}\"> <div each=\"{mark,index in props.marks}\" class=\"riot-slider__marks--items {parent.parseMarkItemClass(mark)}\"> <span class=\"riot-slider__marks--items-dot\" data-key=\"{index}\" riot-style=\"left:{mark.precent + '%'}\" if=\"{mark.dot}\"></span> <span class=\"riot-slider__marks--items-tip\" data-key=\"{index}\" riot-style=\"width:{mark.width + '%'};margin-left:{(-0.5 * mark.width) + '%'};left:{mark.precent + '%'}\" if=\"{mark.tip}\">{mark.label}</span> </div> </div> </div>";
 
 var riotSlideCss = "[data-is=riot-slider] .riot-slider{position:relative}[data-is=riot-slider] .riot-slider__handler,[data-is=riot-slider] .riot-slider__marks,[data-is=riot-slider] .riot-slider__marks--items-dot,[data-is=riot-slider] .riot-slider__marks--items-tip,[data-is=riot-slider] .riot-slider__track--select{position:absolute}[data-is=riot-slider] .riot-slider__marks--items-tip{text-align:center}[data-is=riot-slider] .riot-slider__handler,[data-is=riot-slider] .riot-slider__marks--items-dot,[data-is=riot-slider] .riot-slider__marks--items-tip{cursor:pointer}[data-is=riot-slider] .riot-slider{width:100%;height:.3125rem;padding:.3125rem 0}[data-is=riot-slider] .riot-slider__track{height:100%;border-radius:.15625rem;background-color:#eeeaea;z-index:1}[data-is=riot-slider] .riot-slider__track--select{z-index:2;background-color:#7f1f59;top:.3125rem;bottom:.3125rem;border-radius:.15625rem}[data-is=riot-slider] .riot-slider__handler{width:.75rem;height:.75rem;border-radius:50%;background-color:#fff;box-shadow:0 0 .15625rem 1px hsla(0,0%,76%,.25);top:.0625rem;z-index:4;margin-left:-.375rem}[data-is=riot-slider] .riot-slider__marks{background-color:transparent;z-index:3;top:.3125rem;bottom:.3125rem;width:100%}[data-is=riot-slider] .riot-slider__marks--items-dot{width:.5625rem;height:.5625rem;border-radius:50%;background:#fff;border:1px solid #eeeaea;top:-.25rem;margin-left:-.28125rem}[data-is=riot-slider] .riot-slider__marks--items-tip{font-size:.75rem;line-height:1;top:.625rem;color:#bfbfbf}[data-is=riot-slider] .riot-slider__marks--items-select .riot-slider__marks--items-dot{border-color:#7f1f59}[data-is=riot-slider] .riot-slider__marks--items-select .riot-slider__marks--items-tip{color:#651c4d}[data-is=riot-slider] .riot-slider--independent .riot-slider__handler{background-color:#7f1f59}[data-is=riot-slider] .riot-slider--disable .riot-slider__track--select{background-color:#d7cece}[data-is=riot-slider] .riot-slider--disable .riot-slider__handler{cursor:not-allowed;background-color:#eeeaea}[data-is=riot-slider] .riot-slider--disable .riot-slider__marks--items-select .riot-slider__marks--items-dot{border:1px solid #eeeaea}[data-is=riot-slider] .riot-slider--disable .riot-slider__marks--items-select .riot-slider__marks--items-tip{color:#bfbfbf}";
-
-/// <reference path="../../../typings/index.d.ts" />
 
 var slider = (function (Tag) {
     var defaultConfig = {
@@ -966,7 +1228,7 @@ var slider = (function (Tag) {
     var RiotSlider = (function (_super) {
         __extends(RiotSlider, _super);
         function RiotSlider() {
-            _super.apply(this, arguments);
+            return _super.apply(this, arguments) || this;
         }
         Object.defineProperty(RiotSlider.prototype, "name", {
             get: function () {
@@ -998,7 +1260,7 @@ var slider = (function (Tag) {
         });
         RiotSlider.prototype.noop = function () {
         };
-        
+        ;
         RiotSlider.prototype.onTouchstart = function (e) {
             var self = this;
             if (isNotTouchEvent(e) || self.config.control) {
@@ -1056,7 +1318,7 @@ var slider = (function (Tag) {
         };
         return RiotSlider;
     }(riot.Tag));
-    
+    ;
     return RiotSlider;
 })(riot.Tag);
 

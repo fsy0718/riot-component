@@ -91,3 +91,36 @@ gulp.task('build', function () {
     console.log('build done!');
   })
 });
+
+let calendarDest = config.destpath + '/riotCalendar';
+gulp.task('build:ts:calendar', function(){
+  let promise = new Promise(function (resolve, reject) {
+    rollup.rollup({
+      entry: `${config.sourcepath}/components/calendar/index.ts`,
+      plugins: rollupPluginList
+    }).then(bundle => {
+      let banner = `/**
+      * @file ${config.package.name}.js |基于riot的组件
+      * @version ${config.package.version}
+      * @author ${config.package.author}
+      * @license ${config.package.license}
+      * @copyright fsy0718 ${new Date().getFullYear()}
+      */`
+      bundle.write({
+        format: 'iife',
+        moduleName: changeCase.camelCase('riotCalendar'),
+        globals: { riot: 'riot' },
+        dest: `${calendarDest}.js`,
+        banner: banner
+      })
+      bundle.write({ format: 'es', banner: banner, dest: `${calendarDest}.es6.js` })
+      bundle.write({ format: 'amd', banner: banner, dest: `${calendarDest}.amd.js` })
+      bundle.write({ format: 'cjs', banner: banner, dest: `${calendarDest}.cjs.js` })
+      resolve();
+    }).catch(error => {
+      console.error(error);
+      reject();
+    })
+  })
+  return promise;
+})

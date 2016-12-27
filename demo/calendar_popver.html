@@ -31,24 +31,7 @@
           </div>
           <div class="code-source">
             <textarea class="code">
-var calIpt = document.querySelector('.pop-ipt-1-1');
-var i = 0;
-var tag;
 
-tag = riot.mount(document.querySelector('.riot-calendar-1-1'), 'riot-calendar', {
-  dateTimeFormat: function(y,m,d){
-    return y + '/' + m + '/' + d;
-  },
-  numberOfMonths: 1,
-  isRange: true,
-  selectDates: [new Date(2016,8,30), new Date(2016,10,12)],
-  rangeLimit: [new Date()],
-  
-  maxRangeGap: 61,
-  disabledOverRangeGap: true,
-  switchViewOverLimit: true
-
-})[0];
             </textarea>
           </div>
         </div>
@@ -58,7 +41,7 @@ tag = riot.mount(document.querySelector('.riot-calendar-1-1'), 'riot-calendar', 
     </div>
   </div>
   <script src="./riot.min.js"></script>
-  <script src="../dist/riot-component.js"></script>
+  <script src="../dist/riotCalendar.js"></script>
   <script src="./prism.js"></script>
   <script>
     var codes = [].slice.call(document.querySelectorAll('textarea.code'),0);

@@ -106,6 +106,14 @@ class RiotDate extends RiotDateBase {
   format(arg?): string{
     return _formatRiotDate(this, arg)
   }
+  disable?: number
+  current?: number
+  dateformat ?: string
+  range ?: number
+  select ?: number
+  animation ?: number
+  change ?: number
+
 }
 
 export default RiotDate;
