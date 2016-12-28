@@ -94,7 +94,14 @@ function _formatRiotDate(date, format?){
 export interface RiotDateInterface extends RiotDateBaseInterface {
   week(): number,
   format(date: RiotDateInterface, format ?: string): string,
-  format(date: RiotDateInterface, format: Function): string
+  format(date: RiotDateInterface, format: Function): string,
+  disable?: number
+  current?: number
+  dateformat ?: string
+  range ?: number
+  select ?: number
+  animation ?: number
+  change ?: number
 }
 
 

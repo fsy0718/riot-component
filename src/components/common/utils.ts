@@ -94,12 +94,30 @@ export function pauseEvent(e:Event){
   return this;
 }
 
+const registerChildComponentCache = {};
 
-export function cacheRiotComponentToTAGIMPL(tag){
-  let __cache_div__ = document.createElement('div');
-  var __cacheRiotInstance__ = new tag(__cache_div__);
-  __cacheRiotInstance__.unmout();
-  __cache_div__ = null;
+export function registerChildComponent(tag){
+  if(!tag){
+    console.error('请提供注册的子组件构造函数')
+    return;
+  }
+  let __cache_div__;
+  try{
+    if(tag.name){
+      if(registerChildComponentCache[tag.name]){
+        return;
+      }
+    }
+    __cache_div__= document.createElement('div');
+    let __cacheRiotInstance__ = new tag(__cache_div__);
+    registerChildComponentCache[tag.name] = 1;
+    __cacheRiotInstance__.unmount();
+    __cache_div__ = null;
+  }catch(e){
+    __cache_div__ = null;
+    console.error(e);
+  }
+
 }
 
 function cssFunc(dom: HTMLElement, property: string): string;

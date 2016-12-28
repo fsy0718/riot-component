@@ -9,14 +9,6 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-function __extends(d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-}
-
-var version = 'v${version}';
-
 /* eslint-disable no-unused-vars */
 var hasOwnProperty = Object.prototype.hasOwnProperty;
 var propIsEnumerable = Object.prototype.propertyIsEnumerable;
@@ -100,6 +92,12 @@ var index = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
+function __extends(d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
 var _slice = [].slice;
 var _toString = Object.prototype.toString;
 var each = function (dom, callback) {
@@ -143,6 +141,30 @@ function pauseEvent(e) {
     e.stopPropagation();
     return this;
 }
+var registerChildComponentCache = {};
+function registerChildComponent(tag) {
+    if (!tag) {
+        console.error('请提供注册的子组件构造函数');
+        return;
+    }
+    var __cache_div__;
+    try {
+        if (tag.name) {
+            if (registerChildComponentCache[tag.name]) {
+                return;
+            }
+        }
+        __cache_div__ = document.createElement('div');
+        var __cacheRiotInstance__ = new tag(__cache_div__);
+        registerChildComponentCache[tag.name] = 1;
+        __cacheRiotInstance__.unmount();
+        __cache_div__ = null;
+    }
+    catch (e) {
+        __cache_div__ = null;
+        console.error(e);
+    }
+}
 var elementClassListmethods = ['add', 'remove', 'toggle', 'contains'];
 var elementClassmethods = ['addClass', 'removeClass', 'toggleClass', 'hasClass'];
 var _eleClassListMethods = {};
@@ -157,6 +179,40 @@ elementClassmethods.forEach(function (method, index) {
         return each(dom, call, className);
     };
 });
+
+var riotCalendarSubDateTmpl = "<div class=\"date {className}\"> <i class=\"riot-date--bg\" if=\"{!replaceWithInnerHTML}\"></i> <span if=\"{!replaceWithInnerHTML}\">{date}</span> </div>";
+
+var RiotCalendarSubDate = (function (_super) {
+    __extends(RiotCalendarSubDate, _super);
+    function RiotCalendarSubDate() {
+        return _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(RiotCalendarSubDate.prototype, "name", {
+        get: function () {
+            return 'riot-date';
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(RiotCalendarSubDate.prototype, "tmpl", {
+        get: function () {
+            return riotCalendarSubDateTmpl;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    RiotCalendarSubDate.prototype.onCreate = function (opts) {
+        if (opts.date) {
+            var animation = opts.date.animation;
+            this.className = animation === 1 ? 'riot-calendar-in' : animation === -1 ? 'riot-calendar-out' : '';
+            this.date = opts.date.date();
+            this.replaceWithInnerHTML = false;
+        }
+    };
+    return RiotCalendarSubDate;
+}(riot.Tag));
+
+var version = 'v${version}';
 
 var datesOfMonth = [31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 function getFirstDateInMonth(y, m) {
@@ -1328,6 +1384,10 @@ var slider = (function (Tag) {
     return RiotSlider;
 })(riot.Tag);
 
+//注册子组件
+registerChildComponent(RiotCalendarSubDate);
+
+exports.registerChildComponent = registerChildComponent;
 exports.version = version;
 exports.RiotCalendar = calendar;
 exports.RiotSlider = slider;
