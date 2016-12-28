@@ -1,3 +1,5 @@
+import objectAssign from "object-assign";
+
 const camelize = function (str: string): string {
   return str.replace(/-+(.)?/g, function (match, chr) {
     return chr ? chr.toUpperCase() : ''
@@ -46,6 +48,7 @@ interface CssMethods {
   
 }
 
+export const assign = objectAssign;
 
 export  function $(selector: string, context = document): Element {
   return context.querySelector(selector)

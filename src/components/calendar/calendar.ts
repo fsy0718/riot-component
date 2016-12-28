@@ -2,9 +2,10 @@
 
 import RiotDate from "./riotdate";
 import { RiotDateInterface } from "./riotdate";
-import { eleClassListMethods, isDate, zeroFill, isNumber, isArray } from "../common/utils";
+import { eleClassListMethods, isDate, zeroFill, isNumber, isArray, assign } from "../common/utils";
 import { getWeeksInMonth, getDatesInPrevMonth, getDatesInNextMonth, getDatesInMonth } from "./utils";
-import objectAssign from "../common/objectAssign";
+
+
 import riotCalendarTmpl from "./calendar.tag";
 import riotCalendarCss  from "./calendar.css";
 
@@ -398,7 +399,8 @@ export default (function (Tag) {
   }
 
   const initConfig = function (opts: riotCalendarOptsInterface): riotCalendarOptsInterface {
-    return objectAssign({}, defaultOpts, opts);
+
+    return assign({}, defaultOpts, opts);
   }
 
   const initState = function (ctx: RiotCalendar) {
@@ -496,7 +498,7 @@ export default (function (Tag) {
       let y = date.year() as number;
       let viewItems = getViewItems(y, m, self);
       self.state.viewDatas = getViewDatas(viewItems, self);
-      objectAssign(self.state, checkViewSwitchStatus(self));
+      assign(self.state, checkViewSwitchStatus(self));
       console.log(viewDatesCache)
     }
 

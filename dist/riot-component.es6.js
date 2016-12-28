@@ -13,6 +13,89 @@ function __extends(d, b) {
 
 var version = 'v${version}';
 
+/* eslint-disable no-unused-vars */
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+function toObject(val) {
+	if (val === null || val === undefined) {
+		throw new TypeError('Object.assign cannot be called with null or undefined');
+	}
+
+	return Object(val);
+}
+
+function shouldUseNative() {
+	try {
+		if (!Object.assign) {
+			return false;
+		}
+
+		// Detect buggy property enumeration order in older V8 versions.
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+		var test1 = new String('abc');  // eslint-disable-line
+		test1[5] = 'de';
+		if (Object.getOwnPropertyNames(test1)[0] === '5') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test2 = {};
+		for (var i = 0; i < 10; i++) {
+			test2['_' + String.fromCharCode(i)] = i;
+		}
+		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+			return test2[n];
+		});
+		if (order2.join('') !== '0123456789') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test3 = {};
+		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+			test3[letter] = letter;
+		});
+		if (Object.keys(Object.assign({}, test3)).join('') !==
+				'abcdefghijklmnopqrst') {
+			return false;
+		}
+
+		return true;
+	} catch (e) {
+		// We don't expect any of the above to throw, but better to be safe.
+		return false;
+	}
+}
+
+var index = shouldUseNative() ? Object.assign : function (target, source) {
+	var from;
+	var to = toObject(target);
+	var symbols;
+
+	for (var s = 1; s < arguments.length; s++) {
+		from = Object(arguments[s]);
+
+		for (var key in from) {
+			if (hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (Object.getOwnPropertySymbols) {
+			symbols = Object.getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
+		}
+	}
+
+	return to;
+};
+
 var _slice = [].slice;
 var _toString = Object.prototype.toString;
 var each = function (dom, callback) {
@@ -30,6 +113,7 @@ var each = function (dom, callback) {
         callback.apply(dom[0], args);
     }
 };
+var assign = index;
 function zeroFill(number, targetLength, forceSign) {
     if (targetLength === void 0) { targetLength = 2; }
     if (forceSign === void 0) { forceSign = false; }
@@ -291,84 +375,6 @@ var RiotDate = (function (_super) {
     };
     return RiotDate;
 }(RiotDateBase));
-
-/* eslint-disable no-unused-vars */
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-var propIsEnumerable = Object.prototype.propertyIsEnumerable;
-function toObject(val) {
-    if (val === null || val === undefined) {
-        throw new TypeError('Object.assign cannot be called with null or undefined');
-    }
-    return Object(val);
-}
-function shouldUseNative() {
-    try {
-        if (!Object.assign) {
-            return false;
-        }
-        // Detect buggy property enumeration order in older V8 versions.
-        // https://bugs.chromium.org/p/v8/issues/detail?id=4118
-        var test1 = new String('abc'); // eslint-disable-line
-        test1[5] = 'de';
-        if (Object.getOwnPropertyNames(test1)[0] === '5') {
-            return false;
-        }
-        // https://bugs.chromium.org/p/v8/issues/detail?id=3056
-        var test2 = {};
-        for (var i = 0; i < 10; i++) {
-            test2['_' + String.fromCharCode(i)] = i;
-        }
-        var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
-            return test2[n];
-        });
-        if (order2.join('') !== '0123456789') {
-            return false;
-        }
-        // https://bugs.chromium.org/p/v8/issues/detail?id=3056
-        var test3 = {};
-        'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
-            test3[letter] = letter;
-        });
-        if (Object.keys(Object.assign({}, test3)).join('') !==
-            'abcdefghijklmnopqrst') {
-            return false;
-        }
-        return true;
-    }
-    catch (e) {
-        // We don't expect any of the above to throw, but better to be safe.
-        return false;
-    }
-}
-var objectAssign;
-if (shouldUseNative()) {
-    objectAssign = Object.assign;
-}
-else {
-    objectAssign = function (target, source) {
-        var from;
-        var to = toObject(target);
-        var symbols;
-        for (var s = 1; s < arguments.length; s++) {
-            from = Object(arguments[s]);
-            for (var key in from) {
-                if (hasOwnProperty.call(from, key)) {
-                    to[key] = from[key];
-                }
-            }
-            if (Object.getOwnPropertySymbols) {
-                symbols = Object.getOwnPropertySymbols(from);
-                for (var i = 0; i < symbols.length; i++) {
-                    if (propIsEnumerable.call(from, symbols[i])) {
-                        to[symbols[i]] = from[symbols[i]];
-                    }
-                }
-            }
-        }
-        return to;
-    };
-}
-var objectAssign$1 = objectAssign;
 
 var riotCalendarTmpl = "<div class=\"riot-calendar__box\"> <div class=\"riot-calendar__main {(props.mutipleItems > 1 && 'riot-calendar--multiple riot-calendar--multiple-i' + props.mutipleItems)}\"> <a class=\"prev {state.prevMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{prevMonth}\"><i></i></a> <a class=\"next {state.nextMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{nextMonth}\"><i></i></a> <div class=\"riot-calendar__items\" each=\"{items, index in state.viewDatas}\"> <div class=\"riot-calendar__head\"> <div class=\"control title\"> <div if=\"{otherViewDatas}\" class=\"title__other\">{otherViewDatas[index].title}</div> <div class=\"title__cur\">{items.title}</div> </div> <div class=\"riot-component__row weeks\"> <div class=\"riot-component__col\" each=\"{week in props.weekTitles}\">{week}</div> </div> </div> <div class=\"riot-calendar__body\"> <div class=\"riot-calendar__body--cur\"> <div class=\"riot-component__row\"> <div class=\"riot-component__col\" each=\"{date in items.dates}\"> <span class=\"date-placeholder\" if=\"{!config.showOtherMonthDates && date.current}\"></span> <div if=\"{config.showOtherMonthDates || (config.showOtherMonthDates === false && date.current === 0)}\" class=\"{date.disable === 0 && 'enable' || 'disable'} {date.change && 'change'} {date.select === 1 && 'choice' || ''}\" onclick=\"{checkDate}\"> <riot-date date=\"{date}\">{date.date()}</riot-date> </div> </div> </div> </div> </div> </div> </div> <div class=\"riot-calendar__foot\"></div> </div>";
 
@@ -663,7 +669,7 @@ var calendar = (function (Tag) {
         return { nextMonthDisable: nextMonthDisable, preMonthDisable: preMonthDisable };
     };
     var initConfig = function (opts) {
-        return objectAssign$1({}, defaultOpts, opts);
+        return assign({}, defaultOpts, opts);
     };
     var initState = function (ctx) {
         var selectDates = initSelectDates(ctx);
@@ -770,7 +776,7 @@ var calendar = (function (Tag) {
             var y = date.year();
             var viewItems = getViewItems(y, m, self);
             self.state.viewDatas = getViewDatas(viewItems, self);
-            objectAssign$1(self.state, checkViewSwitchStatus(self));
+            assign(self.state, checkViewSwitchStatus(self));
             console.log(viewDatesCache);
         };
         RiotCalendar.prototype.prevMonth = function (e) {
@@ -831,7 +837,7 @@ var slider = (function (Tag) {
     };
     //初始化配置
     var initConfig = function (opts) {
-        var config = objectAssign$1({}, defaultConfig, opts);
+        var config = assign({}, defaultConfig, opts);
         var step = config.step, min = config.min, max = config.max;
         min = Math.max(0, min);
         step = config.range ? config.marks ? config.step : config.step || 1 : config.step || 1;

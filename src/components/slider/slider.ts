@@ -3,8 +3,7 @@
 
 import addEventListener from "../common/domEventListener";
 import {addEventListenerReturnInterface, IE8DocumentInterface} from "../common/domEventListener";
-import { isNumber, isUndefined, pauseEvent } from "../common/utils";
-import objectAssign from "../common/objectAssign";
+import { isNumber, isUndefined, pauseEvent, assign } from "../common/utils";
 import riotSlideTmpl from "./slider.tag";
 import riotSlideCss from "./slider.css";
 
@@ -100,7 +99,7 @@ export default (function (Tag) {
   }
   //初始化配置
   const initConfig = function (opts: riotSliderOptsInterface): riotSliderOptsInterface {
-    let config = objectAssign({}, defaultConfig, opts);
+    let config = assign({}, defaultConfig, opts);
     let { step, min, max} = config;
     min = Math.max(0, min);
     step = config.range ? config.marks ? config.step : config.step || 1 : config.step || 1

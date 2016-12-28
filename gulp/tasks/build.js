@@ -6,6 +6,7 @@ const changeCase = require('change-case');
 const path = require('path');
 const rollup = require('rollup');
 const nodeResolve = require('rollup-plugin-node-resolve');
+const commonjs = require('rollup-plugin-commonjs');
 const typescript = require('rollup-plugin-typescript');
 const string  = require('rollup-plugin-string');
 const gulpSequence = require('gulp-sequence');
@@ -21,9 +22,19 @@ gulp.task('build:clean', function (cb) {
   })
 })
 
+
+
 let rollupPluginList = [
   typescript({
     typescript: require('typescript')
+  }),
+  nodeResolve({
+    jsnext: true,
+    main: true,
+    browser: true
+  }),
+  commonjs({
+    include: config.modulespath + '/**'
   }),
   string({
     include: [`${config.cachepath}/components/**/*.tag`,`${config.cachepath}/components/**/*.css`]
