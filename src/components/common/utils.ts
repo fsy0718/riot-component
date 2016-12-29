@@ -91,6 +91,32 @@ export function isUndefined(str): boolean{
   return _toString.call(str) === '[object Undefined]'
 }
 
+interface simpleExtendCallInterface {
+  (key:string, val:any): boolean
+}
+
+function simpleExtend(target: Object, source: Object): Object
+function simpleExtend(target: Object, source: Object, blackKeys : string[]): Object;
+function simpleExtend(target: Object, source: Object, blackkeys: simpleExtendCallInterface): Object
+function simpleExtend(target: Object, source: Object, blackKeys: string[], callback: simpleExtendCallInterface): Object
+function simpleExtend(target:Object,source:Object, blackKeys ?:string[]|simpleExtendCallInterface, callback ?: simpleExtendCallInterface){
+  blackKeys = blackKeys || [];
+  if(isFunction(blackKeys)){
+    callback = blackKeys as simpleExtendCallInterface ;
+    blackKeys = [];
+  }
+  for(var i in source){
+    if(source.hasOwnProperty(i)){
+      if((blackKeys as string[]).indexOf(i) === -1 || callback && callback(i, source[i])){
+        target[i] = source[i];
+      }
+    }
+  }
+  return target;
+}
+
+export {simpleExtend}
+
 export function noop(){}
 
 export function pauseEvent(e:Event){
@@ -125,11 +151,11 @@ export function registerChildComponent(tag){
 
 }
 
-function cssFunc(dom: HTMLElement, property: string): string;
-function cssFunc(dom: HTMLElement, property: string[]): string;
-function cssFunc(dom: HTMLElement, property: string, value: string|number): HTMLElement;
-function cssFunc(dom: HTMLElement, property: Object): HTMLElement
-function cssFunc(dom: HTMLElement, property: string|string[]|Object, value?: string|number) {
+function css(dom: HTMLElement, property: string): string;
+function css(dom: HTMLElement, property: string[]): string;
+function css(dom: HTMLElement, property: string, value: string|number): HTMLElement;
+function css(dom: HTMLElement, property: Object): HTMLElement
+function css(dom: HTMLElement, property: string|string[]|Object, value?: string|number) {
   if (arguments.length < 3) {
     if (typeof property == 'string') {
       return dom.style[camelize(property)] || getComputedStyle(dom, '').getPropertyValue(property)
@@ -162,9 +188,7 @@ function cssFunc(dom: HTMLElement, property: string|string[]|Object, value?: str
   return dom.style.cssText += ';' + css;
 }
 
-export const css = cssFunc;
-
-
+export {css}
 
 const elementClassListmethods = ['add', 'remove', 'toggle', 'contains'];
 const elementClassmethods  = ['addClass', 'removeClass', 'toggleClass', 'hasClass'];

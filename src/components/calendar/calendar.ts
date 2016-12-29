@@ -2,7 +2,7 @@
 
 import RiotDate from "./riotdate";
 import { RiotDateInterface } from "./riotdate";
-import { eleClassListMethods, isDate, zeroFill, isNumber, isArray, assign, stopUpdateComponent } from "../common/utils";
+import { eleClassListMethods, isDate, zeroFill, isNumber, isArray, assign, stopUpdateComponent, simpleExtend} from "../common/utils";
 import { getWeeksInMonth, getDatesInPrevMonth, getDatesInNextMonth, getDatesInMonth, isRiotDate, addDays } from "./utils";
 
 import riotCalendarTmpl from "./calendar.tag";
@@ -58,8 +58,12 @@ export interface riotCalendarOptsInterface {
 
 type riotCalendarDateArray = RiotDate[]
 
+interface RiotCalendarSelectDateMaps {
+  [index: string]: RiotDate
+}
+
 interface riotCalendarStateInterface {
-  selectDates: riotCalendarDateArray,
+  selectDates ?: RiotCalendarSelectDateMaps,
   selectDatesFormat: string[],
   curChangeDateFormat?: string,
   lastSelectDatesFormat?: string[],
@@ -138,10 +142,10 @@ export default (function (Tag) {
 
   const weekTitles = ['日', '一', '二', '三', '四', '五', '六'];
 
-  const initSelectDates = function (ctx: RiotCalendar): riotCalendarDateArray {
+  const initSelectDatesFormat = function (ctx: RiotCalendar): string[] {
     const {isRange, isMultiple, selectDates = []} = ctx.config;
     const {rls, rle, mis, mas} = ctx.props;
-    let selectDatesClone = [] as riotCalendarDateArray;
+    let selectDatesFormat = [];
     selectDates.forEach(function (d) {
       let s = format(d);
       if (isRange && ((rls && rls > s) || (rle && rle < s))) {
@@ -150,49 +154,75 @@ export default (function (Tag) {
       else if ((mis && mis > s) || (mas && mas < s)) {
         console.warn('riot-calendr组件value中%s由于不符合minDate与maxDate条件而被移除', d);
       }
-      selectDatesClone.push(new RiotDate(d));
+      selectDatesFormat.push(s);
     });
-    selectDatesClone.sort(function (a, b) {
-      return +a._d - +b._d
+    selectDatesFormat.sort(function (a, b) {
+      return a - b
     });
     if (isRange) {
-      selectDatesClone = selectDatesClone.slice(0, 2);
+      selectDatesFormat = selectDatesFormat.slice(0, 2);
     }
     else if (!isMultiple) {
-      selectDatesClone = selectDatesClone.slice(0, 1);
+      selectDatesFormat = selectDatesFormat.slice(0, 1);
     }
-    return selectDatesClone;
+    return selectDatesFormat;
 
+  }
+  const dateFormatReg = /(\d{4})(\d{2})(\d{2})/;
+  const initSelectDates = function(ctx: RiotCalendar): RiotCalendarSelectDateMaps{
+    const {selectDatesFormat} = ctx.state;
+    let selectDates = {};
+    selectDatesFormat.forEach(function(date){
+      let ymd = date.match(dateFormatReg);
+      let riotdate = new RiotDate(+ymd[1], +ymd[2], +ymd[3]);
+      parseRiotDateProps(riotdate, ctx);
+      //TODO 计算 riotdate.current = riotdate.
+      selectDates[date] = riotdate;
+    });
+    return selectDates;
   }
 
   const setSelectDates = function(ctx: RiotCalendar, date: RiotDate){
-    const {isRange} = ctx.config;
+    const {isRange, isMultiple} = ctx.config;
     const {selectDatesFormat, selectDates} = ctx.state;
     let _selectDatesFormat;
-    let _selectDates;
+    let _selectDates = {};
     let _format = date.format('YYYYMMDD');
     let rs = selectDatesFormat[0], re = selectDatesFormat[1];
     if(isRange){
       if(rs && !re && rs === _format){
         _selectDatesFormat = [];
-        _selectDates = [];
       }
       else if(!rs || (rs && (rs > _format) || re)){
-        _selectDates = [date.clone()];
         _selectDatesFormat = [_format];
+        _selectDates[_format] = simpleExtend(date.clone(), {select:1});
       }else{
-        _selectDates = selectDates.concat(date.clone() as RiotDate);
         _selectDatesFormat = selectDatesFormat.concat(_format);
+        let _d = {}
+        _d[_format] = simpleExtend(date.clone(), {select:1})
+        _selectDates = assign(selectDates,_d);
       }
     }else{
       if(date.select){
         let i = selectDatesFormat.indexOf(_format);
-        _selectDates = selectDates.concat().splice(i,1);
         _selectDatesFormat = selectDatesFormat.concat().splice(i,1);
+        delete ctx.state.selectDates[_format];
+      }else{
+        if(!isMultiple){
+          _selectDatesFormat = [_format];
+          _selectDates[_format] = simpleExtend(date.clone(), {select:1})
+        }else{
+          _selectDatesFormat = selectDatesFormat.concat(_format);
+          let _d = {}
+          _d[_format] = simpleExtend(date.clone(), {select:1})
+          _selectDates = assign(selectDates,_d);
+        }
       }
     }
-
-    return []
+    return {
+      selectDatesFormat: _selectDatesFormat,
+      selectDates: _selectDates
+    }
   }
 
   const getViewItems = function (y: number, m: number, ctx: RiotCalendar): viewItemInterface[] {
@@ -216,7 +246,7 @@ export default (function (Tag) {
     return viewItems;
   }
 
-  const parseRiotDateProps = function (date: RiotDate, ctx: RiotCalendar, rangeStartInOtherMonth: boolean, rangeEndInOtherMonth: boolean) {
+  const parseRiotDateProps = function (date: RiotDate, ctx: RiotCalendar, rangeStartInOtherMonth ?: boolean, rangeEndInOtherMonth?: boolean) {
     date.disable = 0;
     const {isRange, dateTimeFormat, disabledOverRangeGap, minRangeGap, maxRangeGap, disabledDate, isMultiple} = ctx.config;
     const {rls, rle, mis, mas} = ctx.props;
@@ -296,12 +326,12 @@ export default (function (Tag) {
     }
   }
 
+  
   const _getViewDatas = function (y: number, m: number, ctx: RiotCalendar): viewDatasInterface {
     const {weekMode, firstDay} = ctx.config;
     let reiom = false;
     let rsiom = false;
     let cache = [];
-    let viewDatas: viewDatasInterface;
     let viewDates: riotCalendarDateArray = [];
     let weekNum = weekMode ? 6 : getWeeksInMonth(y, m, firstDay);
     let datesInPrevMonth = getDatesInPrevMonth(y, m, firstDay);
@@ -358,6 +388,7 @@ export default (function (Tag) {
         let riotdate = new RiotDate(_y, _m, _d);
         riotdate.current = _c;
         parseRiotDateProps(riotdate, ctx, rsiom, reiom);
+        
         viewDates.push(riotdate);
         j++;
       }
@@ -372,7 +403,6 @@ export default (function (Tag) {
   }
 
   const _parseViewDatasFromCache = function (data: string[], ctx: RiotCalendar): viewDatasInterface {
-    let viewDatas: viewDatasInterface;
     let reiom = false;
     let rsiom = false;
     let viewDates = data.map(function (d) {
@@ -561,17 +591,8 @@ export default (function (Tag) {
   }
 
   const initState = function (ctx: RiotCalendar) {
-    let selectDates = initSelectDates(ctx);
-    let selectDatesFormat = [];
-    const {isMultiple, isRange} = ctx.config;
-    selectDates.forEach(function (d) {
-      selectDatesFormat.push(d.format('YYYYMMDD'));
-    });
-    let state = {
-      selectDates: selectDates,
-      selectDatesFormat: selectDatesFormat,
-    };
-    return state;
+    let selectDatesFormat = initSelectDatesFormat(ctx);
+    return {selectDatesFormat};
   }
 
   const initProps = function (ctx: RiotCalendar): riotCalendarPropsInterface {
@@ -621,13 +642,10 @@ export default (function (Tag) {
     assign(ctx.state, {
       viewDatas: getViewDatas(viewItems, ctx)
     }, checkViewSwitchStatus(ctx));
+
     return ctx;
   }
-
-  const stopUpdateComponent = function(e){
-
-  }
-
+  //TODO 当为isMultiple时，取消选中有bug
   class RiotCalendar extends riot.Tag {
     config: riotCalendarOptsInterface;
     state: riotCalendarStateInterface;
@@ -656,7 +674,11 @@ export default (function (Tag) {
       let date = getDefaultDate(self);
       let m = date.month() as number + 1;
       let y = date.year() as number;
-      updateState(y, m, self)
+      updateState(y, m, self);
+      self.state.selectDates = initSelectDates(self);
+      self.on('update', function(){
+        console.log(self.state);
+      })
     }
 
     prevMonth(e) {
@@ -668,13 +690,22 @@ export default (function (Tag) {
     }
 
     getSelectDates(sort: boolean): riotCalendarDateArray {
-      if (sort && this.config.isMultiple) {
-        this.state.selectDates.sort(function (a, b) {
-          return +a._d - +b._d;
-        });
+      let self = this as RiotCalendar;
+      let _selectDates = [] as riotCalendarDateArray;
+      const {selectDates} = self.state;
+      if (sort) {
+        let selectDateKeys = Object.keys(selectDates).sort();
+        _selectDates = selectDateKeys.map(function(date){
+          return selectDates[date];
+        })
+      }else{
+        for(var date in selectDates){
+          if(selectDates.hasOwnProperty(date)){
+            _selectDates.push(selectDates[date]);
+          }
+        }
       }
-      return this.state.selectDates;
-
+      return _selectDates;
     }
 
     switchCalendarByDate = function (date) {
@@ -717,9 +748,9 @@ export default (function (Tag) {
           }
         }
       }
-      setSelectDates(self, date);
-
-      
+      //更新选择日期
+      assign(self.state, setSelectDates(self, date));
+      self.parent.parent.update();
     }
   }
   return RiotCalendar;

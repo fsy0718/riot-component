@@ -26,7 +26,6 @@ export default class RiotCalendarSubDate extends riot.Tag {
     let classname = '';
     let html = '';
     if (opts.date) {
-      opts.date.test = 1;
       const animation = opts.date.animation;
       this.date = opts.date.date();
       classname = animation === 1 ? 'riot-calendar-in' : animation === -1 ? 'riot-calendar-out' : '';

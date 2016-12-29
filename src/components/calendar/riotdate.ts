@@ -1,4 +1,4 @@
-import { zeroFill, isString, isFunction } from "../common/utils";
+import { zeroFill, isString, isFunction,simpleExtend} from "../common/utils";
 import { getWeeksInYear } from "./utils";
 import RiotDateBase from "./date";
 import {RiotDateBaseInterface} from "./date";
@@ -113,6 +113,18 @@ class RiotDate extends RiotDateBase {
   }
   format(arg?): string{
     return _formatRiotDate(this, arg)
+  }
+  clone(): RiotDate{
+
+    let _d = this._d;
+    let newRiotDate = new RiotDate(_d);
+    simpleExtend(newRiotDate, this, function(key, value){
+      if(key === '_d'){
+        return false;
+      }
+      return true;
+    })
+    return newRiotDate;
   }
   disable?: number
   current?: number

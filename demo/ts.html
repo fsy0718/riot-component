@@ -13,7 +13,8 @@
     var RiotSlider = riotComponent.RiotSlider;
     var riotCalendar = new RiotCalendar(
       document.querySelector('.demo'),{
-        selectDates: [new Date()],
+        isMultiple: true,
+        selectDates: [new Date(), new Date('2017-01-05')],
         beforeShowDate: function(date){
           if(date.day() === 0){
             return {
