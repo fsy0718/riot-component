@@ -17,8 +17,8 @@
           <div class="riot-component__row">
             <div class="riot-component__col" each={date in items.dates}>
               <span class="date-placeholder" if={!config.showOtherMonthDates && date.current}></span>
-              <div if={config.showOtherMonthDates || (config.showOtherMonthDates === false && date.current === 0)} class="{date.disable === 0 && 'enable' || 'disable'} {date.change && 'change'} {date.select === 1 && 'choice' || ''}" onclick={checkDate}>
-                <riot-date date={date}>{date.date()}</riot-date>
+              <div if={config.showOtherMonthDates || (config.showOtherMonthDates === false && date.current === 0)} class="{date.disable === 0 && 'enable' || 'disable'} {date.change && 'change'} {date.select === 1 && 'choice' || ''}" onclick="{parent.parent.clickHandler}">
+                <div data-is="riot-date" date={date} before-show-date={config.beforeShowDate}>{date.date()}</div>
               </div>
             </div>
           </div>

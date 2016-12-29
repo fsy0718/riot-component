@@ -3,20 +3,28 @@
 import RiotDate from "./riotdate";
 import { RiotDateInterface } from "./riotdate";
 import { eleClassListMethods, isDate, zeroFill, isNumber, isArray, assign } from "../common/utils";
-import { getWeeksInMonth, getDatesInPrevMonth, getDatesInNextMonth, getDatesInMonth } from "./utils";
-
-
+import { getWeeksInMonth, getDatesInPrevMonth, getDatesInNextMonth, getDatesInMonth, isRiotDate, addDays } from "./utils";
 
 import riotCalendarTmpl from "./calendar.tag";
-import riotCalendarCss  from "./calendar.css";
+import riotCalendarCss from "./calendar.css";
 
 const {removeClass, addClass} = eleClassListMethods;
 
 
+interface RiotCalendarInterface extends riot.Tag { }
 
 interface riotCalendarDateTimeFormatInterface {
   (date: RiotDate): string
 }
+
+interface riotCalendarOptsBeforeShowDateReturnObjectDate {
+  (date: RiotDate): { className: string, html: string }
+}
+interface riotCalendarOptsBeforeShowDateReturnStringDate {
+  (date: RiotDate): string
+}
+
+export type riotCalendarOptsBeforeShowDate = riotCalendarOptsBeforeShowDateReturnObjectDate | riotCalendarOptsBeforeShowDateReturnStringDate;
 
 export interface riotCalendarOptsInterface {
   autoOk?: boolean,
@@ -40,9 +48,10 @@ export interface riotCalendarOptsInterface {
   maxRangeGap?: number,
   disabledOverRangeGap?: boolean,
   onChange?: (date: RiotDate, ctx: RiotCalendarInterface) => void,
+  afterChange?: (date: RiotDate, ctx: RiotCalendarInterface) => void,
   dateTimeFormat?: string | riotCalendarDateTimeFormatInterface,
   disabledDate?: (date: RiotDate) => number,
-  beforeShowDate?: (date: RiotDate) => string,
+  beforeShowDate?: riotCalendarOptsBeforeShowDate,
   onRangeGapInvalid?: (invalidType: string) => boolean
 
 }
@@ -56,7 +65,8 @@ interface riotCalendarStateInterface {
   lastSelectDatesFormat?: string[],
   viewDatas?: viewDatasInterface[],
   preMonthDisable?: boolean,
-  nextMonthDisable?: boolean
+  nextMonthDisable?: boolean,
+  direction?: number
 }
 
 interface riotCalendarPropsInterface {
@@ -96,6 +106,13 @@ interface viewItemInterface {
   m: number,
 }
 
+interface checkDateInterface {
+  result: boolean,
+  y?: number,
+  m?: number,
+  direction?: number,
+  rangeGapType?: string
+}
 export default (function (Tag) {
   const defaultOpts = {
     showOtherMonthDates: true,
@@ -107,9 +124,13 @@ export default (function (Tag) {
   }
   function format(): string
   function format(date: Date): string
-  function format(date?: Date) {
+  function format(date?: number, m?: number, d?: number): string
+  function format(date?: Date | number, m?: number, d?: number) {
     if (isDate(date)) {
-      return '' + date.getFullYear() + zeroFill(date.getMonth() + 1) + zeroFill(date.getDate())
+      return '' + (date as Date).getFullYear() + zeroFill((date as Date).getMonth() + 1) + zeroFill((date as Date).getDate())
+    }
+    if (arguments.length === 3) {
+      return '' + date + zeroFill(m) + zeroFill(d);
     }
     return ''
   }
@@ -143,6 +164,10 @@ export default (function (Tag) {
     }
     return selectDatesClone;
 
+  }
+
+  const setSelectDates = function(ctx: RiotCalendar, date: RiotDate){
+    return []
   }
 
   const getViewItems = function (y: number, m: number, ctx: RiotCalendar): viewItemInterface[] {
@@ -363,12 +388,23 @@ export default (function (Tag) {
     return viewDatas;
   }
 
-  const changeView = function(direction: number, ctx: RiotCalendar){
+  const updateViewYearAndMonth = function (direction: number, ctx: RiotCalendar) {
     let isPrev = direction === -1;
     let item = ctx.state.viewDatas[isPrev ? 0 : ctx.state.viewDatas.length - 1];
     let m = item.month + direction;
     let y = item.year;
-
+    if(isPrev && m < 1){
+      --y;
+      m = 12;
+    }
+    else if(m > 12){
+      ++y;
+      m = 1;
+    }
+    return {
+      y: y,
+      m: m
+    }
   }
 
   const checkViewSwitchStatus = function (ctx: RiotCalendar) {
@@ -382,8 +418,8 @@ export default (function (Tag) {
       let l = viewDatas.length - 1;
       let y2 = viewDatas[l].year;
       let m2 = viewDatas[l].month;
-      let firstDateFormat = y1 + zeroFill(m1) + '01';
-      let lastDateFormat = y2 + zeroFill(m2) + zeroFill(getDatesInMonth(y2, m2));
+      let firstDateFormat = format(y1, m1, 1);
+      let lastDateFormat = format(y2, m2, getDatesInMonth(y2, m2));
       if (isRange && firstDateFormat <= rls || firstDateFormat <= mis) {
         preMonthDisable = true;
       } else {
@@ -397,6 +433,99 @@ export default (function (Tag) {
     }
 
     return { nextMonthDisable, preMonthDisable }
+  }
+
+  const checkSwitchViewDateIsValid = function (ctx: RiotCalendar, y: number, m: number): boolean {
+    const {rle, rls, mis, mas} = ctx.props
+    if (ctx.config.switchViewOverLimit) {
+      let firstDateFormat = format(y, m, 1);
+      let lastDateFormat = format(y, m, getDatesInMonth(y, m));
+      if (ctx.config.isRange) {
+        if (rle && firstDateFormat >= rle || rls && lastDateFormat <= rls) {
+          return false;
+        }
+      }
+      if (mis && lastDateFormat <= mis || mas && firstDateFormat >= mas) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+
+  const checkDateIsOverRangeGapLimit = function (type: string, date: Date, dateFormat: string, ctx: RiotCalendar) {
+    let isMin = type === 'min';
+    let rangeEnd = addDays(date, ctx.config[isMin ? 'minRangeGap' : 'maxRangeGap'] - 1);
+    let rangeEndFormat = format(rangeEnd);
+    let diff = +rangeEndFormat - +dateFormat;
+    if (isMin && diff > 0 || !isMin && diff < 0) {
+      return {
+        rangeGapType: type,
+        result: false
+      }
+    } else {
+      return {
+        result: true
+      }
+    }
+  }
+
+  const checkDateIsValid = function (date: RiotDate | Date, ctx: RiotCalendar, switchView = false): checkDateInterface {
+    if (switchView) {
+      let y: number;
+      let m: number;
+      if (isRiotDate(date)) {
+        y = (date as RiotDate).year() as number;
+        m = (date as RiotDate).month() as number + 1;
+      }
+      if (isDate(date)) {
+        y = (date as Date).getFullYear();
+        m = (date as Date).getMonth() + 1;
+      }
+      return {
+        result: checkSwitchViewDateIsValid(ctx, y, m),
+        y: y,
+        m: m
+      }
+    }
+    let result: checkDateInterface = {
+      result: true
+    }
+    let resultFalse = { result: false };
+    const {switchViewByOtherMonth, isRange, minRangeGap, maxRangeGap} = ctx.config;
+    const {mis, mas, rls, rle} = ctx.props;
+    const {preMonthDisable, nextMonthDisable} = ctx.state
+    if ((date as RiotDate).disable !== 0) {
+      if (switchViewByOtherMonth && (((date as RiotDate).current === -1 && !preMonthDisable) || (date as RiotDate).current === 1 && !nextMonthDisable)) {
+        result.direction = (date as RiotDate).current
+      } else {
+        return resultFalse
+      }
+    }
+    let _format = (date as RiotDate).format('YYYYMMDD');
+    if (_format < mis || mas && _format > mas) {
+      return resultFalse
+    }
+    if (isRange) {
+      if (_format < rls || rle && _format > rle) {
+        return resultFalse
+      }
+      let r1, r2;
+      if (minRangeGap > 1) {
+        r1 = checkDateIsOverRangeGapLimit('min', (date as RiotDate)._d, _format, ctx)
+      }
+      if (maxRangeGap > 1) {
+        r2 = checkDateIsOverRangeGapLimit('max', (date as RiotDate)._d, _format, ctx)
+      }
+      if (!r1.result || !r2.result) {
+        return {
+          result: false,
+          rangeGapType: r1.rangeGapType || r2.rangeGapType
+        }
+      }
+
+    }
+    return result;
   }
 
   const initConfig = function (opts: riotCalendarOptsInterface): riotCalendarOptsInterface {
@@ -452,6 +581,7 @@ export default (function (Tag) {
 
     return props;
   }
+
   const updateProps = function (ctx: RiotCalendar): void {
     const {selectDates} = ctx.state;
     const {isMultiple, isRange, defaultDate} = ctx.config;
@@ -468,6 +598,18 @@ export default (function (Tag) {
     ctx.props.defaultDate = isDate(defaultDate) ? new RiotDate(defaultDate) : selectDates && selectDates[0] || new RiotDate()
   }
 
+  const updateState = function (y: number, m: number, ctx: RiotCalendar, state?: riotCalendarStateInterface) {
+    let viewItems = getViewItems(y, m, ctx);
+    assign(ctx.state, {
+      viewDatas: getViewDatas(viewItems, ctx)
+    }, checkViewSwitchStatus(ctx));
+    return ctx;
+  }
+
+
+
+
+
   class RiotCalendar extends riot.Tag {
     config: riotCalendarOptsInterface;
     state: riotCalendarStateInterface;
@@ -480,11 +622,11 @@ export default (function (Tag) {
       return riotCalendarTmpl;
     }
 
-    get css(){
+    get css() {
       return riotCalendarCss;
     }
 
-    get attrs(){
+    get attrs() {
       return 'data-is="riot-calendar"';
     }
 
@@ -497,19 +639,16 @@ export default (function (Tag) {
       let date = self.props.defaultDate;
       let m = date.month() as number + 1;
       let y = date.year() as number;
-      let viewItems = getViewItems(y, m, self);
-      self.state.viewDatas = getViewDatas(viewItems, self);
-      assign(self.state, checkViewSwitchStatus(self));
-      console.log(viewDatesCache)
+      updateState(y, m, self)
     }
 
-    prevMonth(e){
+    prevMonth(e) {
       let self = this;
-      if(self.state.preMonthDisable){
+      if (self.state.preMonthDisable) {
         e ? e.preventUpdate = true : '';
         return;
       }
-      changeView(-1, self);
+      updateViewYearAndMonth(-1, self);
     }
 
     getSelectDates(sort: boolean): riotCalendarDateArray {
@@ -520,6 +659,46 @@ export default (function (Tag) {
       }
       return this.state.selectDates;
 
+    }
+
+    switchCalendarByDate = function (date) {
+      let self: RiotCalendar = this;
+      let valid = checkDateIsValid(date, self, true);
+      let {result, y, m} = valid
+      if (result) {
+        let { viewDatas } = self.state;
+        let viewItemsStart = viewDatas[0];
+        let viewItemsEnd = viewDatas[viewDatas.length - 1];
+        let s1 = viewItemsStart.year + zeroFill(viewItemsStart.month);
+        let s2 = viewItemsEnd.year + zeroFill(viewItemsEnd.month);
+        let s3 = y + zeroFill(m);
+        let direction = s3 < s1 ? -1 : s3 > s2 ? 1 : 0;
+        if (direction) {
+          updateState(y, m, self, { direction: direction } as riotCalendarStateInterface);
+          self.update();
+        }else{
+          result = false
+        }
+      }
+      return result;
+    }
+
+    clickHandler(e) {
+      let self: RiotCalendar = this
+      const {date} = e.item
+      let valid = checkDateIsValid(date, self);
+      //不能更新的
+      if(!valid.result){
+        if(valid.direction){
+          //通过点击其他月来更新当前日历
+          setSelectDates(self, date);
+
+        }
+      }
+      if(date.date() === 30){
+        date.select = 1;
+        self.update();
+      }
     }
   }
   return RiotCalendar;

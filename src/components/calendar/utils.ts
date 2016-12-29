@@ -1,4 +1,5 @@
 import {zeroFill, isString, isFunction} from "../common/utils";
+import RiotDate from "./riotdate";
 
 const datesOfMonth = [31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -72,3 +73,7 @@ export function addDays (date: Date, d: number): Date {
   return newDate;
 };
 
+
+export function isRiotDate (date){
+  return date instanceof RiotDate
+}

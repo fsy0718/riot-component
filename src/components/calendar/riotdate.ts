@@ -102,6 +102,7 @@ export interface RiotDateInterface extends RiotDateBaseInterface {
   select ?: number
   animation ?: number
   change ?: number
+  test ?: number
 }
 
 

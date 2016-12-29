@@ -122,8 +122,15 @@ define(['exports'], function (exports) { 'use strict';
 	        Math.pow(10, Math.max(0, zerosToFill)).toString().substr(1) + absNumber;
 	}
 	;
+	//'String', 'Number', 'Object', 'Date', 'Array', 'Function', 'Undefined'
+	function isString(str) {
+	    return _toString.call(str) === '[object String]';
+	}
 	function isNumber(str) {
 	    return _toString.call(str) === '[object Number]';
+	}
+	function isObject(str) {
+	    return _toString.call(str) === '[object Object]';
 	}
 	function isDate(str) {
 	    return _toString.call(str) === '[object Date]';
@@ -200,12 +207,37 @@ define(['exports'], function (exports) { 'use strict';
 	        configurable: true
 	    });
 	    RiotCalendarSubDate.prototype.onCreate = function (opts) {
+	        var classname = '';
+	        var html = '';
 	        if (opts.date) {
+	            opts.date.test = 1;
 	            var animation = opts.date.animation;
-	            this.className = animation === 1 ? 'riot-calendar-in' : animation === -1 ? 'riot-calendar-out' : '';
 	            this.date = opts.date.date();
-	            this.replaceWithInnerHTML = false;
+	            classname = animation === 1 ? 'riot-calendar-in' : animation === -1 ? 'riot-calendar-out' : '';
+	            if (opts.beforeShowDate) {
+	                var _html = opts.beforeShowDate(opts.date);
+	                if (isObject(_html)) {
+	                    classname = classname + ' ' + (_html.className || '');
+	                    html = _html.html;
+	                }
+	                if (isString(_html)) {
+	                    html = _html;
+	                }
+	                if (html) {
+	                    this.replaceWithInnerHTML = true;
+	                }
+	            }
+	            this.className = classname;
 	        }
+	        this.on('mount', function () {
+	            if (html) {
+	                this.root.querySelector('.date').innerHTML = html;
+	            }
+	        });
+	    };
+	    RiotCalendarSubDate.prototype.shouldUpdate = function (data) {
+	        console.log(data);
+	        return true;
 	    };
 	    return RiotCalendarSubDate;
 	}(riot.Tag));
@@ -270,6 +302,19 @@ define(['exports'], function (exports) { 'use strict';
 	    return Math.round(_d / 7);
 	}
 	;
+	function cloneDate(date) {
+	    return new Date(date.getTime());
+	}
+	;
+	function addDays(date, d) {
+	    var newDate = cloneDate(date);
+	    newDate.setDate(date.getDate() + d);
+	    return newDate;
+	}
+	;
+	function isRiotDate(date) {
+	    return date instanceof RiotDate;
+	}
 
 	var _get = function (d, unit) {
 	    return d._d['get' + unit]();
@@ -434,7 +479,7 @@ define(['exports'], function (exports) { 'use strict';
 	    return RiotDate;
 	}(RiotDateBase));
 
-	var riotCalendarTmpl = "<div class=\"riot-calendar__box\"> <div class=\"riot-calendar__main {(props.mutipleItems > 1 && 'riot-calendar--multiple riot-calendar--multiple-i' + props.mutipleItems)}\"> <a class=\"prev {state.prevMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{prevMonth}\"><i></i></a> <a class=\"next {state.nextMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{nextMonth}\"><i></i></a> <div class=\"riot-calendar__items\" each=\"{items, index in state.viewDatas}\"> <div class=\"riot-calendar__head\"> <div class=\"control title\"> <div if=\"{otherViewDatas}\" class=\"title__other\">{otherViewDatas[index].title}</div> <div class=\"title__cur\">{items.title}</div> </div> <div class=\"riot-component__row weeks\"> <div class=\"riot-component__col\" each=\"{week in props.weekTitles}\">{week}</div> </div> </div> <div class=\"riot-calendar__body\"> <div class=\"riot-calendar__body--cur\"> <div class=\"riot-component__row\"> <div class=\"riot-component__col\" each=\"{date in items.dates}\"> <span class=\"date-placeholder\" if=\"{!config.showOtherMonthDates && date.current}\"></span> <div if=\"{config.showOtherMonthDates || (config.showOtherMonthDates === false && date.current === 0)}\" class=\"{date.disable === 0 && 'enable' || 'disable'} {date.change && 'change'} {date.select === 1 && 'choice' || ''}\" onclick=\"{checkDate}\"> <riot-date date=\"{date}\">{date.date()}</riot-date> </div> </div> </div> </div> </div> </div> </div> <div class=\"riot-calendar__foot\"></div> </div>";
+	var riotCalendarTmpl = "<div class=\"riot-calendar__box\"> <div class=\"riot-calendar__main {(props.mutipleItems > 1 && 'riot-calendar--multiple riot-calendar--multiple-i' + props.mutipleItems)}\"> <a class=\"prev {state.prevMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{prevMonth}\"><i></i></a> <a class=\"next {state.nextMonthDisable && 'disable'}\" href=\"javascript:;\" onclick=\"{nextMonth}\"><i></i></a> <div class=\"riot-calendar__items\" each=\"{items, index in state.viewDatas}\"> <div class=\"riot-calendar__head\"> <div class=\"control title\"> <div if=\"{otherViewDatas}\" class=\"title__other\">{otherViewDatas[index].title}</div> <div class=\"title__cur\">{items.title}</div> </div> <div class=\"riot-component__row weeks\"> <div class=\"riot-component__col\" each=\"{week in props.weekTitles}\">{week}</div> </div> </div> <div class=\"riot-calendar__body\"> <div class=\"riot-calendar__body--cur\"> <div class=\"riot-component__row\"> <div class=\"riot-component__col\" each=\"{date in items.dates}\"> <span class=\"date-placeholder\" if=\"{!config.showOtherMonthDates && date.current}\"></span> <div if=\"{config.showOtherMonthDates || (config.showOtherMonthDates === false && date.current === 0)}\" class=\"{date.disable === 0 && 'enable' || 'disable'} {date.change && 'change'} {date.select === 1 && 'choice' || ''}\" onclick=\"{parent.parent.clickHandler}\"> <div data-is=\"riot-date\" date=\"{date}\" before-show-date=\"{config.beforeShowDate}\">{date.date()}</div> </div> </div> </div> </div> </div> </div> </div> <div class=\"riot-calendar__foot\"></div> </div>";
 
 	var riotCalendarCss = ".riot-component__row{letter-spacing:-.31em;text-rendering:optimizeSpeed;display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-flow:row wrap;flex-flow:row wrap;-ms-flex-line-pack:start;align-content:flex-start;font-family:FreeSans,Arimo,Droid Sans,Helvetica,Arial,sans-serif}.riot-component__row .riot-component__col{display:inline-block;zoom:1;letter-spacing:normal;word-spacing:normal;vertical-align:top;text-rendering:auto}[data-is=riot-calendar]{display:block}[data-is=riot-calendar] riot-date{display:block;height:100%}[data-is=riot-calendar] .riot-calendar__main{position:relative}[data-is=riot-calendar] .riot-calendar__main .next,[data-is=riot-calendar] .riot-calendar__main .prev{width:20%;position:absolute;top:0;height:1.625rem;line-height:2;z-index:2}[data-is=riot-calendar] .riot-calendar__main .next i,[data-is=riot-calendar] .riot-calendar__main .prev i{position:absolute;width:.5rem;height:.5rem;top:50%;left:50%;margin-top:-.40625rem;margin-left:-.25rem;border-top:none;border-right:none;border-left:2px solid #7f1f59;border-bottom:2px solid #7f1f59}[data-is=riot-calendar] .riot-calendar__main .next.disable i,[data-is=riot-calendar] .riot-calendar__main .prev.disable i{border-left-color:#b8b8b8;border-bottom-color:#b8b8b8}[data-is=riot-calendar] .riot-calendar__main .prev{left:0}[data-is=riot-calendar] .riot-calendar__main .prev i{-webkit-transform:rotate(45deg);transform:rotate(45deg)}[data-is=riot-calendar] .riot-calendar__main .next{right:0}[data-is=riot-calendar] .riot-calendar__main .next i{-webkit-transform:rotate(-135deg);transform:rotate(-135deg)}[data-is=riot-calendar] .riot-calendar--multiple:after,[data-is=riot-calendar] .riot-calendar--multiple:before{content:\"\";display:table}[data-is=riot-calendar] .riot-calendar--multiple:after{clear:both}[data-is=riot-calendar] .riot-calendar--multiple .riot-calendar__items{float:left;box-sizing:border-box}[data-is=riot-calendar] .riot-calendar--multiple .next,[data-is=riot-calendar] .riot-calendar--multiple .prev{width:15%}[data-is=riot-calendar] .riot-calendar--multiple-i2 .riot-calendar__items{width:49%;padding:0 1%}[data-is=riot-calendar] .riot-calendar--multiple-i3 .riot-calendar__items{width:32.33333%;padding:0 1%}[data-is=riot-calendar] .riot-calendar--multiple-i4 .riot-calendar__items{width:24%;padding:0 1%}[data-is=riot-calendar] .riot-calendar--multiple-i5 .riot-calendar__items{width:19%;padding:0 1%}[data-is=riot-calendar] .riot-calendar--multiple-i6 .riot-calendar__items{width:15.66667%;padding:0 1%}[data-is=riot-calendar] .riot-component__col{width:14.285%;text-align:center;position:relative}[data-is=riot-calendar] .weeks{font-size:.8125rem;color:#333;line-height:2.1875rem;position:relative}[data-is=riot-calendar] .weeks:after{position:absolute;content:\"\";width:90.625%;height:1px;background-color:#efebea;opacity:.97;left:4.6875%;bottom:0;z-index:2}[data-is=riot-calendar] .title{text-align:center;color:#333;font-size:.8125rem;line-height:2;position:relative;height:1.625rem;overflow:hidden;margin:0 20% .5rem}[data-is=riot-calendar] .title--cur{z-index:2}[data-is=riot-calendar] .title--other{z-index:1;pointer-events:none}[data-is=riot-calendar] .riot-calendar__body{padding:.40625rem 0;position:relative;min-height:15rem;overflow:hidden}[data-is=riot-calendar] .riot-calendar__body .pure-g{margin-top:.5rem}[data-is=riot-calendar] .riot-calendar__body--cur{z-index:2}[data-is=riot-calendar] .riot-calendar__body--other{z-index:1;pointer-events:none}[data-is=riot-calendar] .riot-calendar__body--cur,[data-is=riot-calendar] .riot-calendar__body--other,[data-is=riot-calendar] .title__cur,[data-is=riot-calendar] .title__other{will-change:transform,opacity;position:absolute;width:100%;left:0;background:#fff;-webkit-animation-play-state:paused;animation-play-state:paused;-webkit-animation-duration:.45s;animation-duration:.45s;-webkit-animation-fill-mode:forwards;animation-fill-mode:forwards;-webkit-animation-timing-function:cubic-bezier(.23,1,.32,1);animation-timing-function:cubic-bezier(.23,1,.32,1)}[data-is=riot-calendar] .riot-calendar__body--cur.calendar-fadeInLeft,[data-is=riot-calendar] .riot-calendar__body--other.calendar-fadeInLeft,[data-is=riot-calendar] .title__cur.calendar-fadeInLeft,[data-is=riot-calendar] .title__other.calendar-fadeInLeft{-webkit-animation-name:a;animation-name:a}[data-is=riot-calendar] .riot-calendar__body--cur.calendar-fadeInRight,[data-is=riot-calendar] .riot-calendar__body--other.calendar-fadeInRight,[data-is=riot-calendar] .title__cur.calendar-fadeInRight,[data-is=riot-calendar] .title__other.calendar-fadeInRight{-webkit-animation-name:c;animation-name:c}[data-is=riot-calendar] .riot-calendar__body--cur.calendar-fadeOutLeft,[data-is=riot-calendar] .riot-calendar__body--other.calendar-fadeOutLeft,[data-is=riot-calendar] .title__cur.calendar-fadeOutLeft,[data-is=riot-calendar] .title__other.calendar-fadeOutLeft{-webkit-animation-name:b;animation-name:b}[data-is=riot-calendar] .riot-calendar__body--cur.calendar-fadeOutRight,[data-is=riot-calendar] .riot-calendar__body--other.calendar-fadeOutRight,[data-is=riot-calendar] .title__cur.calendar-fadeOutRight,[data-is=riot-calendar] .title__other.calendar-fadeOutRight{-webkit-animation-name:d;animation-name:d}[data-is=riot-calendar] .riot-calendar__body--cur.animation,[data-is=riot-calendar] .riot-calendar__body--other.animation,[data-is=riot-calendar] .title__cur.animation,[data-is=riot-calendar] .title__other.animation{-webkit-animation-play-state:running;animation-play-state:running}[data-is=riot-calendar] .riot-calendar__body--cur,[data-is=riot-calendar] .riot-calendar__body--other{top:.25rem;height:100%}[data-is=riot-calendar] .date-placeholder{display:block}[data-is=riot-calendar] .date,[data-is=riot-calendar] .date-placeholder{height:2rem;line-height:2rem;text-align:center;cursor:default}[data-is=riot-calendar] .date-placeholder i,[data-is=riot-calendar] .date i{font-style:normal}[data-is=riot-calendar] .disable{color:#c5c5c5}[data-is=riot-calendar] .enable{color:#393836}[data-is=riot-calendar] .change .date,[data-is=riot-calendar] .choice .date{width:32px;height:32px;position:absolute;z-index:2;left:50%;margin-left:-16px;-ms-box-sizing:border-box;box-sizing:border-box;line-height:2rem;display:inline-block}[data-is=riot-calendar] .change .date .riot-date--bg,[data-is=riot-calendar] .choice .date .riot-date--bg{width:100%;height:100%;border-radius:50%;content:\"\";background-color:#7f1f59;position:absolute;top:0;left:0;z-index:-1;-webkit-animation-duration:.45s;animation-duration:.45s;-webkit-animation-fill-mode:forwards;animation-fill-mode:forwards;-webkit-animation-timing-function:cubic-bezier(.23,1,.32,1);animation-timing-function:cubic-bezier(.23,1,.32,1);will-change:transform,opacity}[data-is=riot-calendar] .change .date.riot-calendar-in .riot-date--bg,[data-is=riot-calendar] .choice .date.riot-calendar-in .riot-date--bg{-webkit-animation-name:e;animation-name:e}[data-is=riot-calendar] .change .date.riot-calendar-out .riot-date--bg,[data-is=riot-calendar] .choice .date.riot-calendar-out .riot-date--bg{-webkit-animation-name:f;animation-name:f}[data-is=riot-calendar] .choice.enable{color:#fff}[data-is=riot-calendar] .range--area{background-color:#eee2e9}[data-is=riot-calendar] .range--area .enable .date{color:#fff}[data-is=riot-calendar] .checkoutrange{font-weight:700}[data-is=riot-calendar] .range--end:before,[data-is=riot-calendar] .range--start:before{width:50%;height:32px;position:absolute;top:0;background-color:#eee2e9;content:\" \"}[data-is=riot-calendar] .range--start:before{right:0}[data-is=riot-calendar] .range--end:before{left:0}@-webkit-keyframes a{0%{-webkit-transform:translateX(-100%);transform:translateX(-100%);opacity:0}to{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@keyframes a{0%{-webkit-transform:translateX(-100%);transform:translateX(-100%);opacity:0}to{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@-webkit-keyframes b{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}to{-webkit-transform:translateX(100%);transform:translateX(100%);opacity:0}}@keyframes b{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}to{-webkit-transform:translateX(100%);transform:translateX(100%);opacity:0}}@-webkit-keyframes c{0%{-webkit-transform:translateX(100%);transform:translateX(100%);opacity:0}to{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@keyframes c{0%{-webkit-transform:translateX(100%);transform:translateX(100%);opacity:0}to{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@-webkit-keyframes d{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}to{-webkit-transform:translateX(-100%);transform:translateX(-100%);opacity:1}}@keyframes d{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}to{-webkit-transform:translateX(-100%);transform:translateX(-100%);opacity:1}}@-webkit-keyframes e{0%{-webkit-transform:scale(0);transform:scale(0);opacity:0}to{-webkit-transform:scale(1);transform:scale(1);opacith:1}}@keyframes e{0%{-webkit-transform:scale(0);transform:scale(0);opacity:0}to{-webkit-transform:scale(1);transform:scale(1);opacith:1}}@-webkit-keyframes f{0%{-webkit-transform:scale(1);transform:scale(1);opacity:1}to{-webkit-transform:scale(0);transform:scale(0);opacity:0}}@keyframes f{0%{-webkit-transform:scale(1);transform:scale(1);opacity:1}to{-webkit-transform:scale(0);transform:scale(0);opacity:0}}";
 
@@ -447,9 +492,12 @@ define(['exports'], function (exports) { 'use strict';
 	        numberOfMonths: 1,
 	        firstDay: 0
 	    };
-	    function format(date) {
+	    function format(date, m, d) {
 	        if (isDate(date)) {
 	            return '' + date.getFullYear() + zeroFill(date.getMonth() + 1) + zeroFill(date.getDate());
+	        }
+	        if (arguments.length === 3) {
+	            return '' + date + zeroFill(m) + zeroFill(d);
 	        }
 	        return '';
 	    }
@@ -479,6 +527,9 @@ define(['exports'], function (exports) { 'use strict';
 	            selectDatesClone = selectDatesClone.slice(0, 1);
 	        }
 	        return selectDatesClone;
+	    };
+	    var setSelectDates = function (ctx, date) {
+	        return [];
 	    };
 	    var getViewItems = function (y, m, ctx) {
 	        var viewItems = [{ y: y, m: m }];
@@ -692,11 +743,23 @@ define(['exports'], function (exports) { 'use strict';
 	        });
 	        return viewDatas;
 	    };
-	    var changeView = function (direction, ctx) {
+	    var updateViewYearAndMonth = function (direction, ctx) {
 	        var isPrev = direction === -1;
 	        var item = ctx.state.viewDatas[isPrev ? 0 : ctx.state.viewDatas.length - 1];
 	        var m = item.month + direction;
 	        var y = item.year;
+	        if (isPrev && m < 1) {
+	            --y;
+	            m = 12;
+	        }
+	        else if (m > 12) {
+	            ++y;
+	            m = 1;
+	        }
+	        return {
+	            y: y,
+	            m: m
+	        };
 	    };
 	    var checkViewSwitchStatus = function (ctx) {
 	        var _a = ctx.config, switchViewOverLimit = _a.switchViewOverLimit, isRange = _a.isRange;
@@ -709,8 +772,8 @@ define(['exports'], function (exports) { 'use strict';
 	            var l = viewDatas.length - 1;
 	            var y2 = viewDatas[l].year;
 	            var m2 = viewDatas[l].month;
-	            var firstDateFormat = y1 + zeroFill(m1) + '01';
-	            var lastDateFormat = y2 + zeroFill(m2) + zeroFill(getDatesInMonth(y2, m2));
+	            var firstDateFormat = format(y1, m1, 1);
+	            var lastDateFormat = format(y2, m2, getDatesInMonth(y2, m2));
 	            if (isRange && firstDateFormat <= rls || firstDateFormat <= mis) {
 	                preMonthDisable = true;
 	            }
@@ -725,6 +788,97 @@ define(['exports'], function (exports) { 'use strict';
 	            }
 	        }
 	        return { nextMonthDisable: nextMonthDisable, preMonthDisable: preMonthDisable };
+	    };
+	    var checkSwitchViewDateIsValid = function (ctx, y, m) {
+	        var _a = ctx.props, rle = _a.rle, rls = _a.rls, mis = _a.mis, mas = _a.mas;
+	        if (ctx.config.switchViewOverLimit) {
+	            var firstDateFormat = format(y, m, 1);
+	            var lastDateFormat = format(y, m, getDatesInMonth(y, m));
+	            if (ctx.config.isRange) {
+	                if (rle && firstDateFormat >= rle || rls && lastDateFormat <= rls) {
+	                    return false;
+	                }
+	            }
+	            if (mis && lastDateFormat <= mis || mas && firstDateFormat >= mas) {
+	                return false;
+	            }
+	        }
+	        return true;
+	    };
+	    var checkDateIsOverRangeGapLimit = function (type, date, dateFormat, ctx) {
+	        var isMin = type === 'min';
+	        var rangeEnd = addDays(date, ctx.config[isMin ? 'minRangeGap' : 'maxRangeGap'] - 1);
+	        var rangeEndFormat = format(rangeEnd);
+	        var diff = +rangeEndFormat - +dateFormat;
+	        if (isMin && diff > 0 || !isMin && diff < 0) {
+	            return {
+	                rangeGapType: type,
+	                result: false
+	            };
+	        }
+	        else {
+	            return {
+	                result: true
+	            };
+	        }
+	    };
+	    var checkDateIsValid = function (date, ctx, switchView) {
+	        if (switchView === void 0) { switchView = false; }
+	        if (switchView) {
+	            var y = void 0;
+	            var m = void 0;
+	            if (isRiotDate(date)) {
+	                y = date.year();
+	                m = date.month() + 1;
+	            }
+	            if (isDate(date)) {
+	                y = date.getFullYear();
+	                m = date.getMonth() + 1;
+	            }
+	            return {
+	                result: checkSwitchViewDateIsValid(ctx, y, m),
+	                y: y,
+	                m: m
+	            };
+	        }
+	        var result = {
+	            result: true
+	        };
+	        var resultFalse = { result: false };
+	        var _a = ctx.config, switchViewByOtherMonth = _a.switchViewByOtherMonth, isRange = _a.isRange, minRangeGap = _a.minRangeGap, maxRangeGap = _a.maxRangeGap;
+	        var _b = ctx.props, mis = _b.mis, mas = _b.mas, rls = _b.rls, rle = _b.rle;
+	        var _e = ctx.state, preMonthDisable = _e.preMonthDisable, nextMonthDisable = _e.nextMonthDisable;
+	        if (date.disable !== 0) {
+	            if (switchViewByOtherMonth && ((date.current === -1 && !preMonthDisable) || date.current === 1 && !nextMonthDisable)) {
+	                result.direction = date.current;
+	            }
+	            else {
+	                return resultFalse;
+	            }
+	        }
+	        var _format = date.format('YYYYMMDD');
+	        if (_format < mis || mas && _format > mas) {
+	            return resultFalse;
+	        }
+	        if (isRange) {
+	            if (_format < rls || rle && _format > rle) {
+	                return resultFalse;
+	            }
+	            var r1 = void 0, r2 = void 0;
+	            if (minRangeGap > 1) {
+	                r1 = checkDateIsOverRangeGapLimit('min', date._d, _format, ctx);
+	            }
+	            if (maxRangeGap > 1) {
+	                r2 = checkDateIsOverRangeGapLimit('max', date._d, _format, ctx);
+	            }
+	            if (!r1.result || !r2.result) {
+	                return {
+	                    result: false,
+	                    rangeGapType: r1.rangeGapType || r2.rangeGapType
+	                };
+	            }
+	        }
+	        return result;
 	    };
 	    var initConfig = function (opts) {
 	        return assign({}, defaultOpts, opts);
@@ -790,10 +944,40 @@ define(['exports'], function (exports) { 'use strict';
 	        ctx.props.re = re;
 	        ctx.props.defaultDate = isDate(defaultDate) ? new RiotDate(defaultDate) : selectDates && selectDates[0] || new RiotDate();
 	    };
+	    var updateState = function (y, m, ctx, state) {
+	        var viewItems = getViewItems(y, m, ctx);
+	        assign(ctx.state, {
+	            viewDatas: getViewDatas(viewItems, ctx)
+	        }, checkViewSwitchStatus(ctx));
+	        return ctx;
+	    };
 	    var RiotCalendar = (function (_super) {
 	        __extends(RiotCalendar, _super);
 	        function RiotCalendar() {
-	            return _super.apply(this, arguments) || this;
+	            var _this = _super.apply(this, arguments) || this;
+	            _this.switchCalendarByDate = function (date) {
+	                var self = this;
+	                var valid = checkDateIsValid(date, self, true);
+	                var result = valid.result, y = valid.y, m = valid.m;
+	                if (result) {
+	                    var viewDatas = self.state.viewDatas;
+	                    var viewItemsStart = viewDatas[0];
+	                    var viewItemsEnd = viewDatas[viewDatas.length - 1];
+	                    var s1 = viewItemsStart.year + zeroFill(viewItemsStart.month);
+	                    var s2 = viewItemsEnd.year + zeroFill(viewItemsEnd.month);
+	                    var s3 = y + zeroFill(m);
+	                    var direction = s3 < s1 ? -1 : s3 > s2 ? 1 : 0;
+	                    if (direction) {
+	                        updateState(y, m, self, { direction: direction });
+	                        self.update();
+	                    }
+	                    else {
+	                        result = false;
+	                    }
+	                }
+	                return result;
+	            };
+	            return _this;
 	        }
 	        Object.defineProperty(RiotCalendar.prototype, "name", {
 	            get: function () {
@@ -832,10 +1016,7 @@ define(['exports'], function (exports) { 'use strict';
 	            var date = self.props.defaultDate;
 	            var m = date.month() + 1;
 	            var y = date.year();
-	            var viewItems = getViewItems(y, m, self);
-	            self.state.viewDatas = getViewDatas(viewItems, self);
-	            assign(self.state, checkViewSwitchStatus(self));
-	            console.log(viewDatesCache);
+	            updateState(y, m, self);
 	        };
 	        RiotCalendar.prototype.prevMonth = function (e) {
 	            var self = this;
@@ -843,7 +1024,7 @@ define(['exports'], function (exports) { 'use strict';
 	                e ? e.preventUpdate = true : '';
 	                return;
 	            }
-	            changeView(-1, self);
+	            updateViewYearAndMonth(-1, self);
 	        };
 	        RiotCalendar.prototype.getSelectDates = function (sort) {
 	            if (sort && this.config.isMultiple) {
@@ -852,6 +1033,22 @@ define(['exports'], function (exports) { 'use strict';
 	                });
 	            }
 	            return this.state.selectDates;
+	        };
+	        RiotCalendar.prototype.clickHandler = function (e) {
+	            var self = this;
+	            var date = e.item.date;
+	            var valid = checkDateIsValid(date, self);
+	            //不能更新的
+	            if (!valid.result) {
+	                if (valid.direction) {
+	                    //通过点击其他月来更新当前日历
+	                    setSelectDates(self, date);
+	                }
+	            }
+	            if (date.date() === 30) {
+	                date.select = 1;
+	                self.update();
+	            }
 	        };
 	        return RiotCalendar;
 	    }(riot.Tag));

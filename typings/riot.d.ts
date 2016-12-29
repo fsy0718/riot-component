@@ -17,6 +17,8 @@ declare namespace riot {
         css: string;
         attrs: string;
         root: Element;
-        update: ()=> any;
+        update: (data?)=> any;
+        unmount: (keepRoot ?: boolean)=> any;
+        parent ?
     }
 }
