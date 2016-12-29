@@ -237,10 +237,6 @@ var RiotCalendarSubDate = (function (_super) {
             }
         });
     };
-    RiotCalendarSubDate.prototype.shouldUpdate = function (data) {
-        console.log(data);
-        return true;
-    };
     return RiotCalendarSubDate;
 }(riot.Tag));
 
@@ -556,8 +552,10 @@ var calendar = (function (Tag) {
     var parseRiotDateProps = function (date, ctx, rangeStartInOtherMonth, rangeEndInOtherMonth) {
         date.disable = 0;
         var _a = ctx.config, isRange = _a.isRange, dateTimeFormat = _a.dateTimeFormat, disabledOverRangeGap = _a.disabledOverRangeGap, minRangeGap = _a.minRangeGap, maxRangeGap = _a.maxRangeGap, disabledDate = _a.disabledDate, isMultiple = _a.isMultiple;
-        var _b = ctx.props, rs = _b.rs, re = _b.re, rls = _b.rls, rle = _b.rle, mis = _b.mis, mas = _b.mas;
+        var _b = ctx.props, rls = _b.rls, rle = _b.rle, mis = _b.mis, mas = _b.mas;
         var _e = ctx.state, selectDates = _e.selectDates, selectDatesFormat = _e.selectDatesFormat, curChangeDateFormat = _e.curChangeDateFormat, lastSelectDatesFormat = _e.lastSelectDatesFormat;
+        var rs = selectDatesFormat[0];
+        var re = selectDatesFormat[1];
         if (dateTimeFormat) {
             date.dateformat = date.format(dateTimeFormat);
         }
@@ -888,12 +886,13 @@ var calendar = (function (Tag) {
     var initState = function (ctx) {
         var selectDates = initSelectDates(ctx);
         var selectDatesFormat = [];
+        var _a = ctx.config, isMultiple = _a.isMultiple, isRange = _a.isRange;
         selectDates.forEach(function (d) {
             selectDatesFormat.push(d.format('YYYYMMDD'));
         });
         var state = {
             selectDates: selectDates,
-            selectDatesFormat: selectDatesFormat
+            selectDatesFormat: selectDatesFormat,
         };
         return state;
     };
@@ -931,20 +930,10 @@ var calendar = (function (Tag) {
         }
         return props;
     };
-    var updateProps = function (ctx) {
+    var getDefaultDate = function (ctx) {
         var selectDates = ctx.state.selectDates;
-        var _a = ctx.config, isMultiple = _a.isMultiple, isRange = _a.isRange, defaultDate = _a.defaultDate;
-        var rs = '';
-        var re = '';
-        if (selectDates[0] && !isMultiple) {
-            rs = selectDates[0].format('YYYYMMDD');
-        }
-        if (selectDates[1] && isRange) {
-            re = selectDates[1].format('YYYYMMDD');
-        }
-        ctx.props.rs = rs;
-        ctx.props.re = re;
-        ctx.props.defaultDate = isDate(defaultDate) ? new RiotDate(defaultDate) : selectDates && selectDates[0] || new RiotDate();
+        var defaultDate = ctx.config.defaultDate;
+        return isDate(defaultDate) ? new RiotDate(defaultDate) : selectDates && selectDates[0] || new RiotDate();
     };
     var updateState = function (y, m, ctx, state) {
         var viewItems = getViewItems(y, m, ctx);
@@ -952,6 +941,8 @@ var calendar = (function (Tag) {
             viewDatas: getViewDatas(viewItems, ctx)
         }, checkViewSwitchStatus(ctx));
         return ctx;
+    };
+    var stopUpdateComponent = function (e) {
     };
     var RiotCalendar = (function (_super) {
         __extends(RiotCalendar, _super);
@@ -1014,8 +1005,7 @@ var calendar = (function (Tag) {
             self.config = initConfig(opts);
             self.props = initProps(self);
             self.state = initState(self);
-            updateProps(self);
-            var date = self.props.defaultDate;
+            var date = getDefaultDate(self);
             var m = date.month() + 1;
             var y = date.year();
             updateState(y, m, self);
@@ -1023,8 +1013,7 @@ var calendar = (function (Tag) {
         RiotCalendar.prototype.prevMonth = function (e) {
             var self = this;
             if (self.state.preMonthDisable) {
-                e ? e.preventUpdate = true : '';
-                return;
+                return stopUpdateComponent(e);
             }
             updateViewYearAndMonth(-1, self);
         };
@@ -1046,10 +1035,9 @@ var calendar = (function (Tag) {
                     //通过点击其他月来更新当前日历
                     setSelectDates(self, date);
                 }
-            }
-            if (date.date() === 30) {
-                date.select = 1;
-                self.update();
+                else {
+                    stopUpdateComponent(e);
+                }
             }
         };
         return RiotCalendar;

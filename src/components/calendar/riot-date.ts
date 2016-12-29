@@ -52,10 +52,6 @@ export default class RiotCalendarSubDate extends riot.Tag {
       }
     });
   }
-  shouldUpdate(data){
-    console.log(data);
-    return true;
-  }
 }
 
 

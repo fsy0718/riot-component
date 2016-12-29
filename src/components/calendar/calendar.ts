@@ -2,7 +2,7 @@
 
 import RiotDate from "./riotdate";
 import { RiotDateInterface } from "./riotdate";
-import { eleClassListMethods, isDate, zeroFill, isNumber, isArray, assign } from "../common/utils";
+import { eleClassListMethods, isDate, zeroFill, isNumber, isArray, assign, stopUpdateComponent } from "../common/utils";
 import { getWeeksInMonth, getDatesInPrevMonth, getDatesInNextMonth, getDatesInMonth, isRiotDate, addDays } from "./utils";
 
 import riotCalendarTmpl from "./calendar.tag";
@@ -74,8 +74,6 @@ interface riotCalendarPropsInterface {
   idx: string,
   rls?: string, //rangeLimit[0]
   rle?: string, // rangeLimit[1]
-  re?: string, //selectDates[0]
-  rs?: string, //selectDates[1]
   mis?: string, //mixDate
   mas?: string, //maxDate
   defaultDate?: RiotDate,
@@ -194,8 +192,10 @@ export default (function (Tag) {
   const parseRiotDateProps = function (date: RiotDate, ctx: RiotCalendar, rangeStartInOtherMonth: boolean, rangeEndInOtherMonth: boolean) {
     date.disable = 0;
     const {isRange, dateTimeFormat, disabledOverRangeGap, minRangeGap, maxRangeGap, disabledDate, isMultiple} = ctx.config;
-    const {rs, re, rls, rle, mis, mas} = ctx.props;
+    const {rls, rle, mis, mas} = ctx.props;
     const {selectDates, selectDatesFormat, curChangeDateFormat, lastSelectDatesFormat} = ctx.state;
+    let rs = selectDatesFormat[0];
+    let re = selectDatesFormat[1];
     if (dateTimeFormat) {
       date.dateformat = date.format(dateTimeFormat)
     }
@@ -536,12 +536,13 @@ export default (function (Tag) {
   const initState = function (ctx: RiotCalendar) {
     let selectDates = initSelectDates(ctx);
     let selectDatesFormat = [];
+    const {isMultiple, isRange} = ctx.config;
     selectDates.forEach(function (d) {
       selectDatesFormat.push(d.format('YYYYMMDD'));
-    })
+    });
     let state = {
       selectDates: selectDates,
-      selectDatesFormat: selectDatesFormat
+      selectDatesFormat: selectDatesFormat,
     };
     return state;
   }
@@ -582,20 +583,10 @@ export default (function (Tag) {
     return props;
   }
 
-  const updateProps = function (ctx: RiotCalendar): void {
+  const getDefaultDate = function (ctx: RiotCalendar): RiotDate {
     const {selectDates} = ctx.state;
-    const {isMultiple, isRange, defaultDate} = ctx.config;
-    let rs = '';
-    let re = '';
-    if (selectDates[0] && !isMultiple) {
-      rs = selectDates[0].format('YYYYMMDD');
-    }
-    if (selectDates[1] && isRange) {
-      re = selectDates[1].format('YYYYMMDD');
-    }
-    ctx.props.rs = rs;
-    ctx.props.re = re;
-    ctx.props.defaultDate = isDate(defaultDate) ? new RiotDate(defaultDate) : selectDates && selectDates[0] || new RiotDate()
+    const {defaultDate} = ctx.config;
+    return isDate(defaultDate) ? new RiotDate(defaultDate) : selectDates && selectDates[0] || new RiotDate()
   }
 
   const updateState = function (y: number, m: number, ctx: RiotCalendar, state?: riotCalendarStateInterface) {
@@ -606,9 +597,9 @@ export default (function (Tag) {
     return ctx;
   }
 
+  const stopUpdateComponent = function(e){
 
-
-
+  }
 
   class RiotCalendar extends riot.Tag {
     config: riotCalendarOptsInterface;
@@ -635,8 +626,7 @@ export default (function (Tag) {
       self.config = initConfig(opts);
       self.props = initProps(self);
       self.state = initState(self);
-      updateProps(self);
-      let date = self.props.defaultDate;
+      let date = getDefaultDate(self);
       let m = date.month() as number + 1;
       let y = date.year() as number;
       updateState(y, m, self)
@@ -645,8 +635,7 @@ export default (function (Tag) {
     prevMonth(e) {
       let self = this;
       if (self.state.preMonthDisable) {
-        e ? e.preventUpdate = true : '';
-        return;
+        return stopUpdateComponent(e);
       }
       updateViewYearAndMonth(-1, self);
     }
@@ -686,19 +675,26 @@ export default (function (Tag) {
     clickHandler(e) {
       let self: RiotCalendar = this
       const {date} = e.item
+      const {isRange} = self.config
       let valid = checkDateIsValid(date, self);
       //不能更新的
       if(!valid.result){
         if(valid.direction){
           //通过点击其他月来更新当前日历
           setSelectDates(self, date);
+        }
+        //点击
+        else if(valid.rangeGapType){
 
         }
+        else{
+          return stopUpdateComponent(e);
+        }
       }
-      if(date.date() === 30){
-        date.select = 1;
-        self.update();
+      if(isRange){
+
       }
+      
     }
   }
   return RiotCalendar;

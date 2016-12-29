@@ -48,6 +48,11 @@ interface CssMethods {
   
 }
 
+export function stopUpdateComponent(e){
+  e ? e.preventUpdate = true : '';
+  return false;
+}
+
 export const assign = objectAssign;
 
 export  function $(selector: string, context = document): Element {
