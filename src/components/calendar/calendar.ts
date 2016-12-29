@@ -52,7 +52,7 @@ export interface riotCalendarOptsInterface {
   dateTimeFormat?: string | riotCalendarDateTimeFormatInterface,
   disabledDate?: (date: RiotDate) => number,
   beforeShowDate?: riotCalendarOptsBeforeShowDate,
-  onRangeGapInvalid?: (invalidType: string) => boolean
+  onRangeGapInvalid?: (invalidType: string, validDate: RiotDate) => boolean
 
 }
 
@@ -109,7 +109,8 @@ interface checkDateInterface {
   y?: number,
   m?: number,
   direction?: number,
-  rangeGapType?: string
+  rangeGapType?: string,
+  rangeEndValid?: RiotDate
 }
 export default (function (Tag) {
   const defaultOpts = {
@@ -165,6 +166,32 @@ export default (function (Tag) {
   }
 
   const setSelectDates = function(ctx: RiotCalendar, date: RiotDate){
+    const {isRange} = ctx.config;
+    const {selectDatesFormat, selectDates} = ctx.state;
+    let _selectDatesFormat;
+    let _selectDates;
+    let _format = date.format('YYYYMMDD');
+    let rs = selectDatesFormat[0], re = selectDatesFormat[1];
+    if(isRange){
+      if(rs && !re && rs === _format){
+        _selectDatesFormat = [];
+        _selectDates = [];
+      }
+      else if(!rs || (rs && (rs > _format) || re)){
+        _selectDates = [date.clone()];
+        _selectDatesFormat = [_format];
+      }else{
+        _selectDates = selectDates.concat(date.clone() as RiotDate);
+        _selectDatesFormat = selectDatesFormat.concat(_format);
+      }
+    }else{
+      if(date.select){
+        let i = selectDatesFormat.indexOf(_format);
+        _selectDates = selectDates.concat().splice(i,1);
+        _selectDatesFormat = selectDatesFormat.concat().splice(i,1);
+      }
+    }
+
     return []
   }
 
@@ -455,13 +482,13 @@ export default (function (Tag) {
 
   const checkDateIsOverRangeGapLimit = function (type: string, date: Date, dateFormat: string, ctx: RiotCalendar) {
     let isMin = type === 'min';
-    let rangeEnd = addDays(date, ctx.config[isMin ? 'minRangeGap' : 'maxRangeGap'] - 1);
-    let rangeEndFormat = format(rangeEnd);
-    let diff = +rangeEndFormat - +dateFormat;
+    let rangeEnd = new RiotDate(addDays(date, ctx.config[isMin ? 'minRangeGap' : 'maxRangeGap'] - 1));
+    let diff = +rangeEnd.format('YYYYMMDD') - +dateFormat;
     if (isMin && diff > 0 || !isMin && diff < 0) {
       return {
         rangeGapType: type,
-        result: false
+        result: false,
+        rangeEnd: rangeEnd
       }
     } else {
       return {
@@ -675,25 +702,23 @@ export default (function (Tag) {
     clickHandler(e) {
       let self: RiotCalendar = this
       const {date} = e.item
-      const {isRange} = self.config
+      const {onRangeGapInvalid} = self.config
       let valid = checkDateIsValid(date, self);
+      const {direction, rangeGapType, rangeEndValid, result}  = valid;
       //不能更新的
-      if(!valid.result){
-        if(valid.direction){
-          //通过点击其他月来更新当前日历
-          setSelectDates(self, date);
-        }
-        //点击
-        else if(valid.rangeGapType){
-
-        }
-        else{
-          return stopUpdateComponent(e);
+      if(!result && !rangeGapType && !direction){
+        return stopUpdateComponent(e);
+      }
+      if(rangeGapType){
+        if(onRangeGapInvalid){
+          let rangeGapResult = onRangeGapInvalid(rangeGapType, rangeEndValid);
+          if(!rangeGapResult){
+            return stopUpdateComponent(e);
+          }
         }
       }
-      if(isRange){
+      setSelectDates(self, date);
 
-      }
       
     }
   }

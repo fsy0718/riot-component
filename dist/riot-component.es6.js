@@ -523,6 +523,33 @@ var calendar = (function (Tag) {
         return selectDatesClone;
     };
     var setSelectDates = function (ctx, date) {
+        var isRange = ctx.config.isRange;
+        var _a = ctx.state, selectDatesFormat = _a.selectDatesFormat, selectDates = _a.selectDates;
+        var _selectDatesFormat;
+        var _selectDates;
+        var _format = date.format('YYYYMMDD');
+        var rs = selectDatesFormat[0], re = selectDatesFormat[1];
+        if (isRange) {
+            if (rs && !re && rs === _format) {
+                _selectDatesFormat = [];
+                _selectDates = [];
+            }
+            else if (!rs || (rs && (rs > _format) || re)) {
+                _selectDates = [date.clone()];
+                _selectDatesFormat = [_format];
+            }
+            else {
+                _selectDates = selectDates.concat(date.clone());
+                _selectDatesFormat = selectDatesFormat.concat(_format);
+            }
+        }
+        else {
+            if (date.select) {
+                var i = selectDatesFormat.indexOf(_format);
+                _selectDates = selectDates.concat().splice(i, 1);
+                _selectDatesFormat = selectDatesFormat.concat().splice(i, 1);
+            }
+        }
         return [];
     };
     var getViewItems = function (y, m, ctx) {
@@ -803,13 +830,13 @@ var calendar = (function (Tag) {
     };
     var checkDateIsOverRangeGapLimit = function (type, date, dateFormat, ctx) {
         var isMin = type === 'min';
-        var rangeEnd = addDays(date, ctx.config[isMin ? 'minRangeGap' : 'maxRangeGap'] - 1);
-        var rangeEndFormat = format(rangeEnd);
-        var diff = +rangeEndFormat - +dateFormat;
+        var rangeEnd = new RiotDate(addDays(date, ctx.config[isMin ? 'minRangeGap' : 'maxRangeGap'] - 1));
+        var diff = +rangeEnd.format('YYYYMMDD') - +dateFormat;
         if (isMin && diff > 0 || !isMin && diff < 0) {
             return {
                 rangeGapType: type,
-                result: false
+                result: false,
+                rangeEnd: rangeEnd
             };
         }
         else {
@@ -1024,17 +1051,22 @@ var calendar = (function (Tag) {
         RiotCalendar.prototype.clickHandler = function (e) {
             var self = this;
             var date = e.item.date;
+            var onRangeGapInvalid = self.config.onRangeGapInvalid;
             var valid = checkDateIsValid(date, self);
+            var direction = valid.direction, rangeGapType = valid.rangeGapType, rangeEndValid = valid.rangeEndValid, result = valid.result;
             //不能更新的
-            if (!valid.result) {
-                if (valid.direction) {
-                    //通过点击其他月来更新当前日历
-                    setSelectDates(self, date);
-                }
-                else {
-                    stopUpdateComponent(e);
+            if (!result && !rangeGapType && !direction) {
+                return stopUpdateComponent(e);
+            }
+            if (rangeGapType) {
+                if (onRangeGapInvalid) {
+                    var rangeGapResult = onRangeGapInvalid(rangeGapType, rangeEndValid);
+                    if (!rangeGapResult) {
+                        return stopUpdateComponent(e);
+                    }
                 }
             }
+            setSelectDates(self, date);
         };
         return RiotCalendar;
     }(riot.Tag));
