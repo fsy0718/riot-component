@@ -1832,11 +1832,9 @@ var slider = (function (Tag) {
     return RiotSlider;
 })(riot.Tag);
 
-var utils = {
-    addDays: addDays, cloneDate: cloneDate, cloneAsDate: cloneAsDate, registerChildComponent: registerChildComponent, subtractDays: subtractDays, isAfterDate: isAfterDate
-};
+var utils = { addDays: addDays, cloneDate: cloneDate, cloneAsDate: cloneAsDate, registerChildComponent: registerChildComponent, subtractDays: subtractDays, isAfterDate: isAfterDate };
 //注册子组件
-registerChildComponent(RiotCalendarSubDate);
+utils.registerChildComponent(RiotCalendarSubDate);
 
 exports.utils = utils;
 exports.version = version;
