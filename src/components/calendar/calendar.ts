@@ -53,7 +53,7 @@ export interface riotCalendarOptsInterface {
   dateTimeFormat?: string | riotCalendarDateTimeFormatInterface,
   disabledDate?: (date: RiotDate) => number,
   beforeShowDate?: riotCalendarOptsBeforeShowDate,
-  onRangeGapInvalid?: (invalidType: string, curDate: RiotDate, validDate: RiotDate) => boolean
+  onRangeGapInvalid?: (invalidType: string, validDate: RiotDate, curDate: RiotDate) => boolean
 
 }
 
@@ -809,7 +809,7 @@ export default (function (Tag) {
       }
       if (rangeGapType) {
         if (onRangeGapInvalid) {
-          let rangeGapResult = onRangeGapInvalid(rangeGapType, date.clone(), rangeEndValid);
+          let rangeGapResult = onRangeGapInvalid(rangeGapType, rangeEndValid, date.clone(),);
           if (!rangeGapResult) {
             return stopUpdateComponent(e);
           }else{

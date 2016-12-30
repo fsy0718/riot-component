@@ -204,7 +204,7 @@ var rc16 = new riotComponent.RiotCalendar(c16,{
       return date.format('YYYY/MM/DD');
     }).join(' - ') || ''
 	},
-  onRangeGapInvalid: function(type, curRiotDate, validEnd){
+  onRangeGapInvalid: function(type,  validEnd, curRiotDate){
     alert('当前选择日期不符合' + type + 'RangeGap的值')
     var rsa = rc16.getSelectDates();
     var rs = rsa[0]._d;

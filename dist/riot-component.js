@@ -1277,7 +1277,7 @@ var calendar = (function (Tag) {
             }
             if (rangeGapType) {
                 if (onRangeGapInvalid) {
-                    var rangeGapResult = onRangeGapInvalid(rangeGapType, date.clone(), rangeEndValid);
+                    var rangeGapResult = onRangeGapInvalid(rangeGapType, rangeEndValid, date.clone());
                     if (!rangeGapResult) {
                         return stopUpdateComponent(e);
                     }
