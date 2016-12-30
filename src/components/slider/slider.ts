@@ -3,7 +3,7 @@
 
 import addEventListener from "../common/domEventListener";
 import {addEventListenerReturnInterface, IE8DocumentInterface} from "../common/domEventListener";
-import { isNumber, isUndefined, pauseEvent, assign } from "../common/utils";
+import { isNumber, isUndefined, pauseEvent, assign, stopUpdateComponent } from "../common/utils";
 import riotSlideTmpl from "./slider.tag";
 import riotSlideCss from "./slider.css";
 
@@ -482,8 +482,7 @@ export default (function (Tag) {
   const onTouchMove = function (e) {
     if (isNotTouchEvent(e)) {
       eventEnd('touch');
-      e.preventUpdate = true;
-      return;
+      return stopUpdateComponent(e);
     }
     pauseEvent(e);
     let self = this as RiotSlider
@@ -526,8 +525,7 @@ export default (function (Tag) {
     onTouchstart(e) {
       let self = this as RiotSlider
       if (isNotTouchEvent(e) || self.config.control) {
-        e.preventUpdate = true;
-        return;
+        return stopUpdateComponent(e);
       }
       pauseEvent(e);
       let pos = getTouchPosition(e, self.config.vertical);
@@ -540,8 +538,7 @@ export default (function (Tag) {
       let self = this as RiotSlider
       const {control, vertical} = self.config;
       if (e.button !== 0 || control) {
-        e.prevendUpdate = true;
-        return;
+        return stopUpdateComponent(e);
       }
       pauseEvent(e);
 

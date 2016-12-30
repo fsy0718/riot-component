@@ -181,10 +181,10 @@ addFormatToken(0, ['SSS', 3], 0, function(){
 
 
 //Y M D DDD E e H m s S
-function _formatDate(date: string, format?): string;
-function _formatDate(date: Date, format?:string): string;
-function _formatDate(date: Date, format: Function): string;
-function _formatDate(date, format?): string{
+function formatDate(date: string, format?): string;
+function formatDate(date: Date, format?:string): string;
+function formatDate(date: Date, format: Function): string;
+function formatDate(date, format?): string{
   if(isString(date)){
     return date;
   }
@@ -197,31 +197,4 @@ function _formatDate(date, format?): string{
     return formatMoment(date, format)
   }
 }
-export var formatDate = _formatDate
-
-//格式化年月日
-export function formatDateYMD (y: number, m: number, d: number, format?):string {
-  if(isFunction(format)){
-    return format(y,m,d);
-  }
-  return (y + '-' + zeroFill(m)) + (d ? ('-' + zeroFill(d)) : '');
-}
-
-export function formatDate1 (date: Date|string, format?: Function|String): string{
-  if(typeof date === 'string'){
-    return date;
-  }
-  else if(date){
-    return formatDateYMD(date.getFullYear(), date.getMonth() + 1, date.getDate(), format);
-  }
-    return ''
-
-}
-
-//进行日期快速比较及确认日期是否选择 不能用formatDate2  防止需要的格式数据为y/m/d  造成2016/9/10 > 2016/10/1
-export function formatDate3 (y, m, d) {
-  if (arguments.length < 3) {
-    return '' + (typeof y === 'object' ? y.getFullYear() + zeroFill(y.getMonth() + 1) + zeroFill(y.getDate()) : '');
-  }
-  return '' + y + zeroFill(m) + zeroFill(d);
-};
+export {formatDate}

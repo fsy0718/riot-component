@@ -28,7 +28,7 @@ export type riotCalendarOptsBeforeShowDate = riotCalendarOptsBeforeShowDateRetur
 
 export interface riotCalendarOptsInterface {
   autoOk?: boolean,
-  defaultDate?: Date,
+  defaultDate?: Date|RiotDate,
   minDate?: Date,
   maxDate?: Date,
   isRange?: boolean,
@@ -47,12 +47,13 @@ export interface riotCalendarOptsInterface {
   minRangeGap?: number,
   maxRangeGap?: number,
   disabledOverRangeGap?: boolean,
+  beforeChange ?: (date: RiotDate, ctx: RiotCalendarInterface) => boolean,
   onChange?: (date: RiotDate, ctx: RiotCalendarInterface) => void,
-  afterChange?: (date: RiotDate, ctx: RiotCalendarInterface) => void,
+  afterChange?: (ctx: RiotCalendarInterface) => void,
   dateTimeFormat?: string | riotCalendarDateTimeFormatInterface,
   disabledDate?: (date: RiotDate) => number,
   beforeShowDate?: riotCalendarOptsBeforeShowDate,
-  onRangeGapInvalid?: (invalidType: string, validDate: RiotDate) => boolean
+  onRangeGapInvalid?: (invalidType: string, curDate: RiotDate, validDate: RiotDate) => boolean
 
 }
 
@@ -68,7 +69,7 @@ export interface riotCalendarStateInterface {
   viewDatas?: viewDatasInterface[],
   oviewDatas?: viewDatasInterface[],
   viewItems?: viewItemInterface[],
-  preMonthDisable?: boolean,
+  prevMonthDisable?: boolean,
   nextMonthDisable?: boolean,
   direction?: number,
   timer ?: number
@@ -151,8 +152,10 @@ export default (function (Tag) {
       }
       else if ((mis && mis > s) || (mas && mas < s)) {
         console.warn('riot-calendr组件value中%s由于不符合minDate与maxDate条件而被移除', d);
+      }else{
+        selectDatesFormat.push(s);
       }
-      selectDatesFormat.push(s);
+
     });
     selectDatesFormat.sort(function (a, b) {
       return a - b
@@ -180,11 +183,9 @@ export default (function (Tag) {
     return selectDates;
   }
 
-  const updateSelectDates = function (ctx: RiotCalendar, date: RiotDate): RiotCalendar {
+  const updateSelectDates = function (ctx: RiotCalendar, date: RiotDate): {selectDates:RiotCalendarSelectDateMaps, selectDatesFormat:string[]} {
     const {isRange, isMultiple} = ctx.config;
     let {selectDatesFormat, selectDates} = ctx.state;
-    let _selectDatesFormat;
-    let _selectDates = {};
     let _format = date.format('YYYYMMDD');
     let rs = selectDatesFormat[0], re = selectDatesFormat[1];
     if (isRange) {
@@ -220,11 +221,11 @@ export default (function (Tag) {
           let _d = {
             [_format] : simpleExtend<RiotDate>(date.clone(), { select: 1 }as RiotDate) 
           }
-          _selectDates = assign(selectDates, _d);
+          assign(selectDates, _d);
         }
       }
     }
-    return ctx;
+    return {selectDates, selectDatesFormat};
   }
 
   const getViewItems = function (y: number, m: number, ctx: RiotCalendar): viewItemInterface[] {
@@ -503,7 +504,7 @@ export default (function (Tag) {
 
   const checkViewSwitchStatus = function (ctx: RiotCalendar) {
     const {switchViewOverLimit, isRange} = ctx.config;
-    let preMonthDisable = false, nextMonthDisable = false;
+    let prevMonthDisable = false, nextMonthDisable = false;
     if (switchViewOverLimit) {
       const {rls, mis, rle, mas} = ctx.props
       const {viewDatas} = ctx.state;
@@ -515,9 +516,9 @@ export default (function (Tag) {
       let firstDateFormat = format(y1, m1, 1);
       let lastDateFormat = format(y2, m2, getDatesInMonth(y2, m2));
       if (isRange && firstDateFormat <= rls || firstDateFormat <= mis) {
-        preMonthDisable = true;
+        prevMonthDisable = true;
       } else {
-        preMonthDisable = false;
+        prevMonthDisable = false;
       }
       if ((isRange && rle && lastDateFormat >= rle) || (mas && lastDateFormat >= mas)) {
         nextMonthDisable = true;
@@ -526,7 +527,7 @@ export default (function (Tag) {
       }
     }
 
-    return { nextMonthDisable, preMonthDisable }
+    return { nextMonthDisable, prevMonthDisable }
   }
 
   const checkSwitchViewDateIsValid = function (ctx: RiotCalendar, y: number, m: number): boolean {
@@ -546,15 +547,22 @@ export default (function (Tag) {
     return true;
   }
 
-  const checkDateIsOverRangeGapLimit = function (type: string, date: Date, dateFormat: string, ctx: RiotCalendar) {
+  const checkDateIsOverRangeGapLimit = function (type: string, dateformat:string, ctx: RiotCalendar) {
+    const {selectDatesFormat, selectDates} = ctx.state;
+    if(selectDatesFormat.length !== 1){
+      return {
+        result: true
+      }
+    }
     let isMin = type === 'min';
-    let rangeEnd = new RiotDate(addDays(date, ctx.config[isMin ? 'minRangeGap' : 'maxRangeGap'] - 1));
-    let diff = +rangeEnd.format('YYYYMMDD') - +dateFormat;
-    if (isMin && diff > 0 || !isMin && diff < 0) {
+    let rs = selectDatesFormat[0]
+    let rangeEnd = new RiotDate(addDays(selectDates[rs]._d, ctx.config[isMin ? 'minRangeGap' : 'maxRangeGap'] - 1));
+    let res = rangeEnd.format('YYYYMMDD')
+    if (isMin && res > dateformat || !isMin && res < dateformat) {
       return {
         rangeGapType: type,
         result: false,
-        rangeEnd: rangeEnd
+        rangeEnd
       }
     } else {
       return {
@@ -587,9 +595,9 @@ export default (function (Tag) {
     let resultFalse = { result: false };
     const {switchViewByOtherMonth, isRange, minRangeGap, maxRangeGap} = ctx.config;
     const {mis, mas, rls, rle} = ctx.props;
-    const {preMonthDisable, nextMonthDisable} = ctx.state
+    const {prevMonthDisable, nextMonthDisable} = ctx.state
     if ((date as RiotDate).disable !== 0) {
-      if (switchViewByOtherMonth && (((date as RiotDate).current === -1 && !preMonthDisable) || (date as RiotDate).current === 1 && !nextMonthDisable)) {
+      if (switchViewByOtherMonth && (((date as RiotDate).current === -1 && !prevMonthDisable) || (date as RiotDate).current === 1 && !nextMonthDisable)) {
         result.direction = (date as RiotDate).current
       } else {
         return resultFalse
@@ -605,12 +613,12 @@ export default (function (Tag) {
       }
       let r1, r2;
       if (minRangeGap > 1) {
-        r1 = checkDateIsOverRangeGapLimit('min', (date as RiotDate)._d, _format, ctx)
+        r1 = checkDateIsOverRangeGapLimit('min', _format,  ctx)
       }
       if (maxRangeGap > 1) {
-        r2 = checkDateIsOverRangeGapLimit('max', (date as RiotDate)._d, _format, ctx)
+        r2 = checkDateIsOverRangeGapLimit('max', _format, ctx)
       }
-      if (!r1.result || !r2.result) {
+      if ((r1 && !r1.result) || (r2 && !r2.result)) {
         return {
           result: false,
           rangeGapType: r1.rangeGapType || r2.rangeGapType
@@ -672,8 +680,11 @@ export default (function (Tag) {
     const {defaultDate} = ctx.config;
     let year: number, month: number;
     if (isDate(defaultDate)) {
-      year = defaultDate.getFullYear();
-      month = defaultDate.getMonth() + 1;
+      year = (defaultDate as Date).getFullYear();
+      month = (defaultDate as Date).getMonth() + 1;
+    }else if(isRiotDate(defaultDate)){
+      year = (defaultDate as RiotDate).year() as number;
+      month = (defaultDate as RiotDate).month() as number;
     }
     else if (selectDatesFormat[0]) {
       let ymd = selectDatesFormat[0].match(dateFormatReg);
@@ -740,8 +751,8 @@ export default (function (Tag) {
           setViewAnimation(self);
         }
         delete self.state.direction;
+        self.config.afterChange && self.config.afterChange(self)
       });
-      console.log(self.config)
     }
 
     prevMonth(e) {
@@ -785,10 +796,11 @@ export default (function (Tag) {
     }
 
     clickHandler(e) {
-      console.log(e);
-      let self: RiotCalendar = this
-      const {date, index} = e.item
-      const {onRangeGapInvalid, onChange} = self.config
+      let self: RiotCalendar = this.parent.parent
+      const {date, index} = e.item;
+      const {state, config} = self;
+      const {onRangeGapInvalid, onChange, beforeChange} = config;
+
       let valid = checkDateIsValid(date, self);
       const {direction, rangeGapType, rangeEndValid, result} = valid;
       //不能更新的
@@ -797,20 +809,28 @@ export default (function (Tag) {
       }
       if (rangeGapType) {
         if (onRangeGapInvalid) {
-          let rangeGapResult = onRangeGapInvalid(rangeGapType, rangeEndValid);
+          let rangeGapResult = onRangeGapInvalid(rangeGapType, date.clone(), rangeEndValid);
           if (!rangeGapResult) {
             return stopUpdateComponent(e);
+          }else{
+            //清空当前区间起始日期
+            state.selectDates={};
+            state.selectDatesFormat = [];
           }
         }
       }
+      if(beforeChange && !beforeChange(date, self)){
+        return stopUpdateComponent(e);
+      }
+
       //更新选择日期
-      updateSelectDates(self, date);
+      assign(state,updateSelectDates(self, date));
       if (direction) {
         changeViewByDirection(e, direction, self);
       } else {
         updateState(self)
       }
-      let riotdate = self.state.viewDatas[date.item].dates[index];
+      let riotdate = state.viewDatas[date.item].dates[index];
       //更新
       riotdate.animation = riotdate.select === 1 ? 1 : -1;
       !riotdate.select ? riotdate.change = 1 : '';

@@ -73,6 +73,18 @@ export function addDays (date: Date, d: number): Date {
   return newDate;
 };
 
+export function subtractDays(date: Date, d: number): Date{
+  const newDate = cloneDate(date);
+  newDate.setDate(date.getDate() - d);
+  return newDate;
+}
+
+export function isAfterDate(date1: Date, date2: Date): boolean {
+  const d1 = cloneAsDate(date1);
+  const d2 = cloneAsDate(date2);
+  return d1 > d2;
+}
+
 
 export function isRiotDate (date){
   return date instanceof RiotDate

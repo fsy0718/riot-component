@@ -62,12 +62,12 @@ var c3 = document.querySelector('riot-calendar-1');
 var ipt3 = document.querySelector('.datepicker3')
 new riotComponent.RiotCalendar(c3,{
 	isRange: true,
-	dateTimeFormat: function(y, m, d){
-		return '' + y + '年' + m + '月' + d + '日';
-	},
+	dateTimeFormat: 'YYYY年MM月DD日',
 	selectDates:[new Date(2016,9,10), new Date(2016,9,25)],
 	onChange: function(date,tag){
-		ipt3.value = tag.getSelectDates().dateStr.join(' - ')
+		ipt3.value = tag.getSelectDates().map(function(date){
+      return date.dateformat;
+    }).join(' - ') || ''
 	}
 })
         </textarea>
@@ -88,12 +88,14 @@ new riotComponent.RiotCalendar(c3,{
             <textarea class="code" data-line="10">
 var c4 = document.querySelector('.riot-calendar-4');
 var ipt4 = document.querySelector('.datepicker4');
+var weekTitle = ['日','一','二','三', '四', '五', '六'];
 new riotComponent.RiotCalendar(c4,{
-	dateTimeFormat: function(y,m,d){
-		return d + '/' + m + '/' + y;
-	},
 	onChange: function(date){
-		ipt4.value = date.select && date.dateformat || '';
+    if(date.select){
+      ipt4.value = date.format(function(date){
+        return date.date() + '日' + (date.month() + 1) + '月' + date.year() + '年' +  ', ' + '周' + weekTitle[date.day()]  
+      })
+    }
 	},
 	minDate: new Date()
 })
@@ -119,11 +121,14 @@ new riotComponent.RiotCalendar(c6,{
 	isMultiple: true,
 	selectDates:[new Date(2016,9,1), new Date(2016,9,25)],
 	onChange: function(date,tag){
-		ipt6.value = tag.getSelectDates().dateStr.join(',');
+		ipt6.value = tag.getSelectDates().map(function(date){
+      return date.format('YYYY/MM/DD');
+    }).join(' , ') || ''
 	},
-	minDate: new Date(2016,9,1),
+  tt: 1,
+	minDate: new Date(),
 	switchViewOverLimit: true,
-	maxDate: new Date(2016,11,1)
+  maxDate: riotComponent.utils.addDays(new Date(),60)
 })
         </textarea>
           </div>
@@ -155,7 +160,7 @@ var words = {
 words[y + '-' + m + '-' + d] = '今天';
 new riotComponent.RiotCalendar(c15,{
 	beforeShowDate: function(riotDate){
-    var wordKey = riotDate.y + '-' + riotDate.m + '-' + riotDate.d;
+    var wordKey = riotDate.format('YYYY-M-D');
     var word = words[wordKey];
     if(word){
       return {html:'<span class="date-word date-key-' + wordKey + '">' + word + '</span>',
@@ -163,7 +168,9 @@ new riotComponent.RiotCalendar(c15,{
     }
 	},
 	onChange: function(date,tag){
-		ipt15.value = tag.getSelectDates().dateStr.join(',');
+		ipt15.value = tag.getSelectDates().map(function(date){
+      return date.format('YYYY/MM/DD');
+    }).join(' , ') || ''
 	}
 })
         </textarea>
@@ -176,28 +183,36 @@ new riotComponent.RiotCalendar(c15,{
             <p class="pure-u-1-5">范围值:</p>
             <p class="pure-u-3-5"><input class="datepicker-1-6" type="text" /></p>
           </div>
-          <div class="demo-desc">传入<code>isRange</code>进行范围选择，并传入<code>minRangeGap</code>与<code>maxRangeGap</code>控制选择区间范围,最小连续5天，最大连续10天</div>
+          <div class="demo-desc">传入<code>isRange</code>进行范围选择，并传入<code>minRangeGap</code>与<code>maxRangeGap</code>控制选择区间范围,最小连续5天，最大连续10天,如果区间范围为2天，则把选中的当区间开始日期</div>
           <div class="view-source">
             <a title="查看源码" class="view-source-target" href="javascript:;"></a>
           </div>
           <div class="code-source">
             <textarea class="code" data-line="4">
 var c16 = document.querySelector('riot-calendar-1-6');
-var ipt16 = document.querySelector('.datepicker-1-6')
-new riotComponent.RiotCalendar(c16,{
+var ipt16 = document.querySelector('.datepicker-1-6');
+var d = new Date();
+var rc16 = new riotComponent.RiotCalendar(c16,{
 	isRange: true,
-	dateTimeFormat: function(y, m, d){
-		return '' + y + '年' + m + '月' + d + '日';
-	},
+	dateTimeFormat: 'YYYY年MM月DD日',
   minRangeGap: 5,
   maxRangeGap: 10,
   switchViewByOtherMonth: true,
-	selectDates:[new Date(2016,8,28), new Date(2016,9,25)],
+	selectDates:[d, riotComponent.utils.addDays(d, 7)],
 	onChange: function(date,tag){
-		ipt16.value = tag.getSelectDates().dateStr.join(' - ')
+		ipt16.value = tag.getSelectDates().map(function(date){
+      return date.format('YYYY/MM/DD');
+    }).join(' - ') || ''
 	},
-  onRangeGapInvalid: function(type){
+  onRangeGapInvalid: function(type, curRiotDate, validEnd){
     alert('当前选择日期不符合' + type + 'RangeGap的值')
+    var rsa = rc16.getSelectDates();
+    var rs = rsa[0]._d;
+    var cs = curRiotDate._d;
+    var diff = (cs - rs) / 1000 / 60 / 60 / 24;
+    if(type === "min" && diff === 2){
+      return true;
+    }
     return false;
   }
 })
@@ -207,7 +222,7 @@ new riotComponent.RiotCalendar(c16,{
       </div>
       <div class="pure-u-1-2">
         <div class="demo-card">
-          <h4>dateTimeFormat方法，自定义日期显示格式</h4>
+          <h4>dateTimeFormat方法，自定义日期显示格式,可以为字符串，可以为函数</h4>
           <div class="riot-calendar-10"></div>
           <div class="pure-g result">
             <p class="pure-u-1-5">自定义值:</p>
@@ -222,9 +237,7 @@ new riotComponent.RiotCalendar(c16,{
 var c2 = document.querySelector('.riot-calendar-10');
 var ipt2 = document.querySelector('.datepicker2');
 new riotComponent.RiotCalendar(c2,{
-  dateTimeFormat: function(y,m,d){
-    return d + '/' + m + '/' + y;
-  },
+  dateTimeFormat: 'YYYY/MM/DD',
   onChange: function(date,tag){
     ipt2.value = date.select && date.dateformat || '';
   }
@@ -246,17 +259,18 @@ new riotComponent.RiotCalendar(c2,{
           <div class="code-source">
             <textarea class="code" data-line="4-6">
 var c8 = document.querySelector('.riot-calendar-8');
-var ipt8 = document.querySelector('.datepicker8')
+var ipt8 = document.querySelector('.datepicker8');
+var d = new Date();
 new riotComponent.RiotCalendar(c8,{
 	isRange: true,
-	rangeLimit: [new Date(2016,8,1), new Date(2016,10,1)],
+  rangeLimit: [riotComponent.utils.subtractDays(d, 30), riotComponent.utils.addDays(d, 60)],
 	switchViewOverLimit: true,
-	dateTimeFormat: function(y, m, d){
-		return '' + y + '年' + m + '月' + d + '日';
-	},
-	selectDates:[new Date(2016,9,1), new Date(2016,9,25)],
+	dateTimeFormat: 'YYYY年M月D日',
+	selectDates:[d, riotComponent.utils.addDays(d, 5)],
 	onChange: function(date,tag){
-		ipt8.value = tag.getSelectDates().dateStr.join(' - ')
+		ipt8.value = tag.getSelectDates().map(function(date){
+      return date.dateformat;
+    }).join(' - ') || '';
 	}
 })
         </textarea>
@@ -271,7 +285,7 @@ new riotComponent.RiotCalendar(c8,{
               <p class="pure-u-3-5"><input class="datepicker7" type="text" /></p>
             </div>
             <div class="demo-desc">
-              设置<code>disabledDate</code>函数进行精细化控制，将可选的星期天全部置为不可选
+              设置<code>disabledDate</code>函数进行精细化控制，将今天之后30天之内的星期天全部置为不可选
             </div>
             <div class="view-source">
               <a title="查看源码" class="view-source-target" href="javascript:;"></a>
@@ -280,19 +294,18 @@ new riotComponent.RiotCalendar(c8,{
               <textarea class="code" data-line="10-14">
 var c7 = document.querySelector('.riot-calendar-7');
 var ipt7 = document.querySelector('.datepicker7');
+var d = new Date();
+var d2 = riotComponent.utils.addDays(d,31);
 new riotComponent.RiotCalendar(c7,{
-	dateTimeFormat: function(y,m,d){
-		return d + '/' + m + '/' + y;
-	},
 	onChange: function(date){
-		ipt7.value = date.select && date.dateformat || '';
+    ipt7.value = date.select && date.format('YYYY/MM/DD');
 	},
 	disabledDate: function(date){
-		if(date.w === 0 && date.disable === 0){
+		if(date.day() === 0 && date.disable === 0 && riotComponent.utils.isAfterDate(d2, date._d)){
 			date.disable = 4
 		}
 	},
-	minDate: new Date()
+	minDate: d
 })
         		</textarea>
             </div>
@@ -312,13 +325,18 @@ new riotComponent.RiotCalendar(c7,{
               <textarea class="code" data-line="4">
 var c5 = document.querySelector('riot-calendar-5');
 var ipt5 = document.querySelector('.datepicker5');
-new riotComponent.RiotCalendar(c5,{
+var rs5 = new riotComponent.RiotCalendar(c5,{
 	isMultiple: true,
 	selectDates:[new Date(2016,9,1), new Date(2016,9,25)],
 	onChange: function(date,tag){
-		ipt5.value = tag.getSelectDates().dateStr.join(',');
+		ipt5.value = tag.getSelectDates().map(function(date){
+      return date.format('YYYY/MM/DD')
+    }).join(' , ') || '';
 	}
-})
+});
+ipt5.value = rs5.getSelectDates().map(function(date){
+  return date.format('YYYY/MM/DD')
+}).join(' , ');
         		</textarea>
             </div>
           </div>
@@ -346,11 +364,11 @@ var c25 = document.querySelector('.riot-calendar-2-5');
 var ipt25 = document.querySelector('.ipt-2-5');
 var btn25 = document.querySelector('.btn-2-5');
 btn25.onclick = function(e){
-  result = calendar25[0].switchCalendarByDate(new Date(2016,10,1));
+  result = calendar25.switchCalendarByDate(new Date(2016,10,1));
 }
 var calendar25 = new riotComponent.RiotCalendar(c25,{
 	onChange: function(riotDate,tag){
-		ipt25.value = riotDate.select && riotDate.dateformat || '';
+    ipt25.value = riotDate.select && riotDate.format('MM月DD日,YYYY年');
 	}
 });
         		</textarea>
@@ -372,8 +390,8 @@ var calendar25 = new riotComponent.RiotCalendar(c25,{
           <div class="code-source">
             <textarea class="code" data-line="3">
 var c17 = document.querySelector('.riot-calendar-2-6');
-window.r1=new riotComponent.RiotCalendar(c17, 'riot-calendar',{
-  numberOfMonths: [3,1]
+window.r1=new riotComponent.RiotCalendar(c17, {
+  numberOfMonths: [2,2]
 })
         		</textarea>
           </div>
