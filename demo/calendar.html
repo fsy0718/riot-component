@@ -41,7 +41,7 @@
           <div class="code-source">
             <textarea class="code">
 var c1 = document.querySelector('riot-calendar');
-riot.mount(c1, 'riot-calendar')
+new riotComponent.RiotCalendar(c1);
         		</textarea>
           </div>
         </div>
@@ -60,7 +60,7 @@ riot.mount(c1, 'riot-calendar')
             <textarea class="code" data-line="4">
 var c3 = document.querySelector('riot-calendar-1');
 var ipt3 = document.querySelector('.datepicker3')
-riot.mount(c3, 'riot-calendar',{
+new riotComponent.RiotCalendar(c3,{
 	isRange: true,
 	dateTimeFormat: function(y, m, d){
 		return '' + y + '年' + m + '月' + d + '日';
@@ -88,7 +88,7 @@ riot.mount(c3, 'riot-calendar',{
             <textarea class="code" data-line="10">
 var c4 = document.querySelector('.riot-calendar-4');
 var ipt4 = document.querySelector('.datepicker4');
-riot.mount(c4, 'riot-calendar',{
+new riotComponent.RiotCalendar(c4,{
 	dateTimeFormat: function(y,m,d){
 		return d + '/' + m + '/' + y;
 	},
@@ -115,7 +115,7 @@ riot.mount(c4, 'riot-calendar',{
             <textarea class="code" data-line="10">
 var c6 = document.querySelector('riot-calendar-6');
 var ipt6 = document.querySelector('.datepicker6');
-riot.mount(c6, 'riot-calendar',{
+new riotComponent.RiotCalendar(c6,{
 	isMultiple: true,
 	selectDates:[new Date(2016,9,1), new Date(2016,9,25)],
 	onChange: function(date,tag){
@@ -153,7 +153,7 @@ var words = {
   '2016-11-15': '火车票不要钱'
 }
 words[y + '-' + m + '-' + d] = '今天';
-riot.mount(c15, 'riot-calendar',{
+new riotComponent.RiotCalendar(c15,{
 	beforeShowDate: function(riotDate){
     var wordKey = riotDate.y + '-' + riotDate.m + '-' + riotDate.d;
     var word = words[wordKey];
@@ -184,7 +184,7 @@ riot.mount(c15, 'riot-calendar',{
             <textarea class="code" data-line="4">
 var c16 = document.querySelector('riot-calendar-1-6');
 var ipt16 = document.querySelector('.datepicker-1-6')
-riot.mount(c16, 'riot-calendar',{
+new riotComponent.RiotCalendar(c16,{
 	isRange: true,
 	dateTimeFormat: function(y, m, d){
 		return '' + y + '年' + m + '月' + d + '日';
@@ -221,13 +221,13 @@ riot.mount(c16, 'riot-calendar',{
             <textarea class="code" data-line="4-6">
 var c2 = document.querySelector('.riot-calendar-10');
 var ipt2 = document.querySelector('.datepicker2');
-	riot.mount(c2, 'riot-calendar',{
-	dateTimeFormat: function(y,m,d){
-		return d + '/' + m + '/' + y;
-	},
-	onChange: function(date,tag){
-		ipt2.value = date.select && date.dateformat || '';
-	}
+new riotComponent.RiotCalendar(c2,{
+  dateTimeFormat: function(y,m,d){
+    return d + '/' + m + '/' + y;
+  },
+  onChange: function(date,tag){
+    ipt2.value = date.select && date.dateformat || '';
+  }
 })
         		</textarea>
           </div>
@@ -247,7 +247,7 @@ var ipt2 = document.querySelector('.datepicker2');
             <textarea class="code" data-line="4-6">
 var c8 = document.querySelector('.riot-calendar-8');
 var ipt8 = document.querySelector('.datepicker8')
-riot.mount(c8, 'riot-calendar',{
+new riotComponent.RiotCalendar(c8,{
 	isRange: true,
 	rangeLimit: [new Date(2016,8,1), new Date(2016,10,1)],
 	switchViewOverLimit: true,
@@ -280,7 +280,7 @@ riot.mount(c8, 'riot-calendar',{
               <textarea class="code" data-line="10-14">
 var c7 = document.querySelector('.riot-calendar-7');
 var ipt7 = document.querySelector('.datepicker7');
-riot.mount(c7, 'riot-calendar',{
+new riotComponent.RiotCalendar(c7,{
 	dateTimeFormat: function(y,m,d){
 		return d + '/' + m + '/' + y;
 	},
@@ -312,7 +312,7 @@ riot.mount(c7, 'riot-calendar',{
               <textarea class="code" data-line="4">
 var c5 = document.querySelector('riot-calendar-5');
 var ipt5 = document.querySelector('.datepicker5');
-riot.mount(c5, 'riot-calendar',{
+new riotComponent.RiotCalendar(c5,{
 	isMultiple: true,
 	selectDates:[new Date(2016,9,1), new Date(2016,9,25)],
 	onChange: function(date,tag){
@@ -348,7 +348,7 @@ var btn25 = document.querySelector('.btn-2-5');
 btn25.onclick = function(e){
   result = calendar25[0].switchCalendarByDate(new Date(2016,10,1));
 }
-var calendar25 = riot.mount(c25, 'riot-calendar',{
+var calendar25 = new riotComponent.RiotCalendar(c25,{
 	onChange: function(riotDate,tag){
 		ipt25.value = riotDate.select && riotDate.dateformat || '';
 	}
@@ -356,9 +356,30 @@ var calendar25 = riot.mount(c25, 'riot-calendar',{
         		</textarea>
             </div>
           </div>
+<div class="demo-card">
+          <h4>多视图日历</h4>
+          <div class="riot-calendar-2-6"></div>
+          <div class="demo-desc">opts.numberOfMonths控制显示多个月
+            <ul>
+              <li>opts.numberOfMonths参数为number,一行显示多列日历</li>
+              <li>opts.numberOfMonths参数为[number,number], 第一个参数表示行数，第二个参数表示列数</li>
+              <li><strong>设置opts.numberOfMonths后opts.showOtherMonthDates默认为false</strong></li>
+            </ul>
+          </div>
+          <div class="view-source">
+            <a title="查看源码" class="view-source-target" href="javascript:;"></a>
+          </div>
+          <div class="code-source">
+            <textarea class="code" data-line="3">
+var c17 = document.querySelector('.riot-calendar-2-6');
+window.r1=new riotComponent.RiotCalendar(c17, 'riot-calendar',{
+  numberOfMonths: [3,1]
+})
+        		</textarea>
+          </div>
         </div>
       </div>
-      <script src="./riot.min.js"></script>
+      <script src="./riot.js"></script>
       <script src="../dist/riot-component.js"></script>
       <script src="./prism.js"></script>
       <script>

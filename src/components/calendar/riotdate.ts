@@ -102,7 +102,7 @@ export interface RiotDateInterface extends RiotDateBaseInterface {
   select ?: number
   animation ?: number
   change ?: number
-  test ?: number
+  item ?: number
 }
 
 
@@ -115,8 +115,9 @@ class RiotDate extends RiotDateBase {
     return _formatRiotDate(this, arg)
   }
   clone(): RiotDate{
-
-    let _d = this._d;
+    let _d = new Date();
+    let _t = this._d.getTime();
+    _d.setTime(_t);
     let newRiotDate = new RiotDate(_d);
     simpleExtend(newRiotDate, this, function(key, value){
       if(key === '_d'){
@@ -133,6 +134,7 @@ class RiotDate extends RiotDateBase {
   select ?: number
   animation ?: number
   change ?: number
+  item ?: number
 
 }
 

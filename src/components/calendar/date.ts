@@ -90,7 +90,9 @@ export default class RiotDateBase {
         return _getsetMillisecond.call(this,value);
     }
     clone(){
-        let _d = this._d;
+        let _d = new Date();
+        let _t = this._d.getTime();
+        _d.setTime(_t);
         return new RiotDateBase(_d);
     }
 }

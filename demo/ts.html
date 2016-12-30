@@ -12,18 +12,7 @@
     var RiotCalendar = riotComponent.RiotCalendar;
     var RiotSlider = riotComponent.RiotSlider;
     var riotCalendar = new RiotCalendar(
-      document.querySelector('.demo'),{
-        isMultiple: true,
-        selectDates: [new Date(), new Date('2017-01-05')],
-        beforeShowDate: function(date){
-          if(date.day() === 0){
-            return {
-              html: '<span>星期天</span>',
-              className: 'sunday'
-            }
-          }
-        }
-      }
+      document.querySelector('.demo')
     )
   </script>
 </body>
