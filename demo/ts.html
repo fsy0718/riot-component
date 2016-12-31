@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测试ts程序</title>
+</head>
+<body>
+  <div class="demo"></div>
+  <script src="./riot.js"></script>
+  <script src="./dist/riot-component.js"></script>
+  <script>
+    var RiotCalendar = riotComponent.RiotCalendar;
+    var RiotSlider = riotComponent.RiotSlider;
+    var utils = riotComponent.utils;
+    var now = new Date();
+    var end = utils.addDays(now, 90);
+    var riotCalendar = new RiotCalendar(
+      document.querySelector('.demo'),{
+        minDate: now,
+        maxDate: new Date('2017-06-01')
+      }
+    )
+
+  </script>
+</body>
+</html>

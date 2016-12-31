@@ -1,5 +1,6 @@
-﻿@charset "utf-8";
+@charset "utf-8";
 @import '../common/var';
+@import '../common/common';
 :scope/*calendar*/ {
   display: block;
   riot-date{
@@ -7,7 +8,7 @@
     height: 100%;
   }
   .riot-calendar{
-    &__box{
+    &__main{
       position: relative;
       .prev,.next{
         width: 20%;
@@ -78,9 +79,10 @@
     }
   }
 
-  .pure-u-1-8 {
+  .riot-component__col {
     width: 14.285%;
     text-align: center;
+    position: relative;
   }
   .weeks{
     font-size: rSize(26);
@@ -120,7 +122,7 @@
     padding: rSize(13) 0;
     position: relative;
     min-height: rSize((64 + 16) * 6);
-    .pure-g{
+    .riot-component__col{
       margin-top: rSize(16);
     }
     overflow: hidden;
@@ -184,8 +186,18 @@
     color: $calendar-day-color;
   }
 
-  .pure-u-1-8 {
-    position: relative;
+  //在其它月是不响应动画
+  .riot-calendar__body--cur{
+    .riot-calendar-in{
+      .riot-date--bg{
+        animation-name: riot-calendar-scaleIn;
+      }
+    }
+    .riot-calendar-out{
+      .riot-date--bg{
+        animation-name: riot-calendar-scaleOut;
+      }
+    }
   }
 
   .choice,.change{
@@ -215,28 +227,22 @@
         animation-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
         will-change: transform, opacity;
       }
-      &.riot-calendar-in{
-        .riot-date--bg{
-          animation-name: riot-calendar-scaleIn;
-        }
-      }
-      &.riot-calendar-out{
-        .riot-date--bg{
-          animation-name: riot-calendar-scaleOut;
-        }
-      }
     }
-
   }
-  .choice.enable{
-    color: #fff;
-  }
-  
-  .range--area {
-    background-color: $calendar-day-high-color;
-    .enable .date{
+  .enable{
+    &.choice,&.range--area{
       color: #fff;
     }
+  }
+  .riot-calendar__body--other {
+    .change.riot-calendar-out{
+      .riot-date--bg{
+        display: none;
+      }
+    }
+  }
+  .range--area{
+    background-color: $calendar-day-high-color;
   }
 
   .checkoutrange {

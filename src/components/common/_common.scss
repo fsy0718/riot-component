@@ -1,0 +1,19 @@
+.riot-component{
+  &__row{
+    letter-spacing: -.31em;
+    text-rendering: optimizeSpeed;
+    display: flex;
+    flex-flow: row wrap;
+    align-content: flex-start;
+    font-family: FreeSans,Arimo,"Droid Sans",Helvetica,Arial,sans-serif;
+    .riot-component__col{
+      display: inline-block;
+      zoom: 1;
+      letter-spacing: normal;
+      word-spacing: normal;
+      vertical-align: top;
+      text-rendering: auto;
+    }
+  }
+
+}

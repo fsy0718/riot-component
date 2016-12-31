@@ -6,6 +6,7 @@ const basepath = process.cwd();
 const sourcepath = path.join(basepath, 'src');
 const cachepath = path.join(basepath, 'cachepath');
 const destpath = path.join(basepath, 'dist');
+const modulespath = path.join(basepath, 'node_modules');
 
 
 module.exports = {
@@ -13,6 +14,7 @@ module.exports = {
   sourcepath: sourcepath,
   cachepath: cachepath,
   destpath: destpath,
+  modulespath: modulespath,
   autoprefixer: {
     browsers: [
       'ie_mob >= 10',
@@ -31,7 +33,8 @@ module.exports = {
     server: {
       baseDir: "demo",
       routes: {
-        "/dist": "./dist"
+        "/dist": "./dist",
+        "/cachepath": "./cachepath"
       }
     },
     open: false
