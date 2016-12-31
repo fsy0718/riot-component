@@ -3,7 +3,7 @@
 import RiotDate from "./riotdate";
 import { RiotDateInterface } from "./riotdate";
 import { eleClassListMethods, isDate, zeroFill, isNumber, isArray, assign, stopUpdateComponent, simpleExtend, $_, $$_, css } from "../common/utils";
-import { getWeeksInMonth, getDatesInPrevMonth, getDatesInNextMonth, getDatesInMonth, isRiotDate, addDays } from "./utils";
+import { getWeeksInMonth, getDatesInPrevMonth, getDatesInNextMonth, getDatesInMonth, isRiotDate, addDays, monthDiff } from "./utils";
 
 import riotCalendarTmpl from "./calendar.tag";
 import riotCalendarCss from "./calendar.css";
@@ -33,6 +33,7 @@ export interface riotCalendarOptsInterface {
   maxDate?: Date,
   isRange?: boolean,
   rangeLimit?: Date[],
+  singleView ?: boolean,
   weekMode?: boolean,
   firstDay?: number,
   isMultiple?: boolean,
@@ -229,8 +230,14 @@ export default (function (Tag) {
   }
 
   const getViewItems = function (y: number, m: number, ctx: RiotCalendar): viewItemInterface[] {
-    let viewItems = [{ year: y, month: m }];
-    let n = ctx.props.numberOfMonths;
+    const {singleView, minDate, maxDate} = ctx.config;
+    let viewItems = [{ year: y, month: m }], n;
+    if(singleView){
+      n = monthDiff(maxDate, minDate) + 1;
+    }
+    else{
+      n = ctx.props.numberOfMonths;
+    }
     if (n > 1) {
       let i = 1;
       while (i < n) {
@@ -630,7 +637,6 @@ export default (function (Tag) {
   }
 
   const initConfig = function (opts: riotCalendarOptsInterface): riotCalendarOptsInterface {
-
     return assign({}, defaultOpts, opts);
   }
 
@@ -641,7 +647,7 @@ export default (function (Tag) {
 
   const initProps = function (ctx: RiotCalendar): riotCalendarPropsInterface {
     const {config} = ctx;
-    const {firstDay, rangeLimit = [], minDate, maxDate, isRange, isMultiple, weekMode, numberOfMonths} = config;
+    const {firstDay, rangeLimit = [], minDate, maxDate, isRange, isMultiple, weekMode, singleView} = config;
     let rls = format(rangeLimit[0]);
     let rle = format(rangeLimit[1]);
     let mis = format(minDate);
@@ -659,6 +665,22 @@ export default (function (Tag) {
       mas: mas,
       idx: '' + firstDay + '/' + (weekMode ? 1 : 0)
     }
+    //日历单视图
+    if(singleView){
+      if(minDate && maxDate){
+        //不显示其它月
+        config.showOtherMonthDates = false;
+        //禁止切换
+        config.switchViewOverLimit = true;
+        //禁止通过其它月切换
+        config.switchViewByOtherMonth = false;
+        delete config.numberOfMonths
+      }else{
+        delete config.singleView;
+      }
+    }
+    let numberOfMonths = config.numberOfMonths;
+    //多日历视图
     if (numberOfMonths) {
       let col, row = 1;
       if (isNumber(numberOfMonths)) {
@@ -668,8 +690,12 @@ export default (function (Tag) {
         row = parseInt(numberOfMonths[0]) || 0;
         col = parseInt(numberOfMonths[1]) || 0;
       }
-      props.numberOfMonths = row * col;
-      props.mutipleItems = col;
+      if(row * col > 1){
+        config.showOtherMonthDates = false;
+        props.numberOfMonths = row * col;
+        props.mutipleItems = col;
+      }
+
     }
 
     return props;
@@ -677,7 +703,7 @@ export default (function (Tag) {
 
   const getDefaultYearAndMonth = function (ctx: RiotCalendar): { year: number, month: number } {
     const {selectDatesFormat} = ctx.state;
-    const {defaultDate} = ctx.config;
+    const {defaultDate,singleView, minDate, maxDate} = ctx.config;
     let year: number, month: number;
     if (isDate(defaultDate)) {
       year = (defaultDate as Date).getFullYear();
@@ -692,7 +718,11 @@ export default (function (Tag) {
         year = +ymd[1];
         month = +ymd[2];
       }
-    } else {
+    }else if(singleView){
+      year = minDate.getFullYear();
+      month = minDate.getMonth() + 1;
+    }
+    else {
       let date = new Date();
       year = date.getFullYear();
       month = date.getMonth() + 1;
@@ -755,12 +785,12 @@ export default (function (Tag) {
       });
     }
 
-    prevMonth(e) {
-      changeViewByDirection(e, -1, this);
+    prevMonth(e?) {
+      return changeViewByDirection(e, -1, this);
     }
 
-    nextMonth(e) {
-      changeViewByDirection(e, 1, this);
+    nextMonth(e?) {
+      return changeViewByDirection(e, 1, this);
     }
 
     getSelectDates(sort: boolean): riotCalendarDateArray {

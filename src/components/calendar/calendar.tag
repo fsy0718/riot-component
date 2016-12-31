@@ -1,7 +1,7 @@
-<div class="riot-calendar__box">
+<div class="riot-calendar__box {config.singleView && 'riot-calendar--singleView'}">
   <div class="riot-calendar__main {(props.mutipleItems > 1 && 'riot-calendar--multiple riot-calendar--multiple-i' + props.mutipleItems)}">
-    <a class="prev {state.prevMonthDisable && 'disable'}" href="javascript:;" onclick={prevMonth}><i></i></a>
-    <a class="next {state.nextMonthDisable && 'disable'}" href="javascript:;" onclick={nextMonth}><i></i></a>
+    <a if={!config.singleView} class="prev {state.prevMonthDisable && 'disable'}" href="javascript:;" onclick={prevMonth}><i></i></a>
+    <a if={!config.singleView} class="next {state.nextMonthDisable && 'disable'}" href="javascript:;" onclick={nextMonth}><i></i></a>
     <div class="riot-calendar__items" each={items, idx in state.viewDatas}>
       <div class="riot-calendar__head">
         <div class="control title">

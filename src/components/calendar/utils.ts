@@ -84,7 +84,14 @@ export function isAfterDate(date1: Date, date2: Date): boolean {
   const d2 = cloneAsDate(date2);
   return d1 > d2;
 }
-
+//Thanks https://github.com/callemall/material-ui/blob/master/src/DatePicker/dateUtils.js#L149-L155
+export function monthDiff(d1:Date, d2: Date): number {
+  let m;
+  m = (d1.getFullYear() - d2.getFullYear()) * 12;
+  m += d1.getMonth();
+  m -= d2.getMonth();
+  return m;
+}
 
 export function isRiotDate (date){
   return date instanceof RiotDate
