@@ -39,6 +39,7 @@
     "rollup-plugin-string": "^2.0.2",
     "rollup-plugin-strip": "^1.1.1",
     "rollup-pluginutils": "^1.5.0",
+    "rollup-plugin-replace": "^1.1.1",
     "typescript": "^2.1.4",
     "uglify-js": "^2.6.3"
   },

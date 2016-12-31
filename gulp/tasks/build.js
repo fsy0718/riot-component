@@ -11,6 +11,7 @@ const typescript = require('rollup-plugin-typescript');
 const string  = require('rollup-plugin-string');
 const gulpSequence = require('gulp-sequence');
 const Promise = require('bluebird');
+const rollupReplace = require('rollup-plugin-replace');
 
 const config = require('../config');
 
@@ -25,6 +26,11 @@ gulp.task('build:clean', function (cb) {
 
 
 let rollupPluginList = [
+  rollupReplace({
+    include : config.cachepath + '/index.ts',
+    delimiters: ['<@','@>'],
+    VERSION: config.package.version
+  }),
   typescript({
     typescript: require('typescript')
   }),
