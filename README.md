@@ -1,6 +1,8 @@
 #riot-component
 基于riot**v3.0.5**的组件,在线[demo](https://fsy0718.github.io/riot-component/demo/index.html)
-基于riot**2.6.4**的组件，请切换分支到realse/0.0.3
+
+基于riot**2.6.4**的组件，请切换分支到[release/0.0.3](https://github.com/fsy0718/riot-component/tree/release/0.0.3)
+
 - [x] calendar
 - [x] slider
 - [ ] popver
