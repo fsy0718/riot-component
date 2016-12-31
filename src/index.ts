@@ -1,8 +1,8 @@
 import {registerChildComponent} from "./components/common/utils";
 import RiotCalendarSubDate from "./components/calendar/riot-date";
-import {addDays, cloneDate, cloneAsDate, subtractDays, isAfterDate} from "./components/calendar/utils";
+import {addDays, cloneDate, cloneAsDate, subtractDays, isAfterDate, monthDiff} from "./components/calendar/utils";
 
-const utils = {addDays, cloneDate, cloneAsDate, registerChildComponent, subtractDays, isAfterDate}
+const utils = {addDays, cloneDate, cloneAsDate, registerChildComponent, subtractDays, isAfterDate, monthDiff}
 
 //注册子组件
 utils.registerChildComponent(RiotCalendarSubDate);

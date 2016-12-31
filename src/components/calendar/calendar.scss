@@ -185,14 +185,18 @@
   .enable {
     color: $calendar-day-color;
   }
-  .riot-calendar-in{
-    .riot-date--bg{
-      animation-name: riot-calendar-scaleIn;
+
+  //在其它月是不响应动画
+  .riot-calendar__body--cur{
+    .riot-calendar-in{
+      .riot-date--bg{
+        animation-name: riot-calendar-scaleIn;
+      }
     }
-  }
-  .riot-calendar-out{
-    .riot-date--bg{
-      animation-name: riot-calendar-scaleOut;
+    .riot-calendar-out{
+      .riot-date--bg{
+        animation-name: riot-calendar-scaleOut;
+      }
     }
   }
 
@@ -229,7 +233,13 @@
     &.choice,&.range--area{
       color: #fff;
     }
-    
+  }
+  .riot-calendar__body--other {
+    .change.riot-calendar-out{
+      .riot-date--bg{
+        display: none;
+      }
+    }
   }
   .range--area{
     background-color: $calendar-day-high-color;
