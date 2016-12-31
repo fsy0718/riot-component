@@ -49,7 +49,7 @@
   //app.js
   import riot from 'riot'
   //0.0.3
-  import riotComponent from 'riot-component'
+  import 'riot-component'
   riot.mount('riot-calendar')
   //1.0.0
   import {RiotCalendar} from 'riot-component'
@@ -72,7 +72,7 @@
   ```
 
 ### 组件说明
-  请看[api文档](https://fsy0718.github.io/riot-component/)**api文档暂未变化，除了mount方式变化，基本无变化，详情查看demo**
+  请看[api文档](https://fsy0718.github.io/riot-component/)**api文档暂未变化，除了mount方式变化，基本无变化，详情查看[demo](https://fsy0718.github.io/riot-component/demo/index.html)**
 
 
 ### 开发说明
