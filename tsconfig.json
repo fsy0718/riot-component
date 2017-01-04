@@ -8,16 +8,11 @@
         "removeComments": false,
         "noImplicitAny": false,
         "noEmitOnError": false,
-        "typeRoots": ["./typings"], 
-        "baseUrl": "./node_modules",
-        "paths": {
-            "object-assign": "object-assign/index"
-        }
+        "jsx": "react",
+        "outDir": "./dist/"
+
     },
-    "files": [
-        "./src/components/calendar/calendar.ts"
-    ],
-    "include": ["./src/components/**"],
+    "include": ["./src/components/**/*.tsx"],
     "exclude": [
         "node_modules"
     ]

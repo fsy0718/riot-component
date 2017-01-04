@@ -1,48 +1,18 @@
 {
   "name": "riot-component",
-  "version": "1.0.1beta1",
+  "version": "0.0.1",
   "description": "some components base on riot.js",
   "main": "./dist/riot-component.cjs.js",
   "devDependencies": {
-    "@types/object-assign": "^4.0.30",
-    "babel-plugin-external-helpers": "^6.8.0",
-    "babel-plugin-transform-object-rest-spread": "^6.16.0",
-    "babel-preset-es2015-rollup": "1.2.0",
-    "bluebird": "^3.4.2",
-    "browser-sync": "^2.14.0",
-    "change-case": "^3.0.0",
-    "cz-conventional-changelog": "^1.2.0",
-    "del": "^2.2.2",
-    "ghooks": "^1.3.2",
-    "gulp": "^3.9.1",
-    "gulp-autoprefixer": "^3.1.1",
-    "gulp-concat": "^2.6.0",
-    "gulp-cssnano": "^2.1.2",
-    "gulp-if": "2.0.1",
-    "gulp-inject-file": "^0.0.18",
-    "gulp-inject-string": "^1.1.0",
-    "gulp-jsdoc3": "^1.0.1",
-    "gulp-replace": "^0.5.4",
-    "gulp-riot-only-compiler-template": "^0.0.2",
-    "gulp-ruby-sass": "^2.1.0",
-    "gulp-sequence": "^0.4.5",
-    "gulp-typescript": "^3.1.3",
-    "object-assign": "^4.1.0",
-    "require-dir": "^0.3.1",
-    "riot": "^2.4.1",
-    "rollup": "^0.36.3",
-    "rollup-plugin-babel": "2.4.0",
-    "rollup-plugin-commonjs": "^3.0.0",
-    "rollup-plugin-json": "^2.0.0",
-    "rollup-plugin-node-resolve": "^1.7.0",
-    "rollup-plugin-riot": "^0.4.0",
-    "rollup-plugin-string": "^2.0.2",
-    "rollup-plugin-strip": "^1.1.1",
-    "rollup-pluginutils": "^1.5.0",
-    "rollup-plugin-replace": "^1.1.1",
-    "rollup-plugin-typescript":"^0.8.1",
+    "@types/react": "^0.14.55",
+    "@types/react-dom": "^0.14.20",
+    "awesome-typescript-loader": "^3.0.0-beta.17",
+    "babel-loader": "^6.2.10",
+    "babel-preset-es2015": "^6.18.0",
+    "babel-preset-react": "^6.16.0",
+    "source-map-loader": "^0.1.5",
     "typescript": "^2.1.4",
-    "uglify-js": "^2.6.3"
+    "webpack-dev-server": "^1.16.2"
   },
   "scripts": {
     "test": "npm run eslint && npm run karma",
@@ -103,5 +73,9 @@
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
+  },
+  "dependencies": {
+    "react": "^15.4.1",
+    "react-dom": "^15.4.1"
   }
 }

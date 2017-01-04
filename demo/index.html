@@ -1,62 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-	<title>riot-component demo</title>
-	<script src="riot.min.js"></script>
-	<link rel="stylesheet" href="./pure-min.css">
-	<link rel="stylesheet" href="./reset.css">
-  <style>
-    .pure-menu-list{
-      padding-left: 20px;
-    }
-    h1{
-      text-align: center;
-      font-size: 2rem;
-      margin: 20px;
-    }
-    .pure-menu-link{
-      display: inline-block;
-      color: rgb(28, 184, 65);
-    }
-    .pure-menu-link:hover{
-      background: rgba(28,184,65,.5);
-      color: #fff;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>react calendar示例</title>
 </head>
-
 <body>
-  <h1>riot-component</h1>
-	<div class="pure-menu">
-		<span class="pure-menu-heading">在线示例链接</span>
-		<ul class="pure-menu-list">
-			<li class="pure-menu-item">
-				<a href="javascript:;" class="pure-menu-link" data-name="calendar">日历</a>
-			</li>
-      <li class="pure-menu-item">
-				<a href="javascript:;" class="pure-menu-link" data-name="slider">滑块</a>
-			</li>
-		</ul>
-	</div>
-	<script>
-    var hostname = location.hostname;
-    var prefix = '/';
-    if(hostname === 'fsy0718.github.io'){
-      prefix = '/riot-component/demo/';
-    }
-    document.querySelector('ul').addEventListener('click', function(e){
-      var target = e.target;
-      if(target.tagName.toLowerCase() === 'a'){
-        var name = target.dataset.name
-        if(name){
-          target.href = prefix + name + '.html';
-        }
-      }
-    },false)
-  </script>
+  <div id="test"></div>
+  <script src="/dist/lib.dll.js"></script>
+  <script src="/react-component.js"></script>
 </body>
-
 </html>
