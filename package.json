@@ -1,6 +1,6 @@
 {
   "name": "riot-component",
-  "version": "1.0.0",
+  "version": "1.0.1beta1",
   "description": "some components base on riot.js",
   "main": "./dist/riot-component.cjs.js",
   "devDependencies": {
@@ -40,6 +40,7 @@
     "rollup-plugin-strip": "^1.1.1",
     "rollup-pluginutils": "^1.5.0",
     "rollup-plugin-replace": "^1.1.1",
+    "rollup-plugin-typescript":"^0.8.1",
     "typescript": "^2.1.4",
     "uglify-js": "^2.6.3"
   },

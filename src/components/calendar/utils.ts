@@ -14,17 +14,7 @@ export function isLeapYear (y: number): boolean {
 
 export function getDatesInPrevMonth (y: number, m: number, firstDay = 0): number {
   let firstDayInMonth = getFirstDateInMonth(y, m).getDay();
-  let dates = 0;
-  if (~firstDayInMonth) {
-    if (firstDayInMonth > firstDay) {
-      dates = firstDayInMonth - firstDay
-    } else if (firstDayInMonth === firstDay) {
-      dates = 0;
-    } else {
-      dates = 6 - firstDay + 1 + firstDayInMonth;
-    }
-  }
-  return dates;
+  return (firstDayInMonth + 7 - firstDay) % 7
 };
 
 export function getDatesInNextMonth (y: number, m: number, firstDay?: number, weekMode?: boolean): number {

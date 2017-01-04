@@ -3,41 +3,85 @@
       * @version 1.0.0
       * @author fsy0718 <fsy0718@gmail.com>
       * @license MIT
-      * @copyright fsy0718 2016
+      * @copyright fsy0718 2017
       */
+/* eslint-disable no-unused-vars */
+var hasOwnProperty = Object.prototype.hasOwnProperty;
 var propIsEnumerable = Object.prototype.propertyIsEnumerable;
 
-function ToObject(val) {
-	if (val == null) {
+function toObject(val) {
+	if (val === null || val === undefined) {
 		throw new TypeError('Object.assign cannot be called with null or undefined');
 	}
 
 	return Object(val);
 }
 
-function ownEnumerableKeys(obj) {
-	var keys = Object.getOwnPropertyNames(obj);
+function shouldUseNative() {
+	try {
+		if (!Object.assign) {
+			return false;
+		}
 
-	if (Object.getOwnPropertySymbols) {
-		keys = keys.concat(Object.getOwnPropertySymbols(obj));
+		// Detect buggy property enumeration order in older V8 versions.
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+		var test1 = new String('abc');  // eslint-disable-line
+		test1[5] = 'de';
+		if (Object.getOwnPropertyNames(test1)[0] === '5') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test2 = {};
+		for (var i = 0; i < 10; i++) {
+			test2['_' + String.fromCharCode(i)] = i;
+		}
+		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+			return test2[n];
+		});
+		if (order2.join('') !== '0123456789') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test3 = {};
+		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+			test3[letter] = letter;
+		});
+		if (Object.keys(Object.assign({}, test3)).join('') !==
+				'abcdefghijklmnopqrst') {
+			return false;
+		}
+
+		return true;
+	} catch (e) {
+		// We don't expect any of the above to throw, but better to be safe.
+		return false;
 	}
-
-	return keys.filter(function (key) {
-		return propIsEnumerable.call(obj, key);
-	});
 }
 
-var index = Object.assign || function (target, source) {
+var index = shouldUseNative() ? Object.assign : function (target, source) {
 	var from;
-	var keys;
-	var to = ToObject(target);
+	var to = toObject(target);
+	var symbols;
 
 	for (var s = 1; s < arguments.length; s++) {
-		from = arguments[s];
-		keys = ownEnumerableKeys(Object(from));
+		from = Object(arguments[s]);
 
-		for (var i = 0; i < keys.length; i++) {
-			to[keys[i]] = from[keys[i]];
+		for (var key in from) {
+			if (hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (Object.getOwnPropertySymbols) {
+			symbols = Object.getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
 		}
 	}
 
@@ -97,13 +141,11 @@ function stopUpdateComponent(e) {
     return false;
 }
 var assign = index;
-
-
 function $$_(selector, context) {
     context = context || document;
     return context.querySelectorAll(selector);
 }
-
+;
 function zeroFill(number, targetLength, forceSign) {
     if (targetLength === void 0) { targetLength = 2; }
     if (forceSign === void 0) { forceSign = false; }
@@ -111,7 +153,7 @@ function zeroFill(number, targetLength, forceSign) {
     return (sign ? (forceSign ? '+' : '') : '-') +
         Math.pow(10, Math.max(0, zerosToFill)).toString().substr(1) + absNumber;
 }
-
+;
 //'String', 'Number', 'Object', 'Date', 'Array', 'Function', 'Undefined'
 function isString(str) {
     return _toString.call(str) === '[object String]';
@@ -131,7 +173,6 @@ function isArray(str) {
 function isFunction(str) {
     return _toString.call(str) === '[object Function]';
 }
-
 function simpleExtend(target, source, blackKeys, callback) {
     if (isFunction(blackKeys)) {
         callback = blackKeys;
@@ -146,7 +187,6 @@ function simpleExtend(target, source, blackKeys, callback) {
     }
     return target;
 }
-
 function pauseEvent(e) {
     e.preventDefault();
     e.stopPropagation();
@@ -219,12 +259,12 @@ function css(dom, property, value) {
 var elementClassListmethods = ['add', 'remove', 'toggle', 'contains'];
 var elementClassmethods = ['addClass', 'removeClass', 'toggleClass', 'hasClass'];
 var _eleClassListMethods = {};
-elementClassmethods.forEach(function (method, index$$1) {
+elementClassmethods.forEach(function (method, index) {
     _eleClassListMethods[method] = function (dom, className) {
         var call = function (_className) {
             _className = _className.split(' ');
             for (var i = 0, len = _className.length; i < len; i++) {
-                this.classList[elementClassListmethods[index$$1]](_className[i]);
+                this.classList[elementClassListmethods[index]](_className[i]);
             }
         };
         return each(dom, call, className);
@@ -234,11 +274,10 @@ var eleClassListMethods = _eleClassListMethods;
 
 var riotCalendarSubDateTmpl = "<div class=\"{className}\"> <div class=\"date\"> <i class=\"riot-date--bg\" if=\"{!replaceWithInnerHTML}\"></i> <span if=\"{!replaceWithInnerHTML}\">{date}</span> </div> </div>";
 
-/// <reference path="../../../typings/index.d.ts" />
 var RiotCalendarSubDate = (function (_super) {
     __extends(RiotCalendarSubDate, _super);
     function RiotCalendarSubDate() {
-        _super.apply(this, arguments);
+        return _super.apply(this, arguments) || this;
     }
     Object.defineProperty(RiotCalendarSubDate.prototype, "name", {
         get: function () {
@@ -467,7 +506,7 @@ function _formatRiotDate(date, format) {
 var RiotDate = (function (_super) {
     __extends(RiotDate, _super);
     function RiotDate() {
-        _super.apply(this, arguments);
+        return _super.apply(this, arguments) || this;
     }
     //TODO week计算有错误
     RiotDate.prototype.week = function () {
@@ -496,44 +535,32 @@ var datesOfMonth = [31, 0, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 function getFirstDateInMonth(y, m) {
     return new Date(y, m - 1, 1);
 }
-
+;
 //是否为闰年
 function isLeapYear(y) {
     return !(y % 4) && !!(y % 100) || !(y % 400);
 }
-
+;
 function getDatesInPrevMonth(y, m, firstDay) {
     if (firstDay === void 0) { firstDay = 0; }
     var firstDayInMonth = getFirstDateInMonth(y, m).getDay();
-    var dates = 0;
-    if (~firstDayInMonth) {
-        if (firstDayInMonth > firstDay) {
-            dates = firstDayInMonth - firstDay;
-        }
-        else if (firstDayInMonth === firstDay) {
-            dates = 0;
-        }
-        else {
-            dates = 6 - firstDay + 1 + firstDayInMonth;
-        }
-    }
-    return dates;
+    return (firstDayInMonth + 7 - firstDay) % 7;
 }
-
+;
 function getDatesInNextMonth(y, m, firstDay, weekMode) {
     return weekMode ? 6 : getWeeksInMonth(y, m, firstDay) * 7 - getDatesInPrevMonth(y, m, firstDay) - getDatesInMonth(y, m);
 }
-
+;
 function getDatesInMonth(y, m) {
     --m;
     return m === 1 ? isLeapYear(y) ? 29 : 28 : datesOfMonth[m];
 }
-
+;
 function getWeeksInMonth(y, m, firstDay) {
     var datesInMonth = getDatesInMonth(y, m) - 7 + getDatesInPrevMonth(y, m, firstDay);
     return Math.ceil(datesInMonth / 7) + 1 || 0;
 }
-
+;
 function getDatesInYear(y, m, d) {
     var _d = 0;
     var i = 1;
@@ -544,28 +571,28 @@ function getDatesInYear(y, m, d) {
     _d += d;
     return _d;
 }
-
+;
 function getWeeksInYear(y, m, d) {
     var _d = getDatesInYear(y, m, d);
     return Math.round(_d / 7);
 }
-
+;
 function cloneDate(date) {
     return new Date(date.getTime());
 }
-
+;
 function cloneAsDate(date) {
     var _clonedDate = cloneDate(date);
     _clonedDate.setHours(0, 0, 0, 0);
     return _clonedDate;
 }
-
+;
 function addDays(date, d) {
     var newDate = cloneDate(date);
     newDate.setDate(date.getDate() + d);
     return newDate;
 }
-
+;
 function subtractDays(date, d) {
     var newDate = cloneDate(date);
     newDate.setDate(date.getDate() - d);
@@ -592,7 +619,6 @@ var riotCalendarTmpl = "<div class=\"riot-calendar__box {config.singleView && 'r
 
 var riotCalendarCss = ".riot-component__row{letter-spacing:-.31em;text-rendering:optimizeSpeed;display:-webkit-box;display:-ms-flexbox;display:flex;-ms-flex-flow:row wrap;flex-flow:row wrap;-ms-flex-line-pack:start;align-content:flex-start;font-family:FreeSans,Arimo,Droid Sans,Helvetica,Arial,sans-serif}.riot-component__row .riot-component__col{display:inline-block;zoom:1;letter-spacing:normal;word-spacing:normal;vertical-align:top;text-rendering:auto}[data-is=riot-calendar]{display:block}[data-is=riot-calendar] riot-date{display:block;height:100%}[data-is=riot-calendar] .riot-calendar__main{position:relative}[data-is=riot-calendar] .riot-calendar__main .next,[data-is=riot-calendar] .riot-calendar__main .prev{width:20%;position:absolute;top:0;height:1.625rem;line-height:2;z-index:2}[data-is=riot-calendar] .riot-calendar__main .next i,[data-is=riot-calendar] .riot-calendar__main .prev i{position:absolute;width:.5rem;height:.5rem;top:50%;left:50%;margin-top:-.40625rem;margin-left:-.25rem;border-top:none;border-right:none;border-left:2px solid #7f1f59;border-bottom:2px solid #7f1f59}[data-is=riot-calendar] .riot-calendar__main .next.disable i,[data-is=riot-calendar] .riot-calendar__main .prev.disable i{border-left-color:#b8b8b8;border-bottom-color:#b8b8b8}[data-is=riot-calendar] .riot-calendar__main .prev{left:0}[data-is=riot-calendar] .riot-calendar__main .prev i{-webkit-transform:rotate(45deg);transform:rotate(45deg)}[data-is=riot-calendar] .riot-calendar__main .next{right:0}[data-is=riot-calendar] .riot-calendar__main .next i{-webkit-transform:rotate(-135deg);transform:rotate(-135deg)}[data-is=riot-calendar] .riot-calendar--multiple:after,[data-is=riot-calendar] .riot-calendar--multiple:before{content:\"\";display:table}[data-is=riot-calendar] .riot-calendar--multiple:after{clear:both}[data-is=riot-calendar] .riot-calendar--multiple .riot-calendar__items{float:left;box-sizing:border-box}[data-is=riot-calendar] .riot-calendar--multiple .next,[data-is=riot-calendar] .riot-calendar--multiple .prev{width:15%}[data-is=riot-calendar] .riot-calendar--multiple-i2 .riot-calendar__items{width:49%;padding:0 1%}[data-is=riot-calendar] .riot-calendar--multiple-i3 .riot-calendar__items{width:32.33333%;padding:0 1%}[data-is=riot-calendar] .riot-calendar--multiple-i4 .riot-calendar__items{width:24%;padding:0 1%}[data-is=riot-calendar] .riot-calendar--multiple-i5 .riot-calendar__items{width:19%;padding:0 1%}[data-is=riot-calendar] .riot-calendar--multiple-i6 .riot-calendar__items{width:15.66667%;padding:0 1%}[data-is=riot-calendar] .riot-component__col{width:14.285%;text-align:center;position:relative}[data-is=riot-calendar] .weeks{font-size:.8125rem;color:#333;line-height:2.1875rem;position:relative}[data-is=riot-calendar] .weeks:after{position:absolute;content:\"\";width:90.625%;height:1px;background-color:#efebea;opacity:.97;left:4.6875%;bottom:0;z-index:2}[data-is=riot-calendar] .title{text-align:center;color:#333;font-size:.8125rem;line-height:2;position:relative;height:1.625rem;overflow:hidden;margin:0 20% .5rem}[data-is=riot-calendar] .title--cur{z-index:2}[data-is=riot-calendar] .title--other{z-index:1;pointer-events:none}[data-is=riot-calendar] .riot-calendar__body{padding:.40625rem 0;position:relative;min-height:15rem;overflow:hidden}[data-is=riot-calendar] .riot-calendar__body .riot-component__col{margin-top:.5rem}[data-is=riot-calendar] .riot-calendar__body--cur{z-index:2}[data-is=riot-calendar] .riot-calendar__body--other{z-index:1;pointer-events:none}[data-is=riot-calendar] .riot-calendar__body--cur,[data-is=riot-calendar] .riot-calendar__body--other,[data-is=riot-calendar] .title__cur,[data-is=riot-calendar] .title__other{will-change:transform,opacity;position:absolute;width:100%;left:0;background:#fff;-webkit-animation-play-state:paused;animation-play-state:paused;-webkit-animation-duration:.45s;animation-duration:.45s;-webkit-animation-fill-mode:forwards;animation-fill-mode:forwards;-webkit-animation-timing-function:cubic-bezier(.23,1,.32,1);animation-timing-function:cubic-bezier(.23,1,.32,1)}[data-is=riot-calendar] .riot-calendar__body--cur.calendar-fadeInLeft,[data-is=riot-calendar] .riot-calendar__body--other.calendar-fadeInLeft,[data-is=riot-calendar] .title__cur.calendar-fadeInLeft,[data-is=riot-calendar] .title__other.calendar-fadeInLeft{-webkit-animation-name:a;animation-name:a}[data-is=riot-calendar] .riot-calendar__body--cur.calendar-fadeInRight,[data-is=riot-calendar] .riot-calendar__body--other.calendar-fadeInRight,[data-is=riot-calendar] .title__cur.calendar-fadeInRight,[data-is=riot-calendar] .title__other.calendar-fadeInRight{-webkit-animation-name:c;animation-name:c}[data-is=riot-calendar] .riot-calendar__body--cur.calendar-fadeOutLeft,[data-is=riot-calendar] .riot-calendar__body--other.calendar-fadeOutLeft,[data-is=riot-calendar] .title__cur.calendar-fadeOutLeft,[data-is=riot-calendar] .title__other.calendar-fadeOutLeft{-webkit-animation-name:b;animation-name:b}[data-is=riot-calendar] .riot-calendar__body--cur.calendar-fadeOutRight,[data-is=riot-calendar] .riot-calendar__body--other.calendar-fadeOutRight,[data-is=riot-calendar] .title__cur.calendar-fadeOutRight,[data-is=riot-calendar] .title__other.calendar-fadeOutRight{-webkit-animation-name:d;animation-name:d}[data-is=riot-calendar] .riot-calendar__body--cur.animation,[data-is=riot-calendar] .riot-calendar__body--other.animation,[data-is=riot-calendar] .title__cur.animation,[data-is=riot-calendar] .title__other.animation{-webkit-animation-play-state:running;animation-play-state:running}[data-is=riot-calendar] .riot-calendar__body--cur,[data-is=riot-calendar] .riot-calendar__body--other{top:.25rem;height:100%}[data-is=riot-calendar] .date-placeholder{display:block}[data-is=riot-calendar] .date,[data-is=riot-calendar] .date-placeholder{height:2rem;line-height:2rem;text-align:center;cursor:default}[data-is=riot-calendar] .date-placeholder i,[data-is=riot-calendar] .date i{font-style:normal}[data-is=riot-calendar] .disable{color:#c5c5c5}[data-is=riot-calendar] .enable{color:#393836}[data-is=riot-calendar] .riot-calendar__body--cur .riot-calendar-in .riot-date--bg{-webkit-animation-name:e;animation-name:e}[data-is=riot-calendar] .riot-calendar__body--cur .riot-calendar-out .riot-date--bg{-webkit-animation-name:f;animation-name:f}[data-is=riot-calendar] .change .date,[data-is=riot-calendar] .choice .date{width:32px;height:32px;position:absolute;z-index:2;left:50%;margin-left:-16px;-ms-box-sizing:border-box;box-sizing:border-box;line-height:2rem;display:inline-block}[data-is=riot-calendar] .change .date .riot-date--bg,[data-is=riot-calendar] .choice .date .riot-date--bg{width:100%;height:100%;border-radius:50%;content:\"\";background-color:#7f1f59;position:absolute;top:0;left:0;z-index:-1;-webkit-animation-duration:.45s;animation-duration:.45s;-webkit-animation-fill-mode:forwards;animation-fill-mode:forwards;-webkit-animation-timing-function:cubic-bezier(.23,1,.32,1);animation-timing-function:cubic-bezier(.23,1,.32,1);will-change:transform,opacity}[data-is=riot-calendar] .enable.choice,[data-is=riot-calendar] .enable.range--area{color:#fff}[data-is=riot-calendar] .riot-calendar__body--other .change.riot-calendar-out .riot-date--bg{display:none}[data-is=riot-calendar] .range--area{background-color:#eee2e9}[data-is=riot-calendar] .checkoutrange{font-weight:700}[data-is=riot-calendar] .range--end:before,[data-is=riot-calendar] .range--start:before{width:50%;height:32px;position:absolute;top:0;background-color:#eee2e9;content:\" \"}[data-is=riot-calendar] .range--start:before{right:0}[data-is=riot-calendar] .range--end:before{left:0}@-webkit-keyframes a{0%{-webkit-transform:translateX(-100%);transform:translateX(-100%);opacity:0}to{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@keyframes a{0%{-webkit-transform:translateX(-100%);transform:translateX(-100%);opacity:0}to{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@-webkit-keyframes b{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}to{-webkit-transform:translateX(100%);transform:translateX(100%);opacity:0}}@keyframes b{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}to{-webkit-transform:translateX(100%);transform:translateX(100%);opacity:0}}@-webkit-keyframes c{0%{-webkit-transform:translateX(100%);transform:translateX(100%);opacity:0}to{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@keyframes c{0%{-webkit-transform:translateX(100%);transform:translateX(100%);opacity:0}to{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}}@-webkit-keyframes d{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}to{-webkit-transform:translateX(-100%);transform:translateX(-100%);opacity:1}}@keyframes d{0%{-webkit-transform:translateX(0);transform:translateX(0);opacity:1}to{-webkit-transform:translateX(-100%);transform:translateX(-100%);opacity:1}}@-webkit-keyframes e{0%{-webkit-transform:scale(0);transform:scale(0);opacity:0}to{-webkit-transform:scale(1);transform:scale(1);opacith:1}}@keyframes e{0%{-webkit-transform:scale(0);transform:scale(0);opacity:0}to{-webkit-transform:scale(1);transform:scale(1);opacith:1}}@-webkit-keyframes f{0%{-webkit-transform:scale(1);transform:scale(1);opacity:1}to{-webkit-transform:scale(0);transform:scale(0);opacity:0}}@keyframes f{0%{-webkit-transform:scale(1);transform:scale(1);opacity:1}to{-webkit-transform:scale(0);transform:scale(0);opacity:0}}";
 
-/// <reference path="../../../typings/index.d.ts" />
 var removeClass = eleClassListMethods.removeClass;
 var addClass = eleClassListMethods.addClass;
 var calendar = (function (Tag) {
@@ -667,14 +693,12 @@ var calendar = (function (Tag) {
                 selectDatesFormat = [_format];
                 selectDates = (_e = {},
                     _e[_format] = simpleExtend(date.clone(), { select: 1 }),
-                    _e
-                );
+                    _e);
             }
             else {
                 var _d = (_f = {},
                     _f[_format] = simpleExtend(date.clone(), { select: 1 }),
-                    _f
-                );
+                    _f);
                 selectDatesFormat.push(_format);
                 assign(selectDates, _d);
             }
@@ -690,15 +714,13 @@ var calendar = (function (Tag) {
                     selectDatesFormat = [_format];
                     selectDates = (_g = {},
                         _g[_format] = simpleExtend(date.clone(), { select: 1 }),
-                        _g
-                    );
+                        _g);
                 }
                 else {
                     selectDatesFormat.push(_format);
                     var _d = (_h = {},
                         _h[_format] = simpleExtend(date.clone(), { select: 1 }),
-                        _h
-                    );
+                        _h);
                     assign(selectDates, _d);
                 }
             }
@@ -1214,8 +1236,8 @@ var calendar = (function (Tag) {
     var RiotCalendar = (function (_super) {
         __extends(RiotCalendar, _super);
         function RiotCalendar() {
-            _super.apply(this, arguments);
-            this.switchCalendarByDate = function (date) {
+            var _this = _super.apply(this, arguments) || this;
+            _this.switchCalendarByDate = function (date) {
                 var self = this;
                 var valid = checkDateIsValid(date, self, true);
                 var result = valid.result, y = valid.y, m = valid.m;
@@ -1237,6 +1259,7 @@ var calendar = (function (Tag) {
                 }
                 return result;
             };
+            return _this;
         }
         Object.defineProperty(RiotCalendar.prototype, "name", {
             get: function () {
@@ -1344,6 +1367,7 @@ var calendar = (function (Tag) {
     return RiotCalendar;
 })(riot.Tag);
 
+;
 function addEventListener(target, eventType, callback) {
     if (target.addEventListener) {
         target.addEventListener(eventType, callback, false);
@@ -1362,12 +1386,11 @@ function addEventListener(target, eventType, callback) {
         };
     }
 }
+;
 
 var riotSlideTmpl = "<div class=\"riot-slider {config.disabled && 'riot-slider--disable'} {!config.included && 'riot-slider--independent'}\" onmousedown=\"{config.disabled ? noop : onMousedown}\" ontouchstart=\"{config.disabled ? noop : onTouchstart}\"> <div class=\"riot-slider__track\"></div> <div class=\"riot-slider__track--select\" if=\"{config.included}\" riot-style=\"left:{state.track.left + '%'};width:{state.track.width + '%'}\"></div> <div class=\"riot-slider__handler riot-slider__handler--1\" riot-style=\"left:{(config.range ? state.track.left : state.track.width) + '%'}\" data-key=\"{state.track.left}\"></div> <div class=\"riot-slider__handler riot-slider__handler--2\" if=\"{config.range}\" riot-style=\"left: {(state.track.left + state.track.width) + '%'}\" data-key=\"{state.track.left + state.track.width}\"></div> <div class=\"riot-slider__marks\" if=\"{config.marks || config.showAllDots}\"> <div each=\"{mark,index in props.marks}\" class=\"riot-slider__marks--items {parent.parseMarkItemClass(mark)}\"> <span class=\"riot-slider__marks--items-dot\" data-key=\"{index}\" riot-style=\"left:{mark.precent + '%'}\" if=\"{mark.dot}\"></span> <span class=\"riot-slider__marks--items-tip\" data-key=\"{index}\" riot-style=\"width:{mark.width + '%'};margin-left:{(-0.5 * mark.width) + '%'};left:{mark.precent + '%'}\" if=\"{mark.tip}\">{mark.label}</span> </div> </div> </div>";
 
 var riotSlideCss = "[data-is=riot-slider] .riot-slider{position:relative}[data-is=riot-slider] .riot-slider__handler,[data-is=riot-slider] .riot-slider__marks,[data-is=riot-slider] .riot-slider__marks--items-dot,[data-is=riot-slider] .riot-slider__marks--items-tip,[data-is=riot-slider] .riot-slider__track--select{position:absolute}[data-is=riot-slider] .riot-slider__marks--items-tip{text-align:center}[data-is=riot-slider] .riot-slider__handler,[data-is=riot-slider] .riot-slider__marks--items-dot,[data-is=riot-slider] .riot-slider__marks--items-tip{cursor:pointer}[data-is=riot-slider] .riot-slider{width:100%;height:.3125rem;padding:.3125rem 0}[data-is=riot-slider] .riot-slider__track{height:100%;border-radius:.15625rem;background-color:#eeeaea;z-index:1}[data-is=riot-slider] .riot-slider__track--select{z-index:2;background-color:#7f1f59;top:.3125rem;bottom:.3125rem;border-radius:.15625rem}[data-is=riot-slider] .riot-slider__handler{width:.75rem;height:.75rem;border-radius:50%;background-color:#fff;box-shadow:0 0 .15625rem 1px hsla(0,0%,76%,.25);top:.0625rem;z-index:4;margin-left:-.375rem}[data-is=riot-slider] .riot-slider__marks{background-color:transparent;z-index:3;top:.3125rem;bottom:.3125rem;width:100%}[data-is=riot-slider] .riot-slider__marks--items-dot{width:.5625rem;height:.5625rem;border-radius:50%;background:#fff;border:1px solid #eeeaea;top:-.25rem;margin-left:-.28125rem}[data-is=riot-slider] .riot-slider__marks--items-tip{font-size:.75rem;line-height:1;top:.625rem;color:#bfbfbf}[data-is=riot-slider] .riot-slider__marks--items-select .riot-slider__marks--items-dot{border-color:#7f1f59}[data-is=riot-slider] .riot-slider__marks--items-select .riot-slider__marks--items-tip{color:#651c4d}[data-is=riot-slider] .riot-slider--independent .riot-slider__handler{background-color:#7f1f59}[data-is=riot-slider] .riot-slider--disable .riot-slider__track--select{background-color:#d7cece}[data-is=riot-slider] .riot-slider--disable .riot-slider__handler{cursor:not-allowed;background-color:#eeeaea}[data-is=riot-slider] .riot-slider--disable .riot-slider__marks--items-select .riot-slider__marks--items-dot{border:1px solid #eeeaea}[data-is=riot-slider] .riot-slider--disable .riot-slider__marks--items-select .riot-slider__marks--items-tip{color:#bfbfbf}";
-
-/// <reference path="../../../typings/index.d.ts" />
 
 var slider = (function (Tag) {
     var defaultConfig = {
@@ -1773,7 +1796,7 @@ var slider = (function (Tag) {
     var RiotSlider = (function (_super) {
         __extends(RiotSlider, _super);
         function RiotSlider() {
-            _super.apply(this, arguments);
+            return _super.apply(this, arguments) || this;
         }
         Object.defineProperty(RiotSlider.prototype, "name", {
             get: function () {
@@ -1805,7 +1828,7 @@ var slider = (function (Tag) {
         });
         RiotSlider.prototype.noop = function () {
         };
-        
+        ;
         RiotSlider.prototype.onTouchstart = function (e) {
             var self = this;
             if (isNotTouchEvent(e) || self.config.control) {
@@ -1861,7 +1884,7 @@ var slider = (function (Tag) {
         };
         return RiotSlider;
     }(riot.Tag));
-    
+    ;
     return RiotSlider;
 })(riot.Tag);
 
